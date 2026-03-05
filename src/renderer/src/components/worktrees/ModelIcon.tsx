@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import { useSettingsStore } from '@/stores/useSettingsStore'
-import { useWorktreeStore } from '@/stores'
+import { useWorktreeStore, useSessionStore } from '@/stores'
 import claudeIcon from '@/assets/model-icons/claude.svg'
 import openaiIcon from '@/assets/model-icons/openai.svg'
 
@@ -35,7 +35,21 @@ export function ModelIcon({ worktreeId, className }: ModelIconProps): React.JSX.
     return null
   })
 
+  const isClaudeCodeSdk = useSessionStore((s) => {
+    const sessions = s.sessionsByWorktree.get(worktreeId)
+    if (!sessions?.length) return false
+    const latest = sessions[sessions.length - 1]
+    return latest.agent_sdk === 'claude-code'
+  })
+
   if (!showModelIcons) return null
+
+  // Claude Agent SDK always uses Claude models
+  if (isClaudeCodeSdk) {
+    return (
+      <img src={claudeIcon} alt="Claude" className={cn(className)} draggable={false} />
+    )
+  }
 
   const matched = getModelIcon(lastModelId)
   if (!matched) return null
