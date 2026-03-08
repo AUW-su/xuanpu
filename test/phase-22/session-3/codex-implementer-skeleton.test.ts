@@ -13,7 +13,7 @@ vi.mock('../../../src/main/services/logger', () => ({
 
 import { CodexImplementer } from '../../../src/main/services/codex-implementer'
 import { CODEX_CAPABILITIES } from '../../../src/main/services/agent-sdk-types'
-import { CODEX_DEFAULT_MODEL, CODEX_MODELS } from '../../../src/main/services/codex-models'
+import { CODEX_DEFAULT_MODEL } from '../../../src/main/services/codex-models'
 
 describe('CodexImplementer skeleton', () => {
   let impl: CodexImplementer

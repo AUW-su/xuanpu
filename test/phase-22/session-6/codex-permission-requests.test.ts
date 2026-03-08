@@ -278,7 +278,7 @@ describe('Codex Permission Requests', () => {
   describe('CodexImplementer.permissionReply', () => {
     it('routes through to manager.respondToApproval', async () => {
       // Use the mock manager pattern from prompt tests
-      const mockManagerForImpl = {
+      const _mockManagerForImpl = {
         startSession: vi.fn(),
         stopSession: vi.fn(),
         stopAll: vi.fn(),

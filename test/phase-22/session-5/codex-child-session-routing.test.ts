@@ -364,7 +364,7 @@ describe('Codex child session routing', () => {
     })
 
     it('sets status to error when turn fails', async () => {
-      const session = seedSession('/project', 'thread-err', 'hive-err')
+      seedSession('/project', 'thread-err', 'hive-err')
       mockManager.sendTurn.mockRejectedValue(new Error('Network error'))
 
       impl.getSessions().delete('/project::thread-err')

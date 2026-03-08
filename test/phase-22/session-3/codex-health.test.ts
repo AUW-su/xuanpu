@@ -137,7 +137,7 @@ describe('codex-health', () => {
   describe('getCodexVersion', () => {
     it('returns version string when codex is installed', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(null, 'codex 1.5.0\n')
         }
       )
@@ -148,7 +148,7 @@ describe('codex-health', () => {
 
     it('returns null when codex is not installed', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(new Error('command not found'))
         }
       )
@@ -159,7 +159,7 @@ describe('codex-health', () => {
 
     it('returns null on timeout', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(new Error('ETIMEDOUT'))
         }
       )
@@ -170,7 +170,7 @@ describe('codex-health', () => {
 
     it('calls codex with --version flag', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(null, '1.0.0')
         }
       )
@@ -190,7 +190,7 @@ describe('codex-health', () => {
   describe('checkCodexAuth', () => {
     it('returns authenticated when logged in', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(null, '{"authenticated": true}')
         }
       )
@@ -201,7 +201,7 @@ describe('codex-health', () => {
 
     it('returns unauthenticated when not logged in', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(null, 'You are not logged in. Run codex login.')
         }
       )
@@ -212,7 +212,7 @@ describe('codex-health', () => {
 
     it('returns unknown when command fails', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(new Error('command not found'))
         }
       )
@@ -223,7 +223,7 @@ describe('codex-health', () => {
 
     it('calls codex with login status args', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(null, 'ok')
         }
       )
@@ -243,7 +243,7 @@ describe('codex-health', () => {
   describe('checkCodexHealth', () => {
     it('returns unavailable when codex is not installed', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(new Error('command not found'))
         }
       )
@@ -256,7 +256,7 @@ describe('codex-health', () => {
 
     it('returns available with auth status when codex is installed', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           if (args[0] === '--version') {
             cb(null, 'codex 1.0.0\n')
           } else if (args[0] === 'login') {
@@ -274,7 +274,7 @@ describe('codex-health', () => {
 
     it('returns unauthenticated message when not logged in', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           if (args[0] === '--version') {
             cb(null, 'codex 1.0.0\n')
           } else if (args[0] === 'login') {
@@ -291,7 +291,7 @@ describe('codex-health', () => {
 
     it('skips auth check when checkAuth is false', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           if (args[0] === '--version') {
             cb(null, 'codex 1.0.0\n')
           } else {
@@ -307,7 +307,7 @@ describe('codex-health', () => {
 
     it('health status has correct shape', async () => {
       mockExecFile.mockImplementation(
-        (_cmd: string, _args: string[], _opts: unknown, cb: Function) => {
+        (_cmd: string, _args: string[], _opts: unknown, cb: (...a: unknown[]) => void) => {
           cb(new Error('not found'))
         }
       )

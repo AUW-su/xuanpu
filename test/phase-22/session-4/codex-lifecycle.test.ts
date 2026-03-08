@@ -29,7 +29,7 @@ vi.mock('../../../src/main/services/codex-app-server-manager', () => {
   }
 })
 
-import { CodexImplementer, type CodexSessionState } from '../../../src/main/services/codex-implementer'
+import { CodexImplementer } from '../../../src/main/services/codex-implementer'
 import { CODEX_DEFAULT_MODEL } from '../../../src/main/services/codex-models'
 
 describe('CodexImplementer lifecycle', () => {
