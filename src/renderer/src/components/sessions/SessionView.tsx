@@ -404,8 +404,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       : globalModel
   const currentModelId = effectiveModel?.modelID ?? 'claude-opus-4-5-20251101'
   const currentProviderId = effectiveModel?.providerID ?? 'anthropic'
-  // Claude Code SDK uses native plan mode (ExitPlanMode) — skip PLAN_MODE_PREFIX
+  // Claude Code and Codex SDKs skip PLAN_MODE_PREFIX (they don't use the text-prefix approach)
   const isClaudeCode = sessionRecord?.agent_sdk === 'claude-code'
+  const skipPlanModePrefix = isClaudeCode || sessionRecord?.agent_sdk === 'codex'
 
   // Active question prompt from AI
   const activeQuestion = useQuestionStore((s) => s.getActiveQuestion(sessionId))
@@ -2141,7 +2142,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               .getState()
               .setSessionStatus(sessionId, currentMode === 'plan' ? 'planning' : 'working')
             // Apply mode prefix for OpenCode sessions (Claude Code uses native plan mode)
-            const modePrefix = currentMode === 'plan' && !isClaudeCode ? PLAN_MODE_PREFIX : ''
+            const modePrefix = currentMode === 'plan' && !skipPlanModePrefix ? PLAN_MODE_PREFIX : ''
             const promptMessage = modePrefix + pendingMsg
             // Store the full prompt so the stream handler can detect SDK echoes
             lastSentPromptRef.current = promptMessage
@@ -2951,7 +2952,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             } else {
               // Unknown command — send as regular prompt (SDK may handle it)
               const currentMode = useSessionStore.getState().getSessionMode(sessionId)
-              const modePrefix = currentMode === 'plan' && !isClaudeCode ? PLAN_MODE_PREFIX : ''
+              const modePrefix = currentMode === 'plan' && !skipPlanModePrefix ? PLAN_MODE_PREFIX : ''
               const promptMessage = modePrefix + trimmedValue
               lastSentPromptRef.current = promptMessage
               const parts: MessagePart[] = [
@@ -2979,7 +2980,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           } else {
             // Regular prompt — existing code (with mode prefix, attachments, etc.)
             const currentMode = useSessionStore.getState().getSessionMode(sessionId)
-            const modePrefix = currentMode === 'plan' && !isClaudeCode ? PLAN_MODE_PREFIX : ''
+            const modePrefix = currentMode === 'plan' && !skipPlanModePrefix ? PLAN_MODE_PREFIX : ''
             const promptMessage = modePrefix + trimmedValue
             // Store the full prompt so the stream handler can detect SDK echoes
             // of the user message (the SDK often re-emits the prompt without a
@@ -3037,7 +3038,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       allSlashCommands,
       sessionCapabilities,
       revertMessageID,
-      isClaudeCode,
+      skipPlanModePrefix,
       refreshMessagesFromOpenCode,
       getModelForRequests,
       fileMentions,
