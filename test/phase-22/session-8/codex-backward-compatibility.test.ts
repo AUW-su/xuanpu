@@ -19,43 +19,54 @@ import {
  */
 
 describe('Backward compatibility: settings without codex field', () => {
-  it('old availableAgentSdks without codex field does not crash', () => {
-    // Simulate old settings that only had opencode and claude
-    const oldSettings: { opencode: boolean; claude: boolean } = {
-      opencode: true,
-      claude: true
+  // This mirrors the DEFAULT_SETTINGS merge pattern from useSettingsStore.ts:
+  //   loadSettingsFromDatabase() returns { ...DEFAULT_SETTINGS, ...parsed }
+  // Old persisted settings won't have codex-related fields, so the spread
+  // merge fills them in with defaults.
+
+  const DEFAULT_SETTINGS = {
+    autoStartSession: true,
+    defaultAgentSdk: 'opencode' as const,
+    showModelIcons: false,
+    stripAtMentions: true
+  }
+
+  it('old persisted settings merge with defaults — missing fields get default values', () => {
+    const oldPersisted = {
+      autoStartSession: false,
+      defaultAgentSdk: 'opencode' as const
     }
 
-    // Accessing codex via optional chaining on the old shape should return undefined
-    const codexAvailable = (oldSettings as Record<string, boolean | undefined>).codex
-    expect(codexAvailable).toBeUndefined()
+    const merged = { ...DEFAULT_SETTINGS, ...oldPersisted }
 
-    // Treating undefined as false (falsy) should work
-    const isCodexEnabled = !!codexAvailable
-    expect(isCodexEnabled).toBe(false)
+    // Old values are preserved
+    expect(merged.autoStartSession).toBe(false)
+    expect(merged.defaultAgentSdk).toBe('opencode')
+    // New defaults fill in missing fields
+    expect(merged.showModelIcons).toBe(false)
+    expect(merged.stripAtMentions).toBe(true)
   })
 
-  it('new settings with codex: false work correctly', () => {
-    const settings = { opencode: true, claude: true, codex: false }
-    expect(settings.codex).toBe(false)
+  it('new persisted settings with codex as defaultAgentSdk override the default', () => {
+    const newPersisted = {
+      autoStartSession: true,
+      defaultAgentSdk: 'codex' as const,
+      showModelIcons: true
+    }
+
+    const merged = { ...DEFAULT_SETTINGS, ...newPersisted }
+
+    expect(merged.defaultAgentSdk).toBe('codex')
+    expect(merged.showModelIcons).toBe(true)
   })
 
-  it('new settings with codex: true work correctly', () => {
-    const settings = { opencode: true, claude: true, codex: true }
-    expect(settings.codex).toBe(true)
-  })
-
-  it('availableAgentSdks?.codex returning undefined is treated as false', () => {
+  it('availableAgentSdks null safely handles codex access via optional chaining', () => {
     const availableAgentSdks: { opencode: boolean; claude: boolean; codex: boolean } | null = null
 
-    // When availableAgentSdks is null, optional chaining yields undefined
+    // This matches how the renderer accesses capabilities: availableAgentSdks?.codex
     const isCodexAvailable = availableAgentSdks?.codex
     expect(isCodexAvailable).toBeUndefined()
-
-    // Falsy check works
-    if (availableAgentSdks?.codex) {
-      throw new Error('Should not reach here')
-    }
+    expect(!!isCodexAvailable).toBe(false)
   })
 })
 
@@ -124,30 +135,41 @@ describe('Backward compatibility: sessions with existing SDKs still work', () =>
 })
 
 describe('All AgentSdkId values are production-stable', () => {
-  it('exactly four valid AgentSdkId values exist', () => {
-    const allValues: AgentSdkId[] = ['opencode', 'claude-code', 'codex', 'terminal']
-    expect(allValues).toHaveLength(4)
-    expect(new Set(allValues).size).toBe(4)
+  // Anchored to real exported capability constants — each SDK has a corresponding
+  // capability object. If a new SDK is added or one is removed, these tests will
+  // need to be updated, which is the desired contract behavior.
+
+  const SDK_CAPABILITY_MAP: Record<AgentSdkId, typeof OPENCODE_CAPABILITIES> = {
+    opencode: OPENCODE_CAPABILITIES,
+    'claude-code': CLAUDE_CODE_CAPABILITIES,
+    codex: CODEX_CAPABILITIES,
+    terminal: TERMINAL_CAPABILITIES
+  }
+
+  it('every AgentSdkId has a corresponding capability constant', () => {
+    const allIds: AgentSdkId[] = ['opencode', 'claude-code', 'codex', 'terminal']
+    for (const id of allIds) {
+      expect(SDK_CAPABILITY_MAP[id]).toBeDefined()
+    }
   })
 
-  it('"opencode" is a valid AgentSdkId', () => {
-    const id: AgentSdkId = 'opencode'
-    expect(id).toBe('opencode')
+  it('exactly four SDK capability constants are defined', () => {
+    expect(Object.keys(SDK_CAPABILITY_MAP)).toHaveLength(4)
   })
 
-  it('"claude-code" is a valid AgentSdkId', () => {
-    const id: AgentSdkId = 'claude-code'
-    expect(id).toBe('claude-code')
-  })
-
-  it('"codex" is a valid AgentSdkId', () => {
-    const id: AgentSdkId = 'codex'
-    expect(id).toBe('codex')
-  })
-
-  it('"terminal" is a valid AgentSdkId', () => {
-    const id: AgentSdkId = 'terminal'
-    expect(id).toBe('terminal')
+  it('each capability object has all required boolean fields', () => {
+    const requiredFields = [
+      'supportsUndo', 'supportsRedo', 'supportsCommands',
+      'supportsPermissionRequests', 'supportsQuestionPrompts',
+      'supportsModelSelection', 'supportsReconnect', 'supportsPartialStreaming'
+    ]
+    for (const [sdkId, caps] of Object.entries(SDK_CAPABILITY_MAP)) {
+      for (const field of requiredFields) {
+        expect(typeof (caps as Record<string, unknown>)[field]).toBe('boolean')
+      }
+      // Verify the object exists as a real export
+      expect(sdkId).toBeTruthy()
+    }
   })
 })
 

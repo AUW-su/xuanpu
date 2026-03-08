@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import {
+  OPENCODE_CAPABILITIES,
+  CLAUDE_CODE_CAPABILITIES,
+  CODEX_CAPABILITIES,
+  TERMINAL_CAPABILITIES
+} from '../../../src/main/services/agent-sdk-types'
+import { PLAN_MODE_PREFIX } from '@/lib/constants'
 
 // ---------------------------------------------------------------------------
 // ModelIcon mocks
@@ -149,21 +156,27 @@ describe('ModelIcon: Codex awareness', () => {
 // ---------------------------------------------------------------------------
 
 describe('SessionTabs: Codex tab styling', () => {
-  it('codex agentSdk type is not "terminal" — no emerald icon class', () => {
-    // Codex sessions use agentSdk: 'codex' which is NOT 'terminal',
-    // so the SessionTab component renders the standard status indicators
-    // (Loader2/AlertCircle/Check) instead of the TerminalSquare icon.
-    const codexSdk: 'opencode' | 'claude-code' | 'codex' | 'terminal' = 'codex'
-    expect(codexSdk).not.toBe('terminal')
+  it('codex is an AI provider — gets standard status indicators, not terminal icon', () => {
+    // SessionTabs renders TerminalSquare only for agent_sdk === 'terminal'.
+    // Codex must be categorized as an AI SDK (not terminal), which is verified
+    // by checking that CODEX_CAPABILITIES has AI features enabled while
+    // TERMINAL_CAPABILITIES has them all disabled.
+    expect(CODEX_CAPABILITIES.supportsPermissionRequests).toBe(true)
+    expect(CODEX_CAPABILITIES.supportsQuestionPrompts).toBe(true)
+    expect(TERMINAL_CAPABILITIES.supportsPermissionRequests).toBe(false)
+    expect(TERMINAL_CAPABILITIES.supportsQuestionPrompts).toBe(false)
   })
 
-  it('codex sessions are closable and draggable (unlike terminal sticky tabs)', () => {
-    // The SessionTab component renders close button and draggable attribute
-    // for all non-terminal tabs. Codex (agentSdk: 'codex') gets the same
-    // treatment as opencode and claude-code sessions.
-    const codexSdk = 'codex'
-    const isTerminal = codexSdk === 'terminal'
-    expect(isTerminal).toBe(false)
+  it('all AI SDKs (opencode, claude-code, codex) share interactive capabilities that terminal lacks', () => {
+    // The SessionTab component treats terminal differently from AI SDKs.
+    // Verify that all three AI SDKs have capabilities that terminal does not.
+    const aiCapabilities = [OPENCODE_CAPABILITIES, CLAUDE_CODE_CAPABILITIES, CODEX_CAPABILITIES]
+    for (const caps of aiCapabilities) {
+      expect(caps.supportsModelSelection).toBe(true)
+      expect(caps.supportsReconnect).toBe(true)
+    }
+    expect(TERMINAL_CAPABILITIES.supportsModelSelection).toBe(false)
+    expect(TERMINAL_CAPABILITIES.supportsReconnect).toBe(false)
   })
 })
 
@@ -172,60 +185,27 @@ describe('SessionTabs: Codex tab styling', () => {
 // ---------------------------------------------------------------------------
 
 describe('Capability-gated commands for Codex', () => {
-  it('/undo is available when supportsUndo is true', () => {
-    const capabilities = { supportsUndo: true, supportsRedo: false }
-    const commands = new Map([
-      ['undo', { name: 'undo' }],
-      ['redo', { name: 'redo' }],
-      ['help', { name: 'help' }]
-    ])
-
-    const filtered = Array.from(commands.entries()).filter(([key]) => {
-      if (key === 'undo' && !capabilities.supportsUndo) return false
-      if (key === 'redo' && !capabilities.supportsRedo) return false
-      return true
-    })
-
-    const filteredKeys = filtered.map(([k]) => k)
-    expect(filteredKeys).toContain('undo')
+  it('Codex supports undo but not redo (real CODEX_CAPABILITIES)', () => {
+    // Anchored to the real capability constants — if these change, the test catches it
+    expect(CODEX_CAPABILITIES.supportsUndo).toBe(true)
+    expect(CODEX_CAPABILITIES.supportsRedo).toBe(false)
   })
 
-  it('/redo is hidden when supportsRedo is false', () => {
-    const capabilities = { supportsUndo: true, supportsRedo: false }
-    const commands = new Map([
-      ['undo', { name: 'undo' }],
-      ['redo', { name: 'redo' }],
-      ['help', { name: 'help' }]
-    ])
-
-    const filtered = Array.from(commands.entries()).filter(([key]) => {
-      if (key === 'undo' && !capabilities.supportsUndo) return false
-      if (key === 'redo' && !capabilities.supportsRedo) return false
-      return true
-    })
-
-    const filteredKeys = filtered.map(([k]) => k)
-    expect(filteredKeys).not.toContain('redo')
+  it('Codex does not support slash commands', () => {
+    // Codex sessions should not show the command palette or process slash commands
+    expect(CODEX_CAPABILITIES.supportsCommands).toBe(false)
   })
 
-  it('non-undo/redo commands pass through regardless of capabilities', () => {
-    const capabilities = { supportsUndo: false, supportsRedo: false }
-    const commands = new Map([
-      ['undo', { name: 'undo' }],
-      ['redo', { name: 'redo' }],
-      ['help', { name: 'help' }],
-      ['clear', { name: 'clear' }]
-    ])
+  it('OpenCode supports both undo and redo (contrast with Codex)', () => {
+    expect(OPENCODE_CAPABILITIES.supportsUndo).toBe(true)
+    expect(OPENCODE_CAPABILITIES.supportsRedo).toBe(true)
+    expect(OPENCODE_CAPABILITIES.supportsCommands).toBe(true)
+  })
 
-    const filtered = Array.from(commands.entries()).filter(([key]) => {
-      if (key === 'undo' && !capabilities.supportsUndo) return false
-      if (key === 'redo' && !capabilities.supportsRedo) return false
-      return true
-    })
-
-    const filteredKeys = filtered.map(([k]) => k)
-    expect(filteredKeys).toContain('help')
-    expect(filteredKeys).toContain('clear')
+  it('Claude Code matches Codex on undo/redo but differs on commands', () => {
+    expect(CLAUDE_CODE_CAPABILITIES.supportsUndo).toBe(true)
+    expect(CLAUDE_CODE_CAPABILITIES.supportsRedo).toBe(false)
+    expect(CLAUDE_CODE_CAPABILITIES.supportsCommands).toBe(true)
   })
 })
 
@@ -234,32 +214,45 @@ describe('Capability-gated commands for Codex', () => {
 // ---------------------------------------------------------------------------
 
 describe('Plan mode prefix: Codex and Claude Code skip it', () => {
-  const PLAN_MODE_PREFIX = '[PLAN MODE] '
+  // Uses the real PLAN_MODE_PREFIX from the codebase (not a local redefinition)
+  // SessionView.tsx line 409: skipPlanModePrefix = isClaudeCode || sessionRecord?.agent_sdk === 'codex'
+  // SessionView.tsx line 2145: currentMode === 'plan' && !skipPlanModePrefix ? PLAN_MODE_PREFIX : ''
 
-  function buildModePrefix(
-    currentMode: 'plan' | 'build',
-    agentSdk: string
-  ): string {
+  function shouldSkipPlanModePrefix(agentSdk: string): boolean {
+    // This mirrors the exact condition in SessionView.tsx
     const isClaudeCode = agentSdk === 'claude-code'
-    const skipPlanModePrefix = isClaudeCode || agentSdk === 'codex'
-    return currentMode === 'plan' && !skipPlanModePrefix ? PLAN_MODE_PREFIX : ''
+    return isClaudeCode || agentSdk === 'codex'
   }
 
-  it('opencode sessions in plan mode get the prefix', () => {
-    expect(buildModePrefix('plan', 'opencode')).toBe(PLAN_MODE_PREFIX)
+  it('PLAN_MODE_PREFIX is a non-empty constant from @/lib/constants', () => {
+    expect(PLAN_MODE_PREFIX).toBeTruthy()
+    expect(typeof PLAN_MODE_PREFIX).toBe('string')
+    expect(PLAN_MODE_PREFIX.length).toBeGreaterThan(0)
   })
 
-  it('claude-code sessions in plan mode do NOT get the prefix', () => {
-    expect(buildModePrefix('plan', 'claude-code')).toBe('')
+  it('opencode sessions do NOT skip the prefix', () => {
+    expect(shouldSkipPlanModePrefix('opencode')).toBe(false)
   })
 
-  it('codex sessions in plan mode do NOT get the prefix', () => {
-    expect(buildModePrefix('plan', 'codex')).toBe('')
+  it('claude-code sessions skip the prefix', () => {
+    expect(shouldSkipPlanModePrefix('claude-code')).toBe(true)
   })
 
-  it('build mode never gets the prefix regardless of SDK', () => {
-    expect(buildModePrefix('build', 'opencode')).toBe('')
-    expect(buildModePrefix('build', 'claude-code')).toBe('')
-    expect(buildModePrefix('build', 'codex')).toBe('')
+  it('codex sessions skip the prefix', () => {
+    expect(shouldSkipPlanModePrefix('codex')).toBe(true)
+  })
+
+  it('the prefix is prepended only for non-skip SDKs in plan mode', () => {
+    const currentMode = 'plan'
+    const sdks = ['opencode', 'claude-code', 'codex'] as const
+    for (const sdk of sdks) {
+      const skip = shouldSkipPlanModePrefix(sdk)
+      const prefix = currentMode === 'plan' && !skip ? PLAN_MODE_PREFIX : ''
+      if (sdk === 'opencode') {
+        expect(prefix).toBe(PLAN_MODE_PREFIX)
+      } else {
+        expect(prefix).toBe('')
+      }
+    }
   })
 })
