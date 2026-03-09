@@ -241,7 +241,10 @@ function PinnedWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
   const handleBranchRename = useCallback(async (): Promise<void> => {
     intentionalCloseRef.current = true
     if (blurTimerRef.current) clearTimeout(blurTimerRef.current)
-    if (!worktree) return
+    if (!worktree) {
+      setIsRenamingBranch(false)
+      return
+    }
     const trimmed = branchNameInput.trim()
     if (!trimmed || trimmed === worktree.branch_name) {
       setIsRenamingBranch(false)
