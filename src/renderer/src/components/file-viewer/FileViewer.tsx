@@ -142,7 +142,9 @@ export function FileViewer({ filePath }: FileViewerProps): React.JSX.Element {
         if (result.success && result.content !== undefined) {
           setContent(result.content)
           if (isSvg) {
-            setImageDataUri(`data:image/svg+xml;base64,${btoa(result.content)}`)
+            setImageDataUri(
+              `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(result.content)))}`
+            )
           }
         } else {
           setError(result.error || 'Failed to read file')

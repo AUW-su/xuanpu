@@ -47,7 +47,7 @@ export function ImageDiffView({
   )
 
   const buildSvgDataUri = useCallback((textContent: string): string => {
-    return `data:image/svg+xml;base64,${btoa(textContent)}`
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(textContent)))}`
   }, [])
 
   const fetchContent = useCallback(async () => {

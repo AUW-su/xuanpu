@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
 interface ImagePreviewProps {
@@ -9,6 +9,11 @@ interface ImagePreviewProps {
 
 export function ImagePreview({ src, fileName, className }: ImagePreviewProps): React.JSX.Element {
   const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null)
+
+  // Reset dimensions when image source changes to avoid stale values flashing
+  useEffect(() => {
+    setDimensions(null)
+  }, [src])
 
   return (
     <div className={cn('flex flex-col items-center gap-2 p-4', className)}>
