@@ -103,6 +103,7 @@ export interface CodexTurnInput {
   text?: string
   model?: string
   reasoningEffort?: string
+  interactionMode?: 'default' | 'plan'
 }
 
 export interface CodexTurnStartResult {
@@ -149,6 +150,48 @@ const RECOVERABLE_THREAD_RESUME_ERROR_SNIPPETS = [
   'unknown thread',
   'does not exist'
 ]
+
+const CODEX_DEFAULT_DEVELOPER_INSTRUCTIONS = `<collaboration_mode># Collaboration Mode: Default
+
+You are operating in **default** (autonomous execution) mode.
+
+**IMPORTANT:** The \`request_user_input\` tool is **UNAVAILABLE** in this session mode.
+
+- Do NOT attempt to call \`request_user_input\`
+- Make reasonable assumptions and proceed autonomously
+- If something is ambiguous, pick the most sensible interpretation and execute
+- Prefer action over asking for clarification
+</collaboration_mode>`
+
+const CODEX_PLAN_DEVELOPER_INSTRUCTIONS = `<collaboration_mode># Collaboration Mode: Plan (Conversational)
+
+You are operating in **plan** (conversational) mode.
+
+**IMPORTANT:** The \`request_user_input\` tool IS AVAILABLE and you should use it liberally.
+
+## Core Behavior
+- **Strongly prefer** asking clarifying questions before writing code
+- Use \`request_user_input\` to ask ONE focused question at a time
+- Do NOT make assumptions when the user's intent is unclear — ask instead
+
+## Three-Phase Approach
+
+### Phase 1: Ground the Environment
+Before anything else, understand the codebase:
+- Explore relevant files, understand conventions, identify constraints
+
+### Phase 2: Intent Chat
+Clarify WHAT to build:
+- Ask about requirements, edge cases, preferences
+- Use \`request_user_input\` to confirm understanding
+
+### Phase 3: Implementation Chat
+Clarify HOW to build it:
+- Discuss implementation approach before writing code
+- Ask about any technical trade-offs or preferences
+
+Only begin writing code after Phases 1-2 are complete and you have sufficient clarity.
+</collaboration_mode>`
 
 // ── Stderr classification ─────────────────────────────────────────
 
@@ -498,6 +541,20 @@ export class CodexAppServerManager extends EventEmitter<CodexAppServerManagerEve
 
     if (input.reasoningEffort) {
       params.settings = { reasoningEffort: input.reasoningEffort }
+    }
+
+    if (input.interactionMode) {
+      params.collaborationMode = {
+        mode: input.interactionMode,
+        settings: {
+          model: input.model ?? context.session.model ?? 'gpt-5.3-codex',
+          reasoning_effort: input.reasoningEffort ?? 'medium',
+          developer_instructions:
+            input.interactionMode === 'plan'
+              ? CODEX_PLAN_DEVELOPER_INSTRUCTIONS
+              : CODEX_DEFAULT_DEVELOPER_INSTRUCTIONS
+        }
+      }
     }
 
     // Update session to running before sending
