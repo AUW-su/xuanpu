@@ -5,6 +5,7 @@ import readline from 'node:readline'
 
 import { createLogger } from './logger'
 import { asObject, asString } from './codex-utils'
+import { CODEX_DEFAULT_MODEL } from './codex-models'
 
 const log = createLogger({ component: 'CodexAppServerManager' })
 
@@ -544,11 +545,13 @@ export class CodexAppServerManager extends EventEmitter<CodexAppServerManagerEve
     }
 
     if (input.interactionMode) {
+      // collaborationMode is required for request_user_input availability;
+      // its settings block independently specifies model/reasoning for this mode context
       params.collaborationMode = {
         mode: input.interactionMode,
         settings: {
-          model: input.model ?? context.session.model ?? 'gpt-5.3-codex',
-          reasoning_effort: input.reasoningEffort ?? 'medium',
+          model: input.model ?? context.session.model ?? CODEX_DEFAULT_MODEL,
+          reasoning_effort: input.reasoningEffort ?? 'medium', // snake_case: Codex API uses snake_case for this field in the collaborationMode settings block
           developer_instructions:
             input.interactionMode === 'plan'
               ? CODEX_PLAN_DEVELOPER_INSTRUCTIONS
