@@ -57,6 +57,15 @@ function looksLikeCodexProposedPlan(text: string): boolean {
   return hasPlanHeading && hasSteps && !startsWithQuestion
 }
 
+/**
+ * Extracts the markdown content from a `<proposed_plan>` XML block.
+ * Returns the inner content trimmed, or null if no block is found.
+ */
+function extractProposedPlanMarkdown(text: string): string | null {
+  const match = text.match(/<proposed_plan>\s*([\s\S]*?)\s*<\/proposed_plan>/i)
+  return match ? (match[1]?.trim() ?? null) : null
+}
+
 export class CodexImplementer implements AgentSdkImplementer {
   readonly id = 'codex' as const
   readonly capabilities: AgentSdkCapabilities = CODEX_CAPABILITIES
@@ -406,8 +415,13 @@ export class CodexImplementer implements AgentSdkImplementer {
           const payload = asObject(event.payload)
           const msg = asObject(payload?.msg)
           const planText = asString(msg?.last_agent_message)
-          if (planText && looksLikeCodexProposedPlan(planText)) {
-            pendingPlanText = planText
+          if (planText) {
+            const extracted = extractProposedPlanMarkdown(planText)
+            if (extracted) {
+              pendingPlanText = extracted
+            } else if (looksLikeCodexProposedPlan(planText)) {
+              pendingPlanText = planText
+            }
           }
         }
 
@@ -416,8 +430,13 @@ export class CodexImplementer implements AgentSdkImplementer {
           const item = asObject(payload?.item)
           const itemType = asString(item?.type)?.toLowerCase()
           const planText = asString(item?.text)
-          if (itemType === 'agentmessage' && planText && looksLikeCodexProposedPlan(planText)) {
-            pendingPlanText = planText
+          if (itemType === 'agentmessage' && planText) {
+            const extracted = extractProposedPlanMarkdown(planText)
+            if (extracted) {
+              pendingPlanText = extracted
+            } else if (looksLikeCodexProposedPlan(planText)) {
+              pendingPlanText = planText
+            }
           }
         }
       }
@@ -484,6 +503,17 @@ export class CodexImplementer implements AgentSdkImplementer {
           parts: assistantParts,
           timestamp: new Date().toISOString()
         })
+      }
+
+      // If no plan was detected from events, check accumulated assistant text
+      // (in case the <proposed_plan> block appeared in streaming text rather than event payload)
+      if (interactionMode === 'plan' && !pendingPlanText && assistantText) {
+        const extracted = extractProposedPlanMarkdown(assistantText)
+        if (extracted) {
+          pendingPlanText = extracted
+        } else if (looksLikeCodexProposedPlan(assistantText)) {
+          pendingPlanText = assistantText
+        }
       }
 
       if (interactionMode === 'plan' && pendingPlanText) {

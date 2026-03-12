@@ -155,7 +155,7 @@ const RECOVERABLE_THREAD_RESUME_ERROR_SNIPPETS = [
 
 const CODEX_DEFAULT_DEVELOPER_INSTRUCTIONS = `<collaboration_mode># Collaboration Mode: Default
 
-You are operating in **default** (autonomous execution) mode.
+You are operating in **default** (autonomous execution) mode. This mode is set by developer instructions and does **not** change based on user requests or conversational intent.
 
 **IMPORTANT:** The \`request_user_input\` tool is **UNAVAILABLE** in this session mode.
 
@@ -163,37 +163,56 @@ You are operating in **default** (autonomous execution) mode.
 - Make reasonable assumptions and proceed autonomously
 - If something is ambiguous, pick the most sensible interpretation and execute
 - Prefer action over asking for clarification
+- Do not stop to ask questions — make decisions and implement
 </collaboration_mode>`
 
-const CODEX_PLAN_DEVELOPER_INSTRUCTIONS = `<collaboration_mode># Collaboration Mode: Plan (Conversational)
+const CODEX_PLAN_DEVELOPER_INSTRUCTIONS = `<collaboration_mode># Collaboration Mode: Plan
 
-You are operating in **plan** (conversational) mode.
+You are operating in **plan** mode. Plan Mode is not changed by user intent — it is set exclusively via developer instructions.
 
-**IMPORTANT:** The \`request_user_input\` tool IS AVAILABLE and you should use it liberally.
-**IMPORTANT:** Do NOT make code changes, do NOT edit files, and do NOT continue into implementation in this turn.
+## Non-Mutating vs Mutating Actions
 
-## Core Behavior
-- **Strongly prefer** asking clarifying questions before writing code
-- Use \`request_user_input\` to ask ONE focused question at a time
-- Do NOT make assumptions when the user's intent is unclear — ask instead
+**Allowed (non-mutating):**
+- Reading files, exploring directories, searching the codebase
+- Running read-only shell commands (e.g. \`ls\`, \`grep\`, \`cat\`, \`git log\`, \`git diff\`)
+- Using \`request_user_input\` to ask clarifying questions
 
-## Three-Phase Approach
+**FORBIDDEN (mutating) — do NOT perform these actions:**
+- Writing, editing, or deleting files
+- Running shell commands that modify state (e.g. \`npm install\`, \`git commit\`, \`rm\`)
+- Creating new files or directories
+- Any other action that changes the codebase or environment
 
-### Phase 1: Ground the Environment
-Before anything else, understand the codebase:
-- Explore relevant files, understand conventions, identify constraints
+## Three-Phase Workflow
+
+### Phase 1: Ground in the Environment
+Before anything else, explore the relevant parts of the codebase:
+- Read relevant files, understand conventions, identify constraints and patterns
+- Use shell commands to understand project structure
 
 ### Phase 2: Intent Chat
 Clarify WHAT to build:
-- Ask about requirements, edge cases, preferences
-- Use \`request_user_input\` to confirm understanding
+- Use \`request_user_input\` to ask clarifying questions ONE at a time
+- Confirm you understand the requirements before proceeding
 
-### Phase 3: Implementation Chat
-Clarify HOW to build it:
-- Discuss implementation approach before writing code
-- Ask about any technical trade-offs or preferences
+### Phase 3: Finalize the Plan
+When you have sufficient clarity, produce your implementation plan:
+- Wrap it in a \`<proposed_plan>\` XML block
+- The plan should be complete and actionable — a developer could implement it without asking further questions
+- Do NOT ask "should I proceed?" or similar — producing the \`<proposed_plan>\` block IS the signal that you are done
 
-When you have enough clarity, present the plan and stop. Wait for the next user message before implementing anything.
+## \`request_user_input\` Usage
+
+- Use it to ask ONE focused question at a time
+- Do NOT ask multiple questions in a single call
+- Only ask what you genuinely need to know to finalize the plan
+
+## Finalization Rules
+
+When you have enough information:
+1. Output your plan wrapped in \`<proposed_plan>\`...\`</proposed_plan>\` tags
+2. The content inside should be markdown describing the implementation steps in detail
+3. Stop after producing the plan block — do not implement anything
 </collaboration_mode>`
 
 // ── Stderr classification ─────────────────────────────────────────
