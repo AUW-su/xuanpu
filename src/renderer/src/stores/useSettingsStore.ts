@@ -388,30 +388,10 @@ export const useSettingsStore = create<SettingsState>()(
       loadFromDatabase: async () => {
         const dbSettings = await loadSettingsFromDatabase()
         if (dbSettings) {
-          // MIGRATION: If defaultModels is null but selectedModel exists,
-          // initialize all mode defaults to the global default
-          let migratedSettings = dbSettings
-          if (
-            dbSettings.defaultModels === null &&
-            dbSettings.selectedModel !== null &&
-            dbSettings.selectedModel !== undefined
-          ) {
-            migratedSettings = {
-              ...dbSettings,
-              defaultModels: {
-                build: dbSettings.selectedModel,
-                plan: dbSettings.selectedModel,
-                ask: dbSettings.selectedModel
-              }
-            }
-            // Save migrated settings
-            await saveToDatabase(migratedSettings)
-          }
-
           set({
-            ...migratedSettings,
+            ...dbSettings,
             // Existing users upgrading: if field missing, they've already set up
-            initialSetupComplete: migratedSettings.initialSetupComplete ?? true,
+            initialSetupComplete: dbSettings.initialSetupComplete ?? true,
             isLoading: false
           })
         } else {

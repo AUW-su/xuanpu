@@ -279,11 +279,15 @@ export const useSessionStore = create<SessionState>()(
 
           if (!isTerminal) {
             const { resolveModelForSdk } = await import('./useSettingsStore')
+            const configuredDefaultSdk = useSettingsStore.getState().defaultAgentSdk ?? 'opencode'
 
-            // Priority 1: mode-specific default (build mode for new sessions)
-            const modeModel = useSettingsStore.getState().getModelForMode('build')
-            if (modeModel) {
-              defaultModel = modeModel
+            // Priority 1: mode-specific default (only when session SDK matches the
+            // configured default — mode defaults are set in that SDK's context)
+            if (defaultAgentSdk === configuredDefaultSdk) {
+              const modeModel = useSettingsStore.getState().getModelForMode('build')
+              if (modeModel) {
+                defaultModel = modeModel
+              }
             }
 
             // Priority 2: per-provider default → (legacy) global default
@@ -911,16 +915,19 @@ export const useSessionStore = create<SessionState>()(
         // Import settings store dynamically to avoid circular deps
         const { useSettingsStore, resolveModelForSdk } = await import('./useSettingsStore')
 
-        // Mode defaults are configured in the context of the default SDK.
-        // Skip if the session uses a different SDK to avoid injecting wrong models.
         const session = get().getSessionById(sessionId)
         const settings = useSettingsStore.getState()
         const sessionSdk = session?.agent_sdk ?? settings.defaultAgentSdk ?? 'opencode'
         if (sessionSdk === 'terminal') return
 
-        // Check mode-specific default first, then fall back to per-SDK/global default
-        const newModeDefault = settings.getModelForMode(newMode)
-          ?? resolveModelForSdk(sessionSdk, settings)
+        const configuredDefaultSdk = settings.defaultAgentSdk ?? 'opencode'
+
+        // Mode defaults are configured in the context of the default SDK.
+        // Only apply them when the session SDK matches; otherwise fall back to per-SDK default.
+        const modeDefault = sessionSdk === configuredDefaultSdk
+          ? settings.getModelForMode(newMode)
+          : null
+        const newModeDefault = modeDefault ?? resolveModelForSdk(sessionSdk, settings)
         if (!newModeDefault) {
           // No defaults configured, keep current model
           return
@@ -1248,10 +1255,15 @@ export const useSessionStore = create<SessionState>()(
               agentSdkOverride ?? useSettingsStore.getState().defaultAgentSdk ?? 'opencode'
             // Terminal sessions skip model resolution
             if (defaultAgentSdk !== 'terminal') {
-              // Priority 1: mode-specific default (build mode for new sessions)
-              const modeModel = useSettingsStore.getState().getModelForMode('build')
-              if (modeModel) {
-                defaultModel = modeModel
+              const configuredDefaultSdk = useSettingsStore.getState().defaultAgentSdk ?? 'opencode'
+
+              // Priority 1: mode-specific default (only when session SDK matches the
+              // configured default — mode defaults are set in that SDK's context)
+              if (defaultAgentSdk === configuredDefaultSdk) {
+                const modeModel = useSettingsStore.getState().getModelForMode('build')
+                if (modeModel) {
+                  defaultModel = modeModel
+                }
               }
 
               // Priority 2: per-provider default → (legacy) global default
