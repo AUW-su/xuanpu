@@ -304,10 +304,17 @@ export function registerOpenCodeHandlers(
         modelID: string
         variant?: string
         agentSdk?: 'opencode' | 'claude-code' | 'codex'
-      }
+      } | null
     ) => {
-      log.info('IPC: opencode:setModel', { model: model.modelID, agentSdk: model.agentSdk })
+      log.info('IPC: opencode:setModel', { model: model ? model.modelID : null, agentSdk: model?.agentSdk })
       try {
+        // Handle null (clear global model only — per-SDK models are independent)
+        if (model === null) {
+          openCodeService.clearSelectedModel()
+          return { success: true }
+        }
+
+        // Handle non-null model
         if (model.agentSdk && model.agentSdk !== 'opencode' && sdkManager) {
           const impl = sdkManager.getImplementer(model.agentSdk)
           if (impl) {
