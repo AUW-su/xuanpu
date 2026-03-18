@@ -152,7 +152,7 @@ export function LeftSidebar(): React.JSX.Element {
             <ProjectFilter value={filterQuery} onChange={setFilterQuery} />
           </div>
         )}
-        <div className="flex-1 overflow-auto p-2">
+        <div className="flex-1 overflow-auto p-2" data-testid="sidebar-scroll-container">
           <PinnedList />
           <RecentList />
           <ConnectionList />
