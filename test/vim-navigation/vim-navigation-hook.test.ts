@@ -177,6 +177,10 @@ describe('useVimNavigation', () => {
     document
       .querySelectorAll('[data-radix-dialog-content]')
       .forEach((el) => el.remove())
+    // Remove any leftover message-input elements from insert mode tests
+    document
+      .querySelectorAll('[data-testid="message-input"]')
+      .forEach((el) => el.remove())
   })
 
   // =========================================================================
@@ -259,28 +263,48 @@ describe('useVimNavigation', () => {
       expect(consumed).toBe(false)
     })
 
-    it('I (Shift+I) in normal mode calls enterInsertMode, opens sidebar, dispatches focus event', () => {
-      vi.useFakeTimers()
-      layoutState.leftSidebarCollapsed = true
+    it('i in normal mode calls enterInsertMode and focuses the session chat input', () => {
+      // Create a mock message-input element to verify focus
+      const messageInput = document.createElement('textarea')
+      messageInput.setAttribute('data-testid', 'message-input')
+      document.body.appendChild(messageInput)
+      const focusSpy = vi.spyOn(messageInput, 'focus')
+
       renderHook(() => useVimNavigation())
 
-      const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+      fireKey('i')
+
+      // enterInsertMode called by handler (and again by focusin on the textarea)
+      expect(mockEnterInsertMode).toHaveBeenCalled()
+      expect(focusSpy).toHaveBeenCalled()
+
+      focusSpy.mockRestore()
+    })
+
+    it('I (Shift+I) in normal mode also calls enterInsertMode and focuses the session chat input', () => {
+      const messageInput = document.createElement('textarea')
+      messageInput.setAttribute('data-testid', 'message-input')
+      document.body.appendChild(messageInput)
+      const focusSpy = vi.spyOn(messageInput, 'focus')
+
+      renderHook(() => useVimNavigation())
 
       fireKey('I', { shiftKey: true })
 
-      expect(mockEnterInsertMode).toHaveBeenCalledTimes(1)
-      expect(mockSetLeftSidebarCollapsed).toHaveBeenCalledWith(false)
+      expect(mockEnterInsertMode).toHaveBeenCalled()
+      expect(focusSpy).toHaveBeenCalled()
 
-      // Focus event is dispatched after a 100ms delay when sidebar was collapsed
-      vi.advanceTimersByTime(100)
+      focusSpy.mockRestore()
+    })
 
-      const focusEvent = dispatchSpy.mock.calls.find(
-        ([evt]) => evt instanceof Event && evt.type === 'hive:focus-project-filter'
-      )
-      expect(focusEvent).toBeDefined()
+    it('i/I does not open the left sidebar (focuses session input instead)', () => {
+      layoutState.leftSidebarCollapsed = true
+      renderHook(() => useVimNavigation())
 
-      dispatchSpy.mockRestore()
-      vi.useRealTimers()
+      fireKey('i')
+
+      expect(mockEnterInsertMode).toHaveBeenCalled()
+      expect(mockSetLeftSidebarCollapsed).not.toHaveBeenCalled()
     })
 
     it('? toggles help overlay', () => {

@@ -21,7 +21,7 @@ function MnemonicLabel({ letter, label }: { letter: string; label: string }): Re
   return (
     <span>
       {label.slice(0, index)}
-      <span className="text-primary font-bold">{label[index]}</span>
+      <span className="text-primary font-bold bg-primary/15 px-0.5 rounded-sm underline underline-offset-2 decoration-primary decoration-2">{label[index]}</span>
       {label.slice(index + 1)}
     </span>
   )

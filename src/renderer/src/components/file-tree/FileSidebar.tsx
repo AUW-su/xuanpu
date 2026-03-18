@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FileTree } from './FileTree'
@@ -30,6 +30,17 @@ export function FileSidebar({
 }: FileSidebarProps): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'changes' | 'files' | 'diffs'>('changes')
 
+  useEffect(() => {
+    const handler = (e: Event): void => {
+      const tab = (e as CustomEvent).detail?.tab
+      if (tab === 'changes' || tab === 'files' || tab === 'diffs') {
+        setActiveTab(tab)
+      }
+    }
+    window.addEventListener('hive:right-sidebar-tab', handler)
+    return () => window.removeEventListener('hive:right-sidebar-tab', handler)
+  }, [])
+
   return (
     <div className={cn('flex flex-col h-full', className)}>
       <div className="flex items-center border-b border-border px-2 pt-1.5 pb-0">
@@ -42,7 +53,7 @@ export function FileSidebar({
           )}
           onClick={() => setActiveTab('changes')}
         >
-          Changes
+          <span className="text-primary">C</span>hanges
           {activeTab === 'changes' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
           )}
@@ -56,7 +67,7 @@ export function FileSidebar({
           )}
           onClick={() => setActiveTab('files')}
         >
-          Files
+          <span className="text-primary">F</span>iles
           {activeTab === 'files' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
           )}
@@ -70,7 +81,7 @@ export function FileSidebar({
           )}
           onClick={() => setActiveTab('diffs')}
         >
-          Diffs
+          <span className="text-primary">D</span>iffs
           {activeTab === 'diffs' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
           )}

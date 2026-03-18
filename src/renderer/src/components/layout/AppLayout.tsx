@@ -8,6 +8,7 @@ import { SessionHistory } from '@/components/sessions/SessionHistory'
 import { CommandPalette } from '@/components/command-palette'
 import { SettingsModal } from '@/components/settings'
 import { AgentSetupGuard } from '@/components/setup'
+import { HelpOverlay } from '@/components/ui/HelpOverlay'
 import { FileSearchDialog } from '@/components/file-search'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useVimNavigation } from '@/hooks/useVimNavigation'
@@ -124,6 +125,7 @@ export function AppLayout({ children }: AppLayoutProps): React.JSX.Element {
       </ErrorBoundary>
       <GlobalProjectSettings />
       <AgentSetupGuard />
+      <HelpOverlay />
     </div>
   )
 }

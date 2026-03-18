@@ -12,10 +12,10 @@ import { RunTab } from './RunTab'
 import { toast } from '@/lib/toast'
 import { useGhosttyPromotion } from '@/hooks/useGhosttyPromotion'
 
-const tabs: { id: BottomPanelTab; label: string }[] = [
-  { id: 'setup', label: 'Setup' },
-  { id: 'run', label: 'Run' },
-  { id: 'terminal', label: 'Terminal' }
+const tabs: { id: BottomPanelTab; label: string; keybind: string }[] = [
+  { id: 'setup', label: 'Setup', keybind: 'S' },
+  { id: 'run', label: 'Run', keybind: 'R' },
+  { id: 'terminal', label: 'Terminal', keybind: 'T' }
 ]
 
 interface BottomPanelProps {
@@ -90,7 +90,7 @@ export function BottomPanel({
             data-testid={`bottom-panel-tab-${tab.id}`}
             data-active={effectiveTab === tab.id}
           >
-            {tab.label}
+            <span className="text-primary">{tab.keybind}</span>{tab.label.slice(1)}
             {effectiveTab === tab.id && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}

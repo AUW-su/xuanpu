@@ -127,16 +127,12 @@ export function useVimNavigation(): void {
         return
       }
 
-      if (event.key === 'I') {
-        const layout = useLayoutStore.getState()
+      if (event.key === 'i' || event.key === 'I') {
         vim.enterInsertMode()
-        const wasCollapsed = layout.leftSidebarCollapsed
-        if (wasCollapsed) {
-          layout.setLeftSidebarCollapsed(false)
-        }
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('hive:focus-project-filter'))
-        }, wasCollapsed ? 100 : 0)
+        const messageInput = document.querySelector<HTMLElement>(
+          '[data-testid="message-input"]'
+        )
+        messageInput?.focus()
         event.preventDefault()
         return
       }
