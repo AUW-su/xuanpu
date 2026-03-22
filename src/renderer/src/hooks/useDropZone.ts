@@ -17,8 +17,10 @@ export function useDropZone({ onDrop }: UseDropZoneProps) {
 
   const handleDragLeave = useCallback((e: DragEvent) => {
     e.preventDefault()
+    if (!e.dataTransfer?.types.includes('Files')) return
     dragCounterRef.current--
-    if (dragCounterRef.current === 0) {
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0
       setIsDragging(false)
     }
   }, [])

@@ -107,7 +107,7 @@ export function AppLayout({ children }: AppLayoutProps): React.JSX.Element {
     // Process files
     const promises = filesToProcess.map((file) => {
       if (isImageMime(file.type)) {
-        return new Promise<Omit<Attachment, 'id'>>((resolve) => {
+        return new Promise<Omit<Attachment, 'id'>>((resolve, reject) => {
           const reader = new FileReader()
           reader.onload = () => {
             resolve({
@@ -116,6 +116,9 @@ export function AppLayout({ children }: AppLayoutProps): React.JSX.Element {
               mime: file.type,
               dataUrl: reader.result as string
             })
+          }
+          reader.onerror = () => {
+            reject(new Error(`Failed to read file: ${file.name}`))
           }
           reader.readAsDataURL(file)
         })
@@ -128,9 +131,14 @@ export function AppLayout({ children }: AppLayoutProps): React.JSX.Element {
       } as Omit<Attachment, 'id'>)
     })
 
-    Promise.all(promises).then((items) => {
-      useDropAttachmentStore.getState().push(items)
-    })
+    Promise.all(promises)
+      .then((items) => {
+        useDropAttachmentStore.getState().push(items)
+      })
+      .catch((err) => {
+        console.error('Failed to process dropped files:', err)
+        toast.error('Failed to read one or more dropped files')
+      })
   }, [])
 
   const { isDragging } = useDropZone({ onDrop: handleFileDrop })

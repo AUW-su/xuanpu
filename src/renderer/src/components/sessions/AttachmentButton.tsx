@@ -31,6 +31,9 @@ export function AttachmentButton({ onAttach, disabled }: AttachmentButtonProps) 
             dataUrl: reader.result as string
           })
         }
+        reader.onerror = () => {
+          console.error(`Failed to read file: ${file.name}`)
+        }
         reader.readAsDataURL(file)
       } else {
         onAttach({
