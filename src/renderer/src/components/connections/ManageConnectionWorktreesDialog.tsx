@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useProjectStore, useWorktreeStore, useConnectionStore } from '@/stores'
+import { useI18n } from '@/i18n/useI18n'
 
 interface ManageConnectionWorktreesDialogProps {
   connectionId: string
@@ -39,6 +40,7 @@ export function ManageConnectionWorktreesDialog({
   open,
   onOpenChange
 }: ManageConnectionWorktreesDialogProps): React.JSX.Element {
+  const { t } = useI18n()
   const projects = useProjectStore((s) => s.projects)
   const worktreesByProject = useWorktreeStore((s) => s.worktreesByProject)
   const connections = useConnectionStore((s) => s.connections)
@@ -158,16 +160,18 @@ export function ManageConnectionWorktreesDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings2 className="h-4 w-4" />
-            Connection Worktrees
+            {t('dialogs.manageConnectionWorktrees.title')}
           </DialogTitle>
-          <DialogDescription>Manage which worktrees are part of this connection.</DialogDescription>
+          <DialogDescription>
+            {t('dialogs.manageConnectionWorktrees.description')}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Search/Filter */}
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Filter worktrees..."
+            placeholder={t('dialogs.manageConnectionWorktrees.filterPlaceholder')}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="pl-9"
@@ -182,11 +186,11 @@ export function ManageConnectionWorktreesDialog({
         >
           {totalWorktrees === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No active worktrees found.
+              {t('dialogs.manageConnectionWorktrees.noWorktrees')}
             </div>
           ) : filteredGroups.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No worktrees match your filter
+              {t('dialogs.manageConnectionWorktrees.noMatches')}
             </div>
           ) : (
             <div className="py-1">
@@ -231,8 +235,14 @@ export function ManageConnectionWorktreesDialog({
         <DialogFooter className="flex items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">
             {selectedIds.size === 0
-              ? 'Select at least 1 worktree'
-              : `${selectedIds.size} worktree${selectedIds.size !== 1 ? 's' : ''} selected`}
+              ? t('dialogs.manageConnectionWorktrees.selectedNone')
+              : t('dialogs.manageConnectionWorktrees.selectedCount', {
+                  count: selectedIds.size,
+                  label:
+                    selectedIds.size === 1
+                      ? t('dialogs.manageConnectionWorktrees.worktreeSingular')
+                      : t('dialogs.manageConnectionWorktrees.worktreePlural')
+                })}
           </p>
           <Button
             onClick={handleSave}
@@ -242,10 +252,10 @@ export function ManageConnectionWorktreesDialog({
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                {t('dialogs.manageConnectionWorktrees.saving')}
               </>
             ) : (
-              'Save'
+              t('dialogs.manageConnectionWorktrees.save')
             )}
           </Button>
         </DialogFooter>

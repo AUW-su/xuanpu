@@ -197,6 +197,8 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'terminalManager.empty.selectWorktree')).toBe(
       '选择一个 worktree 以打开终端'
     )
+    expect(translate('zh-CN', 'connectionList.title')).toBe('连接')
+    expect(translate('zh-CN', 'dialogs.manageConnectionWorktrees.save')).toBe('保存')
     expect(translate('zh-CN', 'prReview.viewer.selectedCount', { count: 2 })).toBe('已选择 2 条')
     expect(translate('zh-CN', 'prReview.commentCard.copyRawHtml')).toBe('复制原始 HTML')
     expect(translate('zh-CN', 'commandPalette.hints.goBack')).toBe('返回')

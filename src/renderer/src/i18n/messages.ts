@@ -477,6 +477,9 @@ export const messages: Record<AppLocale, MessageTree> = {
         selectWorktree: 'Select a worktree to open a terminal'
       }
     },
+    connectionList: {
+      title: 'Connections'
+    },
     prReview: {
       viewer: {
         loading: 'Loading review comments...',
@@ -581,6 +584,19 @@ export const messages: Record<AppLocale, MessageTree> = {
         worktreePlural: 'worktrees',
         connect: 'Connect',
         connecting: 'Connecting...'
+      },
+      manageConnectionWorktrees: {
+        title: 'Connection Worktrees',
+        description: 'Manage which worktrees are part of this connection.',
+        filterPlaceholder: 'Filter worktrees...',
+        noWorktrees: 'No active worktrees found.',
+        noMatches: 'No worktrees match your filter',
+        selectedNone: 'Select at least 1 worktree',
+        selectedCount: '{count} {label} selected',
+        worktreeSingular: 'worktree',
+        worktreePlural: 'worktrees',
+        save: 'Save',
+        saving: 'Saving...'
       },
       addAttachment: {
         title: 'Add Attachment',
@@ -1242,6 +1258,9 @@ export const messages: Record<AppLocale, MessageTree> = {
         selectWorktree: '选择一个 worktree 以打开终端'
       }
     },
+    connectionList: {
+      title: '连接'
+    },
     prReview: {
       viewer: {
         loading: '正在加载审查评论...',
@@ -1346,6 +1365,19 @@ export const messages: Record<AppLocale, MessageTree> = {
         worktreePlural: 'worktree',
         connect: '连接',
         connecting: '连接中...'
+      },
+      manageConnectionWorktrees: {
+        title: '连接中的 Worktree',
+        description: '管理这个连接中包含哪些 worktree。',
+        filterPlaceholder: '筛选 worktree...',
+        noWorktrees: '没有找到活跃的 worktree。',
+        noMatches: '没有匹配筛选条件的 worktree',
+        selectedNone: '至少选择 1 个 worktree',
+        selectedCount: '已选择 {count} 个{label}',
+        worktreeSingular: 'worktree',
+        worktreePlural: 'worktree',
+        save: '保存',
+        saving: '保存中...'
       },
       addAttachment: {
         title: '添加附件',
