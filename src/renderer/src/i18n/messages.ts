@@ -330,6 +330,20 @@ export const messages: Record<AppLocale, MessageTree> = {
         rerun: 'Rerun Setup'
       }
     },
+    copyMessageButton: {
+      ariaLabel: 'Copy message',
+      toasts: {
+        copied: 'Copied to clipboard',
+        copyError: 'Failed to copy'
+      }
+    },
+    codeBlock: {
+      copyButton: 'Copy code',
+      toasts: {
+        copied: 'Code copied to clipboard',
+        copyError: 'Failed to copy code'
+      }
+    },
     commandPalette: {
       ariaLabel: 'Command palette',
       commandLabel: 'Command palette',
@@ -924,6 +938,20 @@ export const messages: Record<AppLocale, MessageTree> = {
       },
       actions: {
         rerun: '重新运行 Setup'
+      }
+    },
+    copyMessageButton: {
+      ariaLabel: '复制消息',
+      toasts: {
+        copied: '已复制到剪贴板',
+        copyError: '复制失败'
+      }
+    },
+    codeBlock: {
+      copyButton: '复制代码',
+      toasts: {
+        copied: '代码已复制到剪贴板',
+        copyError: '复制代码失败'
       }
     },
     commandPalette: {

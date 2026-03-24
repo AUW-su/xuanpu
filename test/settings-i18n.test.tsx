@@ -173,6 +173,8 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'runOutputSearch.count', { current: 2, total: 5 })).toBe('2 / 5')
     expect(translate('zh-CN', 'setupTab.empty.configure')).toBe('配置 setup 脚本')
     expect(translate('zh-CN', 'setupTab.actions.rerun')).toBe('重新运行 Setup')
+    expect(translate('zh-CN', 'copyMessageButton.ariaLabel')).toBe('复制消息')
+    expect(translate('zh-CN', 'codeBlock.toasts.copied')).toBe('代码已复制到剪贴板')
     expect(translate('zh-CN', 'commandPalette.hints.goBack')).toBe('返回')
     expect(translate('zh-CN', 'recent.status.planReady')).toBe('计划已就绪')
     expect(translate('zh-CN', 'dialogs.gitInit.title')).toBe('不是 Git 仓库')
