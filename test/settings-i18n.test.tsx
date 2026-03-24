@@ -185,6 +185,10 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'gitCommitForm.stagedCount', { count: 3, label: '文件' })).toBe(
       '3 个文件'
     )
+    expect(translate('zh-CN', 'gitPushPull.merge.filterPlaceholder')).toBe('筛选分支...')
+    expect(translate('zh-CN', 'gitPushPull.toasts.mergeSuccess', { branch: 'main' })).toBe(
+      '已成功合并 main'
+    )
     expect(translate('zh-CN', 'commandPalette.hints.goBack')).toBe('返回')
     expect(translate('zh-CN', 'recent.status.planReady')).toBe('计划已就绪')
     expect(translate('zh-CN', 'dialogs.gitInit.title')).toBe('不是 Git 仓库')

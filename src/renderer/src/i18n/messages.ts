@@ -390,6 +390,33 @@ export const messages: Record<AppLocale, MessageTree> = {
         error: 'Failed to commit'
       }
     },
+    gitPushPull: {
+      actions: {
+        push: 'Push',
+        pull: 'Pull',
+        merge: 'Merge',
+        archive: 'Archive',
+        delete: 'Delete'
+      },
+      merge: {
+        label: 'Merge from',
+        select: 'Select branch',
+        filterPlaceholder: 'Filter branches...',
+        loading: 'Loading...',
+        noMatching: 'No matching branches',
+        noBranches: 'No branches found'
+      },
+      toasts: {
+        pushSuccess: 'Pushed successfully',
+        pushError: 'Push failed',
+        pullSuccess: 'Pulled successfully',
+        pullError: 'Pull failed',
+        deleteSuccess: 'Deleted branch {branch}',
+        deleteError: 'Failed to delete branch',
+        mergeSuccess: 'Merged {branch} successfully',
+        mergeError: 'Merge failed'
+      }
+    },
     commandPalette: {
       ariaLabel: 'Command palette',
       commandLabel: 'Command palette',
@@ -1044,6 +1071,33 @@ export const messages: Record<AppLocale, MessageTree> = {
         success: '改动已成功提交',
         commitHash: '提交：{hash}',
         error: '提交失败'
+      }
+    },
+    gitPushPull: {
+      actions: {
+        push: '推送',
+        pull: '拉取',
+        merge: '合并',
+        archive: '归档',
+        delete: '删除'
+      },
+      merge: {
+        label: '合并来源',
+        select: '选择分支',
+        filterPlaceholder: '筛选分支...',
+        loading: '加载中...',
+        noMatching: '没有匹配的分支',
+        noBranches: '没有找到分支'
+      },
+      toasts: {
+        pushSuccess: '推送成功',
+        pushError: '推送失败',
+        pullSuccess: '拉取成功',
+        pullError: '拉取失败',
+        deleteSuccess: '已删除分支 {branch}',
+        deleteError: '删除分支失败',
+        mergeSuccess: '已成功合并 {branch}',
+        mergeError: '合并失败'
       }
     },
     commandPalette: {
