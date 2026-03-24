@@ -344,6 +344,11 @@ export const messages: Record<AppLocale, MessageTree> = {
         copyError: 'Failed to copy code'
       }
     },
+    errorFallback: {
+      title: 'Something went wrong',
+      message: 'An unexpected error occurred',
+      retry: 'Try Again'
+    },
     commandPalette: {
       ariaLabel: 'Command palette',
       commandLabel: 'Command palette',
@@ -953,6 +958,11 @@ export const messages: Record<AppLocale, MessageTree> = {
         copied: '代码已复制到剪贴板',
         copyError: '复制代码失败'
       }
+    },
+    errorFallback: {
+      title: '出了点问题',
+      message: '发生了一个未预期的错误',
+      retry: '重试'
     },
     commandPalette: {
       ariaLabel: '命令面板',
