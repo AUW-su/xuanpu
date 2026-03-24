@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { revealLabel } from '@/lib/platform'
+import { fileManagerName } from '@/lib/platform'
 import {
   ChevronRight,
   Plus,
@@ -51,7 +51,7 @@ import { HintBadge } from '@/components/ui/HintBadge'
 import { WorktreeList, BranchPickerDialog } from '@/components/worktrees'
 import { LanguageIcon } from './LanguageIcon'
 import { HighlightedText } from './HighlightedText'
-import { gitToast } from '@/lib/toast'
+import { useI18n } from '@/i18n/useI18n'
 
 interface Project {
   id: string
@@ -126,6 +126,7 @@ export function ProjectItem({
   const vimMode = useVimModeStore((s) => s.mode)
   const vimModeEnabled = useSettingsStore((s) => s.vimModeEnabled)
   const projectHint = useHintStore((s) => s.hintMap.get('project:' + project.id))
+  const { t } = useI18n()
 
   const [editName, setEditName] = useState(project.name)
   const [branchPickerOpen, setBranchPickerOpen] = useState(false)
@@ -168,9 +169,9 @@ export function ProjectItem({
     if (trimmedName && trimmedName !== project.name) {
       const success = await updateProjectName(project.id, trimmedName)
       if (success) {
-        toast.success('Project renamed successfully')
+        toast.success(t('projectItem.toasts.renamedSuccess'))
       } else {
-        toast.error('Failed to rename project')
+        toast.error(t('projectItem.toasts.renamedError'))
       }
     }
     setEditingProject(null)
@@ -193,9 +194,9 @@ export function ProjectItem({
     setRemoveConfirmOpen(false)
     const success = await removeProject(project.id)
     if (success) {
-      toast.success('Project removed from Hive')
+      toast.success(t('projectItem.toasts.removedSuccess'))
     } else {
-      toast.error('Failed to remove project')
+      toast.error(t('projectItem.toasts.removedError'))
     }
   }
 
@@ -205,12 +206,12 @@ export function ProjectItem({
 
   const handleCopyPath = async (): Promise<void> => {
     await window.projectOps.copyToClipboard(project.path)
-    toast.success('Path copied to clipboard')
+    toast.success(t('projectItem.toasts.pathCopied'))
   }
 
   const handleRefreshProject = async (): Promise<void> => {
     await syncWorktrees(project.id, project.path)
-    toast.success('Project refreshed')
+    toast.success(t('projectItem.toasts.refreshed'))
   }
 
   const doCreateWorktree = useCallback(async (): Promise<void> => {
@@ -225,11 +226,15 @@ export function ProjectItem({
 
     const result = await createWorktree(project.id, project.path, project.name)
     if (result.success) {
-      gitToast.worktreeCreated(project.name)
+      toast.success(t('projectItem.toasts.worktreeCreated', { name: project.name }))
     } else {
-      gitToast.operationFailed('create worktree', result.error)
+      toast.error(
+        result.error
+          ? t('projectItem.toasts.createWorktreeErrorWithReason', { error: result.error })
+          : t('projectItem.toasts.createWorktreeError')
+      )
     }
-  }, [isCreatingWorktree, createWorktree, project])
+  }, [isCreatingWorktree, createWorktree, project, t])
 
   const handleCreateWorktree = useCallback(
     async (e: React.MouseEvent): Promise<void> => {
@@ -261,12 +266,18 @@ export function ProjectItem({
       if (result.success && result.worktree) {
         useWorktreeStore.getState().loadWorktrees(project.id)
         useWorktreeStore.getState().selectWorktree(result.worktree.id)
-        gitToast.worktreeCreated(branchName)
+        toast.success(t('projectItem.toasts.worktreeCreated', { name: branchName }))
       } else {
-        gitToast.operationFailed('create worktree from branch', result.error)
+        toast.error(
+          result.error
+            ? t('projectItem.toasts.createWorktreeFromBranchErrorWithReason', {
+                error: result.error
+              })
+            : t('projectItem.toasts.createWorktreeFromBranchError')
+        )
       }
     },
-    [project]
+    [project, t]
   )
 
   return (
@@ -391,40 +402,40 @@ export function ProjectItem({
           <ContextMenuContent className="w-48">
             <ContextMenuItem onClick={handleStartEdit}>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit Name
+              {t('projectItem.menu.editName')}
             </ContextMenuItem>
             <ContextMenuItem onClick={handleOpenInFinder}>
               <ExternalLink className="h-4 w-4 mr-2" />
-              {revealLabel(true)}
+              {t('projectItem.menu.openInFileManager', { manager: fileManagerName() })}
             </ContextMenuItem>
             <ContextMenuItem onClick={handleCopyPath}>
               <Copy className="h-4 w-4 mr-2" />
-              Copy Path
+              {t('projectItem.menu.copyPath')}
             </ContextMenuItem>
             <ContextMenuItem onClick={() => refreshLanguage(project.id)}>
               <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Language
+              {t('projectItem.menu.refreshLanguage')}
             </ContextMenuItem>
             <ContextMenuItem onClick={handleRefreshProject}>
               <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Project
+              {t('projectItem.menu.refreshProject')}
             </ContextMenuItem>
             <ContextMenuItem onClick={() => setBranchPickerOpen(true)}>
               <GitBranch className="h-4 w-4 mr-2" />
-              New Workspace From...
+              {t('projectItem.menu.newWorkspaceFrom')}
             </ContextMenuItem>
             <ContextMenuItem
               onClick={() => useProjectStore.getState().openProjectSettings(project.id)}
             >
               <Settings className="h-4 w-4 mr-2" />
-              Project Settings
+              {t('projectItem.menu.projectSettings')}
             </ContextMenuItem>
             {spaces.length > 0 && (
               <>
                 <ContextMenuSub>
                   <ContextMenuSubTrigger>
                     <FolderHeart className="h-4 w-4 mr-2" />
-                    Assign to Space
+                    {t('projectItem.menu.assignToSpace')}
                   </ContextMenuSubTrigger>
                   <ContextMenuSubContent className="w-40">
                     {spaces.map((space) => {
@@ -456,7 +467,7 @@ export function ProjectItem({
               className="text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Remove from Hive
+              {t('projectItem.menu.removeFromHive')}
             </ContextMenuItem>
           </ContextMenuContent>
         )}
@@ -477,26 +488,24 @@ export function ProjectItem({
       <AlertDialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove project from Hive?</AlertDialogTitle>
+            <AlertDialogTitle>{t('projectItem.dialogs.remove.title')}</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2">
-                <p>
-                  This will remove <span className="font-semibold">{project.name}</span> from Hive.
-                </p>
+                <p>{t('projectItem.dialogs.remove.description', { name: project.name })}</p>
                 <p className="font-mono text-xs bg-muted rounded px-2 py-1 break-all">
                   {project.path}
                 </p>
-                <p>Your files on disk will not be affected.</p>
+                <p>{t('projectItem.dialogs.remove.unaffected')}</p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('projectItem.dialogs.remove.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRemove}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Remove
+              {t('projectItem.dialogs.remove.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -506,13 +515,15 @@ export function ProjectItem({
       <AlertDialog open={noCommitsDialogOpen} onOpenChange={setNoCommitsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Initial Commit Required</AlertDialogTitle>
+            <AlertDialogTitle>{t('projectItem.dialogs.noCommits.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Creating a first commit with the initial state is required for adding worktrees.
+              {t('projectItem.dialogs.noCommits.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setNoCommitsDialogOpen(false)}>OK</AlertDialogAction>
+            <AlertDialogAction onClick={() => setNoCommitsDialogOpen(false)}>
+              {t('projectItem.dialogs.noCommits.ok')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -504,6 +504,47 @@ export const messages: Record<AppLocale, MessageTree> = {
         openInEditorDescription: 'Make sure VS Code is installed',
         pathCopied: 'Path copied to clipboard'
       }
+    },
+    projectItem: {
+      menu: {
+        editName: 'Edit Name',
+        openInFileManager: 'Open in {manager}',
+        copyPath: 'Copy Path',
+        refreshLanguage: 'Refresh Language',
+        refreshProject: 'Refresh Project',
+        newWorkspaceFrom: 'New Workspace From...',
+        projectSettings: 'Project Settings',
+        assignToSpace: 'Assign to Space',
+        removeFromHive: 'Remove from Hive'
+      },
+      dialogs: {
+        remove: {
+          title: 'Remove project from Hive?',
+          description: 'This will remove {name} from Hive.',
+          unaffected: 'Your files on disk will not be affected.',
+          cancel: 'Cancel',
+          confirm: 'Remove'
+        },
+        noCommits: {
+          title: 'Initial Commit Required',
+          description:
+            'Creating a first commit with the initial state is required for adding worktrees.',
+          ok: 'OK'
+        }
+      },
+      toasts: {
+        renamedSuccess: 'Project renamed successfully',
+        renamedError: 'Failed to rename project',
+        removedSuccess: 'Project removed from Hive',
+        removedError: 'Failed to remove project',
+        pathCopied: 'Path copied to clipboard',
+        refreshed: 'Project refreshed',
+        worktreeCreated: 'Worktree "{name}" created successfully',
+        createWorktreeError: 'Failed to create worktree',
+        createWorktreeErrorWithReason: 'Failed to create worktree: {error}',
+        createWorktreeFromBranchError: 'Failed to create worktree from branch',
+        createWorktreeFromBranchErrorWithReason: 'Failed to create worktree from branch: {error}'
+      }
     }
   },
   'zh-CN': {
@@ -985,6 +1026,46 @@ export const messages: Record<AppLocale, MessageTree> = {
         openInEditorError: '在编辑器中打开失败',
         openInEditorDescription: '请确认 VS Code 已安装',
         pathCopied: '路径已复制到剪贴板'
+      }
+    },
+    projectItem: {
+      menu: {
+        editName: '编辑名称',
+        openInFileManager: '在 {manager} 中打开',
+        copyPath: '复制路径',
+        refreshLanguage: '刷新语言识别',
+        refreshProject: '刷新项目',
+        newWorkspaceFrom: '从分支创建工作区...',
+        projectSettings: '项目设置',
+        assignToSpace: '分配到空间',
+        removeFromHive: '从 Hive 中移除'
+      },
+      dialogs: {
+        remove: {
+          title: '要从 Hive 中移除这个项目吗？',
+          description: '这会把 {name} 从 Hive 中移除。',
+          unaffected: '磁盘上的文件不会受到影响。',
+          cancel: '取消',
+          confirm: '移除'
+        },
+        noCommits: {
+          title: '需要先提交初始版本',
+          description: '要创建 worktree，必须先创建一次初始提交。',
+          ok: '好的'
+        }
+      },
+      toasts: {
+        renamedSuccess: '项目重命名成功',
+        renamedError: '项目重命名失败',
+        removedSuccess: '项目已从 Hive 中移除',
+        removedError: '移除项目失败',
+        pathCopied: '路径已复制到剪贴板',
+        refreshed: '项目已刷新',
+        worktreeCreated: 'Worktree “{name}” 创建成功',
+        createWorktreeError: '创建 worktree 失败',
+        createWorktreeErrorWithReason: '创建 worktree 失败：{error}',
+        createWorktreeFromBranchError: '从分支创建 worktree 失败',
+        createWorktreeFromBranchErrorWithReason: '从分支创建 worktree 失败：{error}'
       }
     }
   }

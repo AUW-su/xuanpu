@@ -173,5 +173,9 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'pinned.title')).toBe('已固定')
     expect(translate('zh-CN', 'pinned.menu.renameBranch')).toBe('重命名分支')
     expect(translate('zh-CN', 'pinned.toasts.pathCopied')).toBe('路径已复制到剪贴板')
+    expect(translate('zh-CN', 'projectItem.menu.openInFileManager', { manager: 'Finder' })).toBe(
+      '在 Finder 中打开'
+    )
+    expect(translate('zh-CN', 'projectItem.toasts.createWorktreeError')).toBe('创建 worktree 失败')
   })
 })
