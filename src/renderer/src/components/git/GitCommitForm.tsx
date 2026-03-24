@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useGitStore } from '@/stores/useGitStore'
 import { useWorktreeStore } from '@/stores/useWorktreeStore'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/i18n/useI18n'
 
 interface GitCommitFormProps {
   worktreePath: string | null
@@ -22,6 +23,7 @@ export function GitCommitForm({
   hasConflicts,
   className
 }: GitCommitFormProps): React.JSX.Element | null {
+  const { t } = useI18n()
   const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const summaryInputRef = useRef<HTMLInputElement>(null)
@@ -91,18 +93,20 @@ export function GitCommitForm({
     const result = await commit(worktreePath, message)
 
     if (result.success) {
-      toast.success('Changes committed successfully', {
-        description: result.commitHash ? `Commit: ${result.commitHash.slice(0, 7)}` : undefined
+      toast.success(t('gitCommitForm.toasts.success'), {
+        description: result.commitHash
+          ? t('gitCommitForm.toasts.commitHash', { hash: result.commitHash.slice(0, 7) })
+          : undefined
       })
       // Clear form
       setSummary('')
       setDescription('')
     } else {
-      toast.error('Failed to commit', {
+      toast.error(t('gitCommitForm.toasts.error'), {
         description: result.error
       })
     }
-  }, [worktreePath, canCommit, summary, description, commit])
+  }, [worktreePath, canCommit, summary, description, commit, t])
 
   // Keyboard shortcut: Cmd/Ctrl+Enter to commit
   useEffect(() => {
@@ -141,7 +145,7 @@ export function GitCommitForm({
           ref={summaryInputRef}
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
-          placeholder="Commit summary"
+          placeholder={t('gitCommitForm.summaryPlaceholder')}
           className={cn(
             'text-xs h-7 pr-12',
             summaryStatus === 'error' && 'border-red-500 focus-visible:ring-red-500',
@@ -167,7 +171,7 @@ export function GitCommitForm({
       <Textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Extended description (optional)"
+        placeholder={t('gitCommitForm.descriptionPlaceholder')}
         className="text-xs min-h-[40px] resize-none"
         rows={2}
         disabled={isCommitting}
@@ -185,14 +189,22 @@ export function GitCommitForm({
         {isCommitting ? (
           <>
             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-            Committing...
+            {t('gitCommitForm.committing')}
           </>
         ) : (
           <>
-            Commit
+            {t('gitCommitForm.commit')}
             {hasStaged && (
               <span className="ml-1 text-[10px] opacity-75">
-                ({stagedFilesCount} file{stagedFilesCount !== 1 ? 's' : ''})
+                (
+                {t('gitCommitForm.stagedCount', {
+                  count: stagedFilesCount,
+                  label:
+                    stagedFilesCount === 1
+                      ? t('gitCommitForm.fileSingular')
+                      : t('gitCommitForm.filePlural')
+                })}
+                )
               </span>
             )}
           </>
@@ -205,13 +217,15 @@ export function GitCommitForm({
           className="text-[10px] text-red-500 text-center font-medium"
           data-testid="commit-conflict-warning"
         >
-          Resolve merge conflicts before committing
+          {t('gitCommitForm.conflictWarning')}
         </div>
       )}
 
       {/* Help text */}
       <div className="text-[10px] text-muted-foreground text-center">
-        {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'}+Enter to commit
+        {t('gitCommitForm.shortcutHint', {
+          modifier: navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'
+        })}
       </div>
     </div>
   )

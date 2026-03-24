@@ -181,6 +181,10 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'ghosttyPromoToast.activate')).toBe('启用')
     expect(translate('zh-CN', 'compactionPill.auto')).toBe('已自动压缩上下文')
     expect(translate('zh-CN', 'indeterminateProgressBar.working')).toBe('Agent 正在执行')
+    expect(translate('zh-CN', 'gitCommitForm.summaryPlaceholder')).toBe('提交摘要')
+    expect(translate('zh-CN', 'gitCommitForm.stagedCount', { count: 3, label: '文件' })).toBe(
+      '3 个文件'
+    )
     expect(translate('zh-CN', 'commandPalette.hints.goBack')).toBe('返回')
     expect(translate('zh-CN', 'recent.status.planReady')).toBe('计划已就绪')
     expect(translate('zh-CN', 'dialogs.gitInit.title')).toBe('不是 Git 仓库')

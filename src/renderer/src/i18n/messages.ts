@@ -374,6 +374,22 @@ export const messages: Record<AppLocale, MessageTree> = {
       asking: 'Waiting for answer',
       working: 'Agent is working'
     },
+    gitCommitForm: {
+      summaryPlaceholder: 'Commit summary',
+      descriptionPlaceholder: 'Extended description (optional)',
+      committing: 'Committing...',
+      commit: 'Commit',
+      stagedCount: '{count} {label}',
+      fileSingular: 'file',
+      filePlural: 'files',
+      conflictWarning: 'Resolve merge conflicts before committing',
+      shortcutHint: '{modifier}+Enter to commit',
+      toasts: {
+        success: 'Changes committed successfully',
+        commitHash: 'Commit: {hash}',
+        error: 'Failed to commit'
+      }
+    },
     commandPalette: {
       ariaLabel: 'Command palette',
       commandLabel: 'Command palette',
@@ -1013,6 +1029,22 @@ export const messages: Record<AppLocale, MessageTree> = {
     indeterminateProgressBar: {
       asking: '等待回答中',
       working: 'Agent 正在执行'
+    },
+    gitCommitForm: {
+      summaryPlaceholder: '提交摘要',
+      descriptionPlaceholder: '补充说明（可选）',
+      committing: '提交中...',
+      commit: '提交',
+      stagedCount: '{count} 个{label}',
+      fileSingular: '文件',
+      filePlural: '文件',
+      conflictWarning: '请先解决合并冲突，再进行提交',
+      shortcutHint: '{modifier}+Enter 提交',
+      toasts: {
+        success: '改动已成功提交',
+        commitHash: '提交：{hash}',
+        error: '提交失败'
+      }
     },
     commandPalette: {
       ariaLabel: '命令面板',
