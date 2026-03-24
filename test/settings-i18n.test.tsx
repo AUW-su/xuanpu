@@ -177,6 +177,8 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'codeBlock.toasts.copied')).toBe('代码已复制到剪贴板')
     expect(translate('zh-CN', 'errorFallback.title')).toBe('出了点问题')
     expect(translate('zh-CN', 'errorFallback.retry')).toBe('重试')
+    expect(translate('zh-CN', 'updateToast.available.skip')).toBe('跳过此版本')
+    expect(translate('zh-CN', 'ghosttyPromoToast.activate')).toBe('启用')
     expect(translate('zh-CN', 'commandPalette.hints.goBack')).toBe('返回')
     expect(translate('zh-CN', 'recent.status.planReady')).toBe('计划已就绪')
     expect(translate('zh-CN', 'dialogs.gitInit.title')).toBe('不是 Git 仓库')

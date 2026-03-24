@@ -349,6 +349,23 @@ export const messages: Record<AppLocale, MessageTree> = {
       message: 'An unexpected error occurred',
       retry: 'Try Again'
     },
+    updateToast: {
+      available: {
+        title: 'Update v{version} available',
+        later: 'Later',
+        skip: 'Skip this version',
+        download: 'Download'
+      },
+      progress: {
+        title: 'Downloading v{version}...'
+      }
+    },
+    ghosttyPromoToast: {
+      title: 'Ghostty native terminal available',
+      description: 'Metal-accelerated rendering with your Ghostty config',
+      dismiss: "Don't show again",
+      activate: 'Activate'
+    },
     commandPalette: {
       ariaLabel: 'Command palette',
       commandLabel: 'Command palette',
@@ -963,6 +980,23 @@ export const messages: Record<AppLocale, MessageTree> = {
       title: '出了点问题',
       message: '发生了一个未预期的错误',
       retry: '重试'
+    },
+    updateToast: {
+      available: {
+        title: '发现 v{version} 更新',
+        later: '稍后',
+        skip: '跳过此版本',
+        download: '下载'
+      },
+      progress: {
+        title: '正在下载 v{version}...'
+      }
+    },
+    ghosttyPromoToast: {
+      title: 'Ghostty 原生终端已可用',
+      description: '基于 Metal 的原生渲染，并沿用你的 Ghostty 配置',
+      dismiss: '不再提示',
+      activate: '启用'
     },
     commandPalette: {
       ariaLabel: '命令面板',
