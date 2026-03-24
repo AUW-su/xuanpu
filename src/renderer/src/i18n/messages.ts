@@ -278,6 +278,16 @@ export const messages: Record<AppLocale, MessageTree> = {
       },
       fileCount: '{count} files'
     },
+    fileTree: {
+      gitStatus: {
+        modified: 'Modified',
+        staged: 'Staged',
+        deleted: 'Deleted',
+        untracked: 'Untracked',
+        conflicted: 'Conflicted',
+        stagedSuffix: ' (staged)'
+      }
+    },
     commandPalette: {
       ariaLabel: 'Command palette',
       commandLabel: 'Command palette',
@@ -821,6 +831,16 @@ export const messages: Record<AppLocale, MessageTree> = {
         close: '关闭'
       },
       fileCount: '{count} 个文件'
+    },
+    fileTree: {
+      gitStatus: {
+        modified: '已修改',
+        staged: '已暂存',
+        deleted: '已删除',
+        untracked: '未跟踪',
+        conflicted: '有冲突',
+        stagedSuffix: '（已暂存）'
+      }
     },
     commandPalette: {
       ariaLabel: '命令面板',
