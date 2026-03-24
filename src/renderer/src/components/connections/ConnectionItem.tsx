@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { revealLabel } from '@/lib/platform'
+import { fileManagerName } from '@/lib/platform'
 import {
   AlertCircle,
   Code,
@@ -32,11 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   useConnectionStore,
   usePinnedStore,
@@ -46,7 +42,8 @@ import {
 } from '@/stores'
 import { useWorktreeStatusStore } from '@/stores/useWorktreeStatusStore'
 import { HintBadge } from '@/components/ui/HintBadge'
-import { toast, clipboardToast } from '@/lib/toast'
+import { toast } from '@/lib/toast'
+import { useI18n } from '@/i18n/useI18n'
 
 interface ConnectionMemberEnriched {
   id: string
@@ -82,6 +79,7 @@ export function ConnectionItem({
   connection,
   onManageWorktrees
 }: ConnectionItemProps): React.JSX.Element {
+  const { t } = useI18n()
   const selectedConnectionId = useConnectionStore((s) => s.selectedConnectionId)
   const selectConnection = useConnectionStore((s) => s.selectConnection)
   const deleteConnection = useConnectionStore((s) => s.deleteConnection)
@@ -117,18 +115,33 @@ export function ConnectionItem({
   // Derive display status text + color
   const { displayStatus, statusClass } =
     connectionStatus === 'answering'
-      ? { displayStatus: 'Answer questions', statusClass: 'font-semibold text-amber-500' }
+      ? { displayStatus: t('pinned.status.answering'), statusClass: 'font-semibold text-amber-500' }
       : connectionStatus === 'permission'
-        ? { displayStatus: 'Permission', statusClass: 'font-semibold text-amber-500' }
+        ? {
+            displayStatus: t('pinned.status.permission'),
+            statusClass: 'font-semibold text-amber-500'
+          }
         : connectionStatus === 'planning'
-          ? { displayStatus: 'Planning', statusClass: 'font-semibold text-blue-400' }
+          ? {
+              displayStatus: t('pinned.status.planning'),
+              statusClass: 'font-semibold text-blue-400'
+            }
           : connectionStatus === 'working'
-            ? { displayStatus: 'Working', statusClass: 'font-semibold text-primary' }
+            ? {
+                displayStatus: t('pinned.status.working'),
+                statusClass: 'font-semibold text-primary'
+              }
             : connectionStatus === 'plan_ready'
-              ? { displayStatus: 'Plan ready', statusClass: 'font-semibold text-blue-400' }
+              ? {
+                  displayStatus: t('pinned.status.planReady'),
+                  statusClass: 'font-semibold text-blue-400'
+                }
               : connectionStatus === 'completed'
-                ? { displayStatus: 'Ready', statusClass: 'font-semibold text-green-400' }
-                : { displayStatus: 'Ready', statusClass: 'text-muted-foreground' }
+                ? {
+                    displayStatus: t('pinned.status.ready'),
+                    statusClass: 'font-semibold text-green-400'
+                  }
+                : { displayStatus: t('pinned.status.ready'), statusClass: 'text-muted-foreground' }
 
   // Marquee animation state for overflowing display name
   const containerRef = useRef<HTMLDivElement>(null)
@@ -231,20 +244,20 @@ export function ConnectionItem({
   const handleOpenInTerminal = useCallback(async (): Promise<void> => {
     const result = await window.connectionOps.openInTerminal(connection.path)
     if (result.success) {
-      toast.success('Opened in Terminal')
+      toast.success(t('pinned.toasts.openedInTerminal'))
     } else {
-      toast.error(result.error || 'Failed to open in terminal')
+      toast.error(result.error || t('pinned.toasts.openInTerminalError'))
     }
-  }, [connection.path])
+  }, [connection.path, t])
 
   const handleOpenInEditor = useCallback(async (): Promise<void> => {
     const result = await window.connectionOps.openInEditor(connection.path)
     if (result.success) {
-      toast.success('Opened in Editor')
+      toast.success(t('pinned.toasts.openedInEditor'))
     } else {
-      toast.error(result.error || 'Failed to open in editor')
+      toast.error(result.error || t('pinned.toasts.openInEditorError'))
     }
-  }, [connection.path])
+  }, [connection.path, t])
 
   const handleOpenInFinder = async (): Promise<void> => {
     await window.projectOps.showInFolder(connection.path)
@@ -252,7 +265,7 @@ export function ConnectionItem({
 
   const handleCopyPath = async (): Promise<void> => {
     await window.projectOps.copyToClipboard(connection.path)
-    clipboardToast.copied('Path')
+    toast.success(t('pinned.toasts.pathCopied'))
   }
 
   const handleDelete = useCallback(async (): Promise<void> => {
@@ -269,47 +282,48 @@ export function ConnectionItem({
   )
 
   // Build detailed project info for tooltip (project name + branch)
-  const projectDetails = connection.members?.map((m) => ({
-    project: m.project_name,
-    branch: m.worktree_branch
-  })) || []
+  const projectDetails =
+    connection.members?.map((m) => ({
+      project: m.project_name,
+      branch: m.worktree_branch
+    })) || []
 
   // Display logic: custom name takes priority over project names
   const hasCustomName = !!connection.custom_name
   const displayName = hasCustomName
     ? connection.custom_name!
-    : projectNames || connection.name || 'Connection'
+    : projectNames || connection.name || t('pinned.connectionFallback')
 
   const menuItems = (
     <>
       <ContextMenuItem onClick={handleManageWorktrees}>
         <Settings2 className="h-4 w-4 mr-2" />
-        Connection Worktrees
+        {t('pinned.menu.connectionWorktrees')}
       </ContextMenuItem>
       <ContextMenuItem onClick={handleStartRename}>
         <Pencil className="h-4 w-4 mr-2" />
-        Rename
+        {t('pinned.menu.rename')}
       </ContextMenuItem>
       <ContextMenuItem onClick={handleTogglePin}>
         {isPinned ? <PinOff className="h-4 w-4 mr-2" /> : <Pin className="h-4 w-4 mr-2" />}
-        {isPinned ? 'Unpin' : 'Pin'}
+        {isPinned ? t('pinned.menu.unpin') : t('pinned.menu.pin')}
       </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem onClick={handleOpenInTerminal}>
         <Terminal className="h-4 w-4 mr-2" />
-        Open in Terminal
+        {t('pinned.menu.openInTerminal')}
       </ContextMenuItem>
       <ContextMenuItem onClick={handleOpenInEditor}>
         <Code className="h-4 w-4 mr-2" />
-        Open in Editor
+        {t('pinned.menu.openInEditor')}
       </ContextMenuItem>
       <ContextMenuItem onClick={handleOpenInFinder}>
         <ExternalLink className="h-4 w-4 mr-2" />
-        {revealLabel(true)}
+        {t('pinned.menu.openInFileManager', { manager: fileManagerName() })}
       </ContextMenuItem>
       <ContextMenuItem onClick={handleCopyPath}>
         <Copy className="h-4 w-4 mr-2" />
-        Copy Path
+        {t('pinned.menu.copyPath')}
       </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem
@@ -317,7 +331,7 @@ export function ConnectionItem({
         className="text-destructive focus:text-destructive focus:bg-destructive/10"
       >
         <Trash2 className="h-4 w-4 mr-2" />
-        Delete
+        {t('pinned.menu.delete')}
       </ContextMenuItem>
     </>
   )
@@ -331,179 +345,171 @@ export function ConnectionItem({
       onClick={handleClick}
       data-testid={`connection-item-${connection.id}`}
     >
-          {/* Connection color indicator — always visible */}
-          {connection.color ? (
-            <span
-              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
-              style={{ backgroundColor: parseColorQuad(connection.color)[1] }}
-              aria-hidden="true"
-            />
-          ) : (
-            <Link className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          )}
+      {/* Connection color indicator — always visible */}
+      {connection.color ? (
+        <span
+          className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+          style={{ backgroundColor: parseColorQuad(connection.color)[1] }}
+          aria-hidden="true"
+        />
+      ) : (
+        <Link className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      )}
 
-          {/* Status icon (shown alongside color) */}
-          {(connectionStatus === 'working' || connectionStatus === 'planning') && (
-            <Loader2 className="h-3.5 w-3.5 text-primary shrink-0 animate-spin" />
-          )}
-          {(connectionStatus === 'answering' || connectionStatus === 'permission') && (
-            <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-          )}
-          {connectionStatus === 'plan_ready' && (
-            <Map className="h-3.5 w-3.5 text-blue-400 shrink-0" />
-          )}
+      {/* Status icon (shown alongside color) */}
+      {(connectionStatus === 'working' || connectionStatus === 'planning') && (
+        <Loader2 className="h-3.5 w-3.5 text-primary shrink-0 animate-spin" />
+      )}
+      {(connectionStatus === 'answering' || connectionStatus === 'permission') && (
+        <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+      )}
+      {connectionStatus === 'plan_ready' && <Map className="h-3.5 w-3.5 text-blue-400 shrink-0" />}
 
-          {/* Name and status */}
-          <div className="flex-1 min-w-0">
-            {isRenaming ? (
-              <input
-                ref={renameInputRef}
-                autoFocus
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                onKeyDown={handleRenameKeyDown}
-                onBlur={() => {
-                  // Skip scheduling timer if we're intentionally closing via Escape/Enter
-                  if (intentionalCloseRef.current) {
-                    intentionalCloseRef.current = false
-                    return
+      {/* Name and status */}
+      <div className="flex-1 min-w-0">
+        {isRenaming ? (
+          <input
+            ref={renameInputRef}
+            autoFocus
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            onKeyDown={handleRenameKeyDown}
+            onBlur={() => {
+              // Skip scheduling timer if we're intentionally closing via Escape/Enter
+              if (intentionalCloseRef.current) {
+                intentionalCloseRef.current = false
+                return
+              }
+              // Ignore blur events that happen too soon after starting rename (menu closing)
+              const timeSinceStart = Date.now() - renameStartTimeRef.current
+              if (timeSinceStart < 500) {
+                // Always refocus during the first 500ms (menu closing period)
+                // User can press Escape to cancel if needed
+                setTimeout(() => {
+                  if (renameInputRef.current && document.activeElement !== renameInputRef.current) {
+                    renameInputRef.current.focus()
+                    renameInputRef.current.select()
                   }
-                  // Ignore blur events that happen too soon after starting rename (menu closing)
-                  const timeSinceStart = Date.now() - renameStartTimeRef.current
-                  if (timeSinceStart < 500) {
-                    // Always refocus during the first 500ms (menu closing period)
-                    // User can press Escape to cancel if needed
-                    setTimeout(() => {
-                      if (
-                        renameInputRef.current &&
-                        document.activeElement !== renameInputRef.current
-                      ) {
-                        renameInputRef.current.focus()
-                        renameInputRef.current.select()
-                      }
-                    }, 0)
-                    return
-                  }
+                }, 0)
+                return
+              }
 
-                  // Delay blur to allow for normal focus changes
-                  if (blurTimerRef.current) clearTimeout(blurTimerRef.current)
-                  blurTimerRef.current = setTimeout(() => {
-                    blurTimerRef.current = null
-                    // Only close if the input is still not focused
-                    if (document.activeElement !== renameInputRef.current) {
-                      setIsRenaming(false)
-                    }
-                  }, 100)
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-background border border-border rounded px-1.5 py-0.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-ring"
-                placeholder={projectNames || 'Connection name'}
-              />
-            ) : (
-              <>
-                <div
-                  className="overflow-hidden"
-                  ref={containerRef}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <span
-                    ref={textRef}
-                    className={cn('text-sm whitespace-nowrap block', !isAnimating && 'truncate')}
-                    style={
-                      isAnimating
-                        ? ({
-                            '--scroll-distance': `${scrollDistance}px`,
-                            animation: `marquee-scroll ${animationDuration}s linear infinite`
-                          } as React.CSSProperties)
-                        : undefined
-                    }
-                    title={displayName}
-                  >
-                    {displayName}
-                  </span>
-                </div>
-                <span
-                  className={cn('text-[11px]', statusClass)}
-                  data-testid="connection-status-text"
-                >
-                  {displayStatus}
-                </span>
-              </>
+              // Delay blur to allow for normal focus changes
+              if (blurTimerRef.current) clearTimeout(blurTimerRef.current)
+              blurTimerRef.current = setTimeout(() => {
+                blurTimerRef.current = null
+                // Only close if the input is still not focused
+                if (document.activeElement !== renameInputRef.current) {
+                  setIsRenaming(false)
+                }
+              }, 100)
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-background border border-border rounded px-1.5 py-0.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-ring"
+            placeholder={projectNames || t('pinned.connectionNamePlaceholder')}
+          />
+        ) : (
+          <>
+            <div
+              className="overflow-hidden"
+              ref={containerRef}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <span
+                ref={textRef}
+                className={cn('text-sm whitespace-nowrap block', !isAnimating && 'truncate')}
+                style={
+                  isAnimating
+                    ? ({
+                        '--scroll-distance': `${scrollDistance}px`,
+                        animation: `marquee-scroll ${animationDuration}s linear infinite`
+                      } as React.CSSProperties)
+                    : undefined
+                }
+                title={displayName}
+              >
+                {displayName}
+              </span>
+            </div>
+            <span className={cn('text-[11px]', statusClass)} data-testid="connection-status-text">
+              {displayStatus}
+            </span>
+          </>
+        )}
+      </div>
+
+      {/* Hint badge */}
+      {hint && vimModeEnabled && vimMode === 'normal' && (
+        <HintBadge
+          code={hint}
+          mode={hintMode}
+          pendingChar={hintPendingChar}
+          actionMode={hintActionMode}
+        />
+      )}
+
+      {/* Unread dot badge */}
+      {connectionStatus === 'unread' && (
+        <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
+      )}
+
+      {/* More Options Dropdown (visible on hover) */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity',
+              'hover:bg-accent'
             )}
-          </div>
-
-          {/* Hint badge */}
-          {hint && vimModeEnabled && vimMode === 'normal' && (
-            <HintBadge
-              code={hint}
-              mode={hintMode}
-              pendingChar={hintPendingChar}
-              actionMode={hintActionMode}
-            />
-          )}
-
-          {/* Unread dot badge */}
-          {connectionStatus === 'unread' && (
-            <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
-          )}
-
-          {/* More Options Dropdown (visible on hover) */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  'h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity',
-                  'hover:bg-accent'
-                )}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-52" align="end">
-              <DropdownMenuItem onClick={handleManageWorktrees}>
-                <Settings2 className="h-4 w-4 mr-2" />
-                Connection Worktrees
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleStartRename}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleTogglePin}>
-                {isPinned ? <PinOff className="h-4 w-4 mr-2" /> : <Pin className="h-4 w-4 mr-2" />}
-                {isPinned ? 'Unpin' : 'Pin'}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleOpenInTerminal}>
-                <Terminal className="h-4 w-4 mr-2" />
-                Open in Terminal
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleOpenInEditor}>
-                <Code className="h-4 w-4 mr-2" />
-                Open in Editor
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleOpenInFinder}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                {revealLabel(true)}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyPath}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy Path
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="text-destructive focus:text-destructive focus:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreHorizontal className="h-3.5 w-3.5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-52" align="end">
+          <DropdownMenuItem onClick={handleManageWorktrees}>
+            <Settings2 className="h-4 w-4 mr-2" />
+            {t('pinned.menu.connectionWorktrees')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleStartRename}>
+            <Pencil className="h-4 w-4 mr-2" />
+            {t('pinned.menu.rename')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleTogglePin}>
+            {isPinned ? <PinOff className="h-4 w-4 mr-2" /> : <Pin className="h-4 w-4 mr-2" />}
+            {isPinned ? t('pinned.menu.unpin') : t('pinned.menu.pin')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleOpenInTerminal}>
+            <Terminal className="h-4 w-4 mr-2" />
+            {t('pinned.menu.openInTerminal')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenInEditor}>
+            <Code className="h-4 w-4 mr-2" />
+            {t('pinned.menu.openInEditor')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenInFinder}>
+            <ExternalLink className="h-4 w-4 mr-2" />
+            {t('pinned.menu.openInFileManager', { manager: fileManagerName() })}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleCopyPath}>
+            <Copy className="h-4 w-4 mr-2" />
+            {t('pinned.menu.copyPath')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={handleDelete}
+            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {t('pinned.menu.delete')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 
   return (
