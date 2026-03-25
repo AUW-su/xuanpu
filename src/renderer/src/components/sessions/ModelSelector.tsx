@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { useSettingsStore, resolveModelForSdk } from '@/stores/useSettingsStore'
 import { useSessionStore } from '@/stores/useSessionStore'
 import { toast } from '@/lib/toast'
+import { useI18n } from '@/i18n/useI18n'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,6 +51,7 @@ export function ModelSelector({
   onChange,
   agentSdkOverride
 }: ModelSelectorProps): React.JSX.Element {
+  const { t } = useI18n()
   // Read per-session model from session store (with global fallback)
   const session = useSessionStore((state) => {
     if (!sessionId) return null
@@ -255,8 +257,8 @@ export function ModelSelector({
         useSettingsStore.getState().setSelectedModelForSdk(agentSdk, newModel)
       }
     }
-    toast.success(`Variant: ${nextVariant}`)
-  }, [selectedModel, currentModel, agentSdk, sessionId, onChange])
+    toast.success(t('modelSelector.toasts.variant', { variant: nextVariant }))
+  }, [selectedModel, currentModel, agentSdk, sessionId, onChange, t])
 
   // Listen for centralized Alt+T shortcut via custom event (session selectors only).
   // Controlled-mode selectors (e.g. Settings > Models) must not react to the global
@@ -327,11 +329,13 @@ export function ModelSelector({
               'border select-none',
               'bg-muted/50 border-border text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
-            title="Select model"
-            aria-label={`Current model: ${displayName}. Click to change model`}
+            title={t('modelSelector.title')}
+            aria-label={t('modelSelector.ariaLabel', { model: displayName })}
             data-testid="model-selector"
           >
-            <span className="truncate max-w-[140px]">{isLoading ? 'Loading...' : displayName}</span>
+            <span className="truncate max-w-[140px]">
+              {isLoading ? t('modelSelector.loading') : displayName}
+            </span>
             {hasVariants && selectedModel?.variant && (
               <span
                 className="text-[10px] font-semibold text-primary uppercase"
@@ -351,7 +355,7 @@ export function ModelSelector({
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
-              placeholder="Filter models..."
+              placeholder={t('modelSelector.filterPlaceholder')}
               className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground/60"
             />
           </div>
@@ -359,7 +363,8 @@ export function ModelSelector({
           {favoriteModelObjects.length > 0 && (
             <>
               <DropdownMenuLabel className="text-xs text-muted-foreground flex items-center gap-1">
-                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" /> Favorites
+                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{' '}
+                {t('modelSelector.favorites')}
               </DropdownMenuLabel>
               {favoriteModelObjects.map((model) => (
                 <DropdownMenuItem
@@ -441,7 +446,7 @@ export function ModelSelector({
           ))}
           {filteredProviders.length === 0 && !isLoading && (
             <div className="px-2 py-4 text-center text-sm text-muted-foreground">
-              {filter ? 'No matching models' : 'No models available'}
+              {filter ? t('modelSelector.empty.filtered') : t('modelSelector.empty.default')}
             </div>
           )}
         </DropdownMenuContent>

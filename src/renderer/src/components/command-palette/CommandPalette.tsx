@@ -268,13 +268,14 @@ export function CommandPalette() {
                 {t('commandPalette.hints.select')}
               </span>
               <span>
-                <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">esc</kbd>{' '}
+                <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Esc</kbd>{' '}
                 {t('commandPalette.hints.close')}
               </span>
             </div>
             {commandStack.length > 0 && (
               <span>
-                <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">esc</kbd> or{' '}
+                <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Esc</kbd>{' '}
+                {t('commandPalette.hints.or')}{' '}
                 <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">←</kbd>{' '}
                 {t('commandPalette.hints.goBack')}
               </span>

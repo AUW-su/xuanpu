@@ -218,7 +218,7 @@ export function FileSearchDialog() {
                 {t('fileSearch.hints.open')}
               </span>
               <span>
-                <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">esc</kbd>{' '}
+                <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">Esc</kbd>{' '}
                 {t('fileSearch.hints.close')}
               </span>
             </div>

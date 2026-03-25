@@ -805,6 +805,7 @@ const FileRow = memo(function FileRow({
   contextMenu,
   onStageToggle
 }: FileRowProps): React.JSX.Element {
+  const { t } = useI18n()
   const fileName = file.relativePath.split('/').pop() || file.relativePath
   const ext = fileName.includes('.') ? '.' + fileName.split('.').pop() : null
 
@@ -830,7 +831,7 @@ const FileRow = memo(function FileRow({
                   e.stopPropagation()
                   onStageToggle(file)
                 }}
-                title={file.staged ? 'Unstage' : 'Stage'}
+                title={file.staged ? t('fileTree.changes.unstage') : t('fileTree.changes.stage')}
               >
                 {file.staged ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
               </button>
@@ -880,6 +881,7 @@ const MemberChanges = memo(function MemberChanges({
   onDiscardChanges,
   onViewDiff
 }: MemberChangesProps): React.JSX.Element {
+  const { t } = useI18n()
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
 
   const toggleGroup = useCallback((group: string) => {
@@ -920,7 +922,7 @@ const MemberChanges = memo(function MemberChanges({
       {/* Staged */}
       {member.staged.length > 0 && (
         <GroupHeader
-          title="Staged Changes"
+          title={t('fileTree.changes.stagedChanges')}
           count={member.staged.length}
           isCollapsed={collapsed.has('staged')}
           onToggle={() => toggleGroup('staged')}
@@ -930,10 +932,10 @@ const MemberChanges = memo(function MemberChanges({
               size="sm"
               className="h-5 px-1.5 text-[10px]"
               onClick={() => onUnstageAll(wp)}
-              title="Unstage all"
+              title={t('fileTree.changes.unstageAllTitle')}
             >
               <Minus className="h-3 w-3 mr-0.5" />
-              Unstage
+              {t('fileTree.changes.unstage')}
             </Button>
           }
         >
@@ -947,7 +949,7 @@ const MemberChanges = memo(function MemberChanges({
                 <ContextMenuContent>
                   <ContextMenuItem onClick={() => onUnstageFile(wp, file.relativePath)}>
                     <Minus className="h-3.5 w-3.5 mr-2" />
-                    Unstage
+                    {t('fileTree.changes.unstage')}
                   </ContextMenuItem>
                 </ContextMenuContent>
               }
@@ -959,7 +961,7 @@ const MemberChanges = memo(function MemberChanges({
       {/* Modified */}
       {member.modified.length > 0 && (
         <GroupHeader
-          title="Changes"
+          title={t('fileTree.changes.changes')}
           count={member.modified.length}
           isCollapsed={collapsed.has('modified')}
           onToggle={() => toggleGroup('modified')}
@@ -969,10 +971,10 @@ const MemberChanges = memo(function MemberChanges({
               size="sm"
               className="h-5 px-1.5 text-[10px]"
               onClick={() => onStageAll(wp)}
-              title="Stage all"
+              title={t('fileTree.changes.stageAllTitle')}
             >
               <Plus className="h-3 w-3 mr-0.5" />
-              Stage
+              {t('fileTree.changes.stage')}
             </Button>
           }
         >
@@ -986,7 +988,7 @@ const MemberChanges = memo(function MemberChanges({
                 <ContextMenuContent>
                   <ContextMenuItem onClick={() => onStageFile(wp, file.relativePath)}>
                     <Plus className="h-3.5 w-3.5 mr-2" />
-                    Stage
+                    {t('fileTree.changes.stage')}
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem
@@ -994,7 +996,7 @@ const MemberChanges = memo(function MemberChanges({
                     className="text-destructive focus:text-destructive"
                   >
                     <Undo2 className="h-3.5 w-3.5 mr-2" />
-                    Discard Changes
+                    {t('fileTree.changes.discardChanges')}
                   </ContextMenuItem>
                 </ContextMenuContent>
               }
@@ -1006,7 +1008,7 @@ const MemberChanges = memo(function MemberChanges({
       {/* Untracked */}
       {member.untracked.length > 0 && (
         <GroupHeader
-          title="Untracked"
+          title={t('fileTree.changes.untracked')}
           count={member.untracked.length}
           isCollapsed={collapsed.has('untracked')}
           onToggle={() => toggleGroup('untracked')}
@@ -1021,7 +1023,7 @@ const MemberChanges = memo(function MemberChanges({
                 <ContextMenuContent>
                   <ContextMenuItem onClick={() => onStageFile(wp, file.relativePath)}>
                     <Plus className="h-3.5 w-3.5 mr-2" />
-                    Stage
+                    {t('fileTree.changes.stage')}
                   </ContextMenuItem>
                 </ContextMenuContent>
               }

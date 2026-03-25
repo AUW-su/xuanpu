@@ -243,12 +243,12 @@ export function Header(): React.JSX.Element {
           })
           setPrList(sorted)
         } else {
-          toast.error(res.error || 'Failed to load PRs')
+          toast.error(res.error || t('header.toasts.loadPRsError'))
           setPrPickerOpen(false)
         }
       })
       .catch(() => {
-        toast.error('Failed to load PRs')
+        toast.error(t('header.toasts.loadPRsError'))
         setPrPickerOpen(false)
       })
 
@@ -267,7 +267,7 @@ export function Header(): React.JSX.Element {
         : Promise.resolve()
 
     Promise.all([fetchPRs, fetchState]).finally(() => setPrListLoading(false))
-  }, [prPickerOpen, selectedProject?.path, attachedPR, branchInfo?.name])
+  }, [prPickerOpen, selectedProject?.path, attachedPR, branchInfo?.name, t])
 
   // Clear live state when attached PR changes
   useEffect(() => {
@@ -279,7 +279,7 @@ export function Header(): React.JSX.Element {
 
     const wtId = selectedWorktreeId
     if (!wtId) {
-      toast.error('No worktree selected')
+      toast.error(t('header.toasts.noWorktreeSelected'))
       return
     }
 
@@ -292,7 +292,7 @@ export function Header(): React.JSX.Element {
       }
     }
     if (!projectId) {
-      toast.error('Could not find project for worktree')
+      toast.error(t('header.toasts.projectNotFound'))
       return
     }
 
@@ -301,11 +301,14 @@ export function Header(): React.JSX.Element {
     const sessionStore = useSessionStore.getState()
     const result = await sessionStore.createSession(wtId, projectId)
     if (!result.success || !result.session) {
-      toast.error('Failed to create PR session')
+      toast.error(t('header.toasts.createPRSessionError'))
       return
     }
 
-    await sessionStore.updateSessionName(result.session.id, `PR → ${targetBranch}`)
+    await sessionStore.updateSessionName(
+      result.session.id,
+      t('header.sessionNames.pr', { branch: targetBranch })
+    )
     sessionStore.setPendingMessage(
       result.session.id,
       [
@@ -321,14 +324,14 @@ export function Header(): React.JSX.Element {
       creating: true,
       sessionId: result.session.id
     })
-  }, [selectedWorktree?.path, selectedWorktreeId, prTargetBranch, branchInfo])
+  }, [selectedWorktree?.path, selectedWorktreeId, prTargetBranch, branchInfo, t])
 
   const handleReview = useCallback(async () => {
     if (!selectedWorktree?.path) return
 
     const wtId = selectedWorktreeId
     if (!wtId) {
-      toast.error('No worktree selected')
+      toast.error(t('header.toasts.noWorktreeSelected'))
       return
     }
 
@@ -341,12 +344,12 @@ export function Header(): React.JSX.Element {
       }
     }
     if (!projectId) {
-      toast.error('Could not find project for worktree')
+      toast.error(t('header.toasts.projectNotFound'))
       return
     }
 
     const targetBranch = reviewTargetBranch || branchInfo?.tracking || 'origin/main'
-    const branchName = branchInfo?.name || 'unknown'
+    const branchName = branchInfo?.name || t('gitStatusPanel.unknownBranch')
 
     let reviewTemplate = ''
     try {
@@ -376,16 +379,16 @@ export function Header(): React.JSX.Element {
     const sessionStore = useSessionStore.getState()
     const result = await sessionStore.createSession(wtId, projectId)
     if (!result.success || !result.session) {
-      toast.error('Failed to create review session')
+      toast.error(t('header.toasts.createReviewSessionError'))
       return
     }
 
     await sessionStore.updateSessionName(
       result.session.id,
-      `Code Review — ${branchName} vs ${targetBranch}`
+      t('header.sessionNames.review', { branch: branchName, target: targetBranch })
     )
     sessionStore.setPendingMessage(result.session.id, prompt)
-  }, [selectedWorktree?.path, selectedWorktreeId, reviewTargetBranch, branchInfo])
+  }, [selectedWorktree?.path, selectedWorktreeId, reviewTargetBranch, branchInfo, t])
 
   const handleMergePR = useCallback(async () => {
     if (!selectedWorktree?.path || !selectedWorktreeId) return
@@ -396,17 +399,17 @@ export function Header(): React.JSX.Element {
     try {
       const result = await window.gitOps.prMerge(selectedWorktree.path, pr.number)
       if (result.success) {
-        toast.success('PR merged successfully')
+        toast.success(t('header.toasts.prMergedSuccess'))
         setPrLiveState({ state: 'MERGED', title: prLiveState?.title })
       } else {
-        toast.error(`Merge failed: ${result.error}`)
+        toast.error(t('header.toasts.mergePRErrorWithReason', { error: result.error }))
       }
     } catch {
-      toast.error('Failed to merge PR')
+      toast.error(t('header.toasts.mergePRError'))
     } finally {
       setIsMergingPR(false)
     }
-  }, [selectedWorktree?.path, selectedWorktreeId, prLiveState?.title])
+  }, [selectedWorktree?.path, selectedWorktreeId, prLiveState?.title, t])
 
   const handleArchiveWorktree = useCallback(async () => {
     if (!selectedWorktreeId || !selectedWorktree || !selectedProject) return
@@ -462,8 +465,8 @@ export function Header(): React.JSX.Element {
       return
     }
 
-    const branchName = selectedWorktree?.branch_name || 'unknown'
-    await updateSessionName(session.id, `Merge Conflicts -- ${branchName}`)
+    const branchName = selectedWorktree?.branch_name || t('gitStatusPanel.unknownBranch')
+    await updateSessionName(session.id, t('header.sessionNames.conflicts', { branch: branchName }))
     setPendingMessage(session.id, 'Fix merge conflicts')
     setActiveSession(session.id)
 

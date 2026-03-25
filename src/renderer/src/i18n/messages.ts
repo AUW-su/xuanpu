@@ -1307,7 +1307,8 @@ export const messages: Record<AppLocale, MessageTree> = {
         navigate: 'navigate',
         select: 'select',
         close: 'close',
-        goBack: 'go back'
+        goBack: 'go back',
+        or: 'or'
       },
       categories: {
         recent: 'Recent',
@@ -1499,6 +1500,35 @@ export const messages: Record<AppLocale, MessageTree> = {
         hideSidebar: 'Hide sidebar',
         merged: 'merged',
         closed: 'closed'
+      },
+      toasts: {
+        loadPRsError: 'Failed to load PRs',
+        noWorktreeSelected: 'No worktree selected',
+        projectNotFound: 'Could not find project for worktree',
+        createPRSessionError: 'Failed to create PR session',
+        createReviewSessionError: 'Failed to create review session',
+        prMergedSuccess: 'PR merged successfully',
+        mergePRError: 'Failed to merge PR',
+        mergePRErrorWithReason: 'Merge failed: {error}'
+      },
+      sessionNames: {
+        pr: 'PR -> {branch}',
+        review: 'Code Review - {branch} vs {target}',
+        conflicts: 'Merge Conflicts - {branch}'
+      }
+    },
+    modelSelector: {
+      title: 'Select model',
+      ariaLabel: 'Current model: {model}. Click to change model',
+      loading: 'Loading...',
+      filterPlaceholder: 'Filter models...',
+      favorites: 'Favorites',
+      empty: {
+        filtered: 'No matching models',
+        default: 'No models available'
+      },
+      toasts: {
+        variant: 'Variant: {variant}'
       }
     },
     pinned: {
@@ -2890,7 +2920,8 @@ export const messages: Record<AppLocale, MessageTree> = {
         navigate: '导航',
         select: '选择',
         close: '关闭',
-        goBack: '返回'
+        goBack: '返回',
+        or: '或'
       },
       categories: {
         recent: '最近',
@@ -3081,6 +3112,35 @@ export const messages: Record<AppLocale, MessageTree> = {
         hideSidebar: '隐藏侧边栏',
         merged: '已合并',
         closed: '已关闭'
+      },
+      toasts: {
+        loadPRsError: '加载 PR 失败',
+        noWorktreeSelected: '未选择 worktree',
+        projectNotFound: '找不到该 worktree 对应的项目',
+        createPRSessionError: '创建 PR 会话失败',
+        createReviewSessionError: '创建审查会话失败',
+        prMergedSuccess: 'PR 已成功合并',
+        mergePRError: '合并 PR 失败',
+        mergePRErrorWithReason: '合并失败：{error}'
+      },
+      sessionNames: {
+        pr: 'PR -> {branch}',
+        review: '代码审查 - {branch} 对比 {target}',
+        conflicts: '合并冲突 - {branch}'
+      }
+    },
+    modelSelector: {
+      title: '选择模型',
+      ariaLabel: '当前模型：{model}。点击以切换模型',
+      loading: '加载中...',
+      filterPlaceholder: '筛选模型...',
+      favorites: '收藏',
+      empty: {
+        filtered: '没有匹配的模型',
+        default: '没有可用模型'
+      },
+      toasts: {
+        variant: '变体：{variant}'
       }
     },
     pinned: {
