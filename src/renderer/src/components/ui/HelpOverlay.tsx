@@ -8,6 +8,28 @@ import { useProjectStore } from '@/stores/useProjectStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { DEFAULT_SHORTCUTS, formatBinding, shortcutCategoryOrder } from '@/lib/keyboard-shortcuts'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/i18n/useI18n'
+
+const SYSTEM_SHORTCUT_LABEL_KEYS: Record<string, string> = {
+  'session:new': 'keyboardShortcuts.items.sessionNew',
+  'session:close': 'keyboardShortcuts.items.sessionClose',
+  'session:mode-toggle': 'keyboardShortcuts.items.sessionModeToggle',
+  'project:run': 'keyboardShortcuts.items.projectRun',
+  'model:cycle-variant': 'keyboardShortcuts.items.modelCycleVariant',
+  'nav:file-search': 'keyboardShortcuts.items.navFileSearch',
+  'nav:command-palette': 'keyboardShortcuts.items.navCommandPalette',
+  'nav:session-history': 'keyboardShortcuts.items.navSessionHistory',
+  'nav:new-worktree': 'keyboardShortcuts.items.navNewWorktree',
+  'git:commit': 'keyboardShortcuts.items.gitCommit',
+  'git:push': 'keyboardShortcuts.items.gitPush',
+  'git:pull': 'keyboardShortcuts.items.gitPull',
+  'nav:filter-projects': 'keyboardShortcuts.items.navFilterProjects',
+  'sidebar:toggle-left': 'keyboardShortcuts.items.sidebarToggleLeft',
+  'sidebar:toggle-right': 'keyboardShortcuts.items.sidebarToggleRight',
+  'focus:left-sidebar': 'keyboardShortcuts.items.focusLeftSidebar',
+  'focus:main-pane': 'keyboardShortcuts.items.focusMainPane',
+  'settings:open': 'keyboardShortcuts.items.settingsOpen'
+}
 
 // ---------------------------------------------------------------------------
 // Mnemonic highlighting helper
@@ -75,6 +97,7 @@ function ShortcutRow({
 // ---------------------------------------------------------------------------
 
 export function HelpOverlay(): React.JSX.Element | null {
+  const { t } = useI18n()
   const vimModeEnabled = useSettingsStore((s) => s.vimModeEnabled)
   const helpOverlayOpen = useVimModeStore((s) => s.helpOverlayOpen)
   const mode = useVimModeStore((s) => s.mode)
@@ -119,11 +142,12 @@ export function HelpOverlay(): React.JSX.Element | null {
     const map = new Map<string, string>()
     for (const conn of connections) {
       const projectNames = [...new Set(conn.members?.map((m) => m.project_name) || [])].join(' + ')
-      const name = conn.custom_name || projectNames || conn.name || 'Connection'
+      const name =
+        conn.custom_name || projectNames || conn.name || t('helpOverlay.dynamic.connectionFallback')
       map.set(conn.id, name)
     }
     return map
-  }, [connections])
+  }, [connections, t])
 
   // Build sidebar hint entries for display
   const sidebarHintEntries = useMemo(() => {
@@ -140,17 +164,17 @@ export function HelpOverlay(): React.JSX.Element | null {
         entries.push({ code, label: name })
       } else if (target.kind === 'pinned-worktree' && target.worktreeId) {
         const name = worktreeNameMap.get(target.worktreeId) ?? target.worktreeId
-        entries.push({ code, label: `[pin] ${name}` })
+        entries.push({ code, label: t('helpOverlay.dynamic.pinnedPrefix', { name }) })
       } else if (target.kind === 'pinned-connection' && target.connectionId) {
         const name = connectionNameMap.get(target.connectionId) ?? target.connectionId
-        entries.push({ code, label: `[pin] ${name}` })
+        entries.push({ code, label: t('helpOverlay.dynamic.pinnedPrefix', { name }) })
       } else if (target.kind === 'connection' && target.connectionId) {
         const name = connectionNameMap.get(target.connectionId) ?? target.connectionId
         entries.push({ code, label: name })
       }
     }
     return entries.sort((a, b) => a.code.localeCompare(b.code))
-  }, [hintMap, hintTargetMap, worktreeNameMap, projectNameMap, connectionNameMap])
+  }, [hintMap, hintTargetMap, worktreeNameMap, projectNameMap, connectionNameMap, t])
 
   // Build session hint entries for display
   const sessionHintEntries = useMemo(() => {
@@ -164,11 +188,11 @@ export function HelpOverlay(): React.JSX.Element | null {
 
   // Group system shortcuts by category
   const groupedShortcuts = useMemo(() => {
-    const groups = new Map<string, Array<{ label: string; binding: string }>>()
+    const groups = new Map<string, Array<{ id: string; binding: string }>>()
     for (const shortcut of DEFAULT_SHORTCUTS) {
       const binding = formatBinding(shortcut.defaultBinding)
       const group = groups.get(shortcut.category) ?? []
-      group.push({ label: shortcut.label, binding })
+      group.push({ id: shortcut.id, binding })
       groups.set(shortcut.category, group)
     }
     return groups
@@ -193,7 +217,7 @@ export function HelpOverlay(): React.JSX.Element | null {
         <div className="pointer-events-auto w-[640px] max-h-[80vh] overflow-y-auto rounded-lg border border-border bg-background shadow-2xl p-5">
           {/* Header with mode pill */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-foreground">Keyboard Shortcuts</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t('helpOverlay.title')}</h2>
             <span
               className={cn(
                 'text-[10px] font-mono px-1.5 py-0.5 rounded border select-none',
@@ -202,14 +226,14 @@ export function HelpOverlay(): React.JSX.Element | null {
                   : 'text-primary bg-primary/10 border-primary/30'
               )}
             >
-              {mode === 'normal' ? 'NORMAL' : 'INSERT'}
+              {mode === 'normal' ? t('helpOverlay.mode.normal') : t('helpOverlay.mode.insert')}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             {/* ---- Vim Navigation ---- */}
             <div>
-              <SectionTitle>Vim Navigation</SectionTitle>
+              <SectionTitle>{t('helpOverlay.sections.vimNavigation')}</SectionTitle>
               <ShortcutRow
                 keyContent={
                   <span className="flex gap-1">
@@ -217,7 +241,7 @@ export function HelpOverlay(): React.JSX.Element | null {
                     <KeyBadge>k</KeyBadge>
                   </span>
                 }
-                label="Navigate worktrees"
+                label={t('helpOverlay.rows.navigateWorktrees')}
               />
               <ShortcutRow
                 keyContent={
@@ -226,46 +250,52 @@ export function HelpOverlay(): React.JSX.Element | null {
                     <KeyBadge>l</KeyBadge>
                   </span>
                 }
-                label="Navigate session tabs"
+                label={t('helpOverlay.rows.navigateSessionTabs')}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>I</KeyBadge>}
-                label="Filter projects (insert mode)"
+                label={t('helpOverlay.rows.filterProjectsInsert')}
               />
-              <ShortcutRow keyContent={<KeyBadge>Esc</KeyBadge>} label="Return to normal mode" />
-              <ShortcutRow keyContent={<KeyBadge>?</KeyBadge>} label="Toggle this help" />
+              <ShortcutRow
+                keyContent={<KeyBadge>Esc</KeyBadge>}
+                label={t('helpOverlay.rows.returnToNormalMode')}
+              />
+              <ShortcutRow
+                keyContent={<KeyBadge>?</KeyBadge>}
+                label={t('helpOverlay.rows.toggleHelp')}
+              />
             </div>
 
             {/* ---- Panel Shortcuts ---- */}
             <div>
-              <SectionTitle>Panel Shortcuts</SectionTitle>
+              <SectionTitle>{t('helpOverlay.sections.panelShortcuts')}</SectionTitle>
 
               {/* Right sidebar tabs */}
               <ShortcutRow
                 keyContent={<KeyBadge>c</KeyBadge>}
-                label={<MnemonicLabel letter="c" label="Changes" />}
+                label={<MnemonicLabel letter="c" label={t('helpOverlay.panels.changes')} />}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>f</KeyBadge>}
-                label={<MnemonicLabel letter="f" label="Files" />}
+                label={<MnemonicLabel letter="f" label={t('helpOverlay.panels.files')} />}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>d</KeyBadge>}
-                label={<MnemonicLabel letter="d" label="Diffs" />}
+                label={<MnemonicLabel letter="d" label={t('helpOverlay.panels.diffs')} />}
               />
 
               {/* Bottom panel tabs */}
               <ShortcutRow
                 keyContent={<KeyBadge>s</KeyBadge>}
-                label={<MnemonicLabel letter="s" label="Setup" />}
+                label={<MnemonicLabel letter="s" label={t('helpOverlay.panels.setup')} />}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>u</KeyBadge>}
-                label={<MnemonicLabel letter="u" label="Run" />}
+                label={<MnemonicLabel letter="u" label={t('helpOverlay.panels.run')} />}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>t</KeyBadge>}
-                label={<MnemonicLabel letter="t" label="Terminal" />}
+                label={<MnemonicLabel letter="t" label={t('helpOverlay.panels.terminal')} />}
               />
 
               {/* File tab cycling */}
@@ -276,35 +306,35 @@ export function HelpOverlay(): React.JSX.Element | null {
                     <KeyBadge>]</KeyBadge>
                   </span>
                 }
-                label="Prev / Next file tab"
+                label={t('helpOverlay.rows.prevNextFileTab')}
               />
             </div>
 
             {/* ---- Action Shortcuts ---- */}
             <div>
-              <SectionTitle>Action Shortcuts</SectionTitle>
+              <SectionTitle>{t('helpOverlay.sections.actionShortcuts')}</SectionTitle>
               <ShortcutRow
                 keyContent={<KeyBadge>r</KeyBadge>}
-                label={<MnemonicLabel letter="r" label="Review" />}
+                label={<MnemonicLabel letter="r" label={t('helpOverlay.actions.review')} />}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>p</KeyBadge>}
-                label={<MnemonicLabel letter="p" label="PR" />}
+                label={<MnemonicLabel letter="p" label={t('helpOverlay.actions.pr')} />}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>m</KeyBadge>}
-                label={<MnemonicLabel letter="m" label="Merge PR" />}
+                label={<MnemonicLabel letter="m" label={t('helpOverlay.actions.mergePr')} />}
               />
               <ShortcutRow
                 keyContent={<KeyBadge>a</KeyBadge>}
-                label={<MnemonicLabel letter="a" label="Archive" />}
+                label={<MnemonicLabel letter="a" label={t('helpOverlay.actions.archive')} />}
               />
             </div>
 
             {/* ---- Dynamic Sidebar Hints ---- */}
             {sidebarHintEntries.length > 0 && (
               <div>
-                <SectionTitle>Sidebar Hints</SectionTitle>
+                <SectionTitle>{t('helpOverlay.sections.sidebarHints')}</SectionTitle>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
                   {sidebarHintEntries.map(({ code, label }) => (
                     <ShortcutRow
@@ -320,7 +350,7 @@ export function HelpOverlay(): React.JSX.Element | null {
             {/* ---- Dynamic Session Hints ---- */}
             {sessionHintEntries.length > 0 && (
               <div>
-                <SectionTitle>Session Hints</SectionTitle>
+                <SectionTitle>{t('helpOverlay.sections.sessionHints')}</SectionTitle>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
                   {sessionHintEntries.map(({ code, label }) => (
                     <ShortcutRow
@@ -335,16 +365,18 @@ export function HelpOverlay(): React.JSX.Element | null {
 
             {/* ---- System Shortcuts ---- */}
             <div className="col-span-2 border-t border-border/50 pt-3 mt-1">
-              <SectionTitle>System Shortcuts</SectionTitle>
+              <SectionTitle>{t('helpOverlay.sections.systemShortcuts')}</SectionTitle>
               <div className="grid grid-cols-3 gap-x-4 gap-y-0.5">
                 {shortcutCategoryOrder.map((category) => {
                   const shortcuts = groupedShortcuts.get(category)
                   if (!shortcuts?.length) return null
-                  return shortcuts.map(({ label, binding }) => (
+                  return shortcuts.map(({ id, binding }) => (
                     <ShortcutRow
-                      key={label}
+                      key={id}
                       keyContent={<KeyBadge>{binding}</KeyBadge>}
-                      label={label}
+                      label={
+                        SYSTEM_SHORTCUT_LABEL_KEYS[id] ? t(SYSTEM_SHORTCUT_LABEL_KEYS[id]) : id
+                      }
                     />
                   ))
                 })}

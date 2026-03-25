@@ -226,6 +226,11 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'contextIndicator.cost.session', { cost: '$1.2345' })).toBe(
       '会话成本：$1.2345'
     )
+    expect(translate('zh-CN', 'helpOverlay.title')).toBe('键盘快捷键')
+    expect(translate('zh-CN', 'helpOverlay.dynamic.pinnedPrefix', { name: 'foo' })).toBe(
+      '[固定] foo'
+    )
+    expect(translate('zh-CN', 'keyboardShortcuts.items.sessionNew')).toBe('新建会话')
     expect(translate('zh-CN', 'commandPalette.hints.goBack')).toBe('返回')
     expect(translate('zh-CN', 'recent.status.planReady')).toBe('计划已就绪')
     expect(translate('zh-CN', 'dialogs.gitInit.title')).toBe('不是 Git 仓库')

@@ -647,6 +647,69 @@ export const messages: Record<AppLocale, MessageTree> = {
         session: 'Session cost: {cost}'
       }
     },
+    helpOverlay: {
+      title: 'Keyboard Shortcuts',
+      mode: {
+        normal: 'NORMAL',
+        insert: 'INSERT'
+      },
+      sections: {
+        vimNavigation: 'Vim Navigation',
+        panelShortcuts: 'Panel Shortcuts',
+        actionShortcuts: 'Action Shortcuts',
+        sidebarHints: 'Sidebar Hints',
+        sessionHints: 'Session Hints',
+        systemShortcuts: 'System Shortcuts'
+      },
+      rows: {
+        navigateWorktrees: 'Navigate worktrees',
+        navigateSessionTabs: 'Navigate session tabs',
+        filterProjectsInsert: 'Filter projects (insert mode)',
+        returnToNormalMode: 'Return to normal mode',
+        toggleHelp: 'Toggle this help',
+        prevNextFileTab: 'Prev / Next file tab'
+      },
+      panels: {
+        changes: 'Changes',
+        files: 'Files',
+        diffs: 'Diffs',
+        setup: 'Setup',
+        run: 'Run',
+        terminal: 'Terminal'
+      },
+      actions: {
+        review: 'Review',
+        pr: 'PR',
+        mergePr: 'Merge PR',
+        archive: 'Archive'
+      },
+      dynamic: {
+        pinnedPrefix: '[pin] {name}',
+        connectionFallback: 'Connection'
+      }
+    },
+    keyboardShortcuts: {
+      items: {
+        sessionNew: 'New Session',
+        sessionClose: 'Close Session',
+        sessionModeToggle: 'Toggle Build/Plan Mode',
+        projectRun: 'Run Project',
+        modelCycleVariant: 'Cycle Model Variant',
+        navFileSearch: 'Search Files',
+        navCommandPalette: 'Open Command Palette',
+        navSessionHistory: 'Open Session History',
+        navNewWorktree: 'New Worktree',
+        gitCommit: 'Focus Commit Form',
+        gitPush: 'Push to Remote',
+        gitPull: 'Pull from Remote',
+        navFilterProjects: 'Filter Projects',
+        sidebarToggleLeft: 'Toggle Left Sidebar',
+        sidebarToggleRight: 'Toggle Right Sidebar',
+        focusLeftSidebar: 'Focus Left Sidebar',
+        focusMainPane: 'Focus Main Pane',
+        settingsOpen: 'Open Settings'
+      }
+    },
     commandPalette: {
       ariaLabel: 'Command palette',
       commandLabel: 'Command palette',
@@ -1574,6 +1637,69 @@ export const messages: Record<AppLocale, MessageTree> = {
       },
       cost: {
         session: '会话成本：{cost}'
+      }
+    },
+    helpOverlay: {
+      title: '键盘快捷键',
+      mode: {
+        normal: '普通',
+        insert: '插入'
+      },
+      sections: {
+        vimNavigation: 'Vim 导航',
+        panelShortcuts: '面板快捷键',
+        actionShortcuts: '操作快捷键',
+        sidebarHints: '侧边栏提示',
+        sessionHints: '会话提示',
+        systemShortcuts: '系统快捷键'
+      },
+      rows: {
+        navigateWorktrees: '在 worktree 之间导航',
+        navigateSessionTabs: '在会话标签之间导航',
+        filterProjectsInsert: '筛选项目（进入插入模式）',
+        returnToNormalMode: '返回普通模式',
+        toggleHelp: '切换此帮助面板',
+        prevNextFileTab: '上一个 / 下一个文件标签'
+      },
+      panels: {
+        changes: '变更',
+        files: '文件',
+        diffs: '差异',
+        setup: '设置',
+        run: '运行',
+        terminal: '终端'
+      },
+      actions: {
+        review: '审查',
+        pr: 'PR',
+        mergePr: '合并 PR',
+        archive: '归档'
+      },
+      dynamic: {
+        pinnedPrefix: '[固定] {name}',
+        connectionFallback: '连接'
+      }
+    },
+    keyboardShortcuts: {
+      items: {
+        sessionNew: '新建会话',
+        sessionClose: '关闭会话',
+        sessionModeToggle: '切换 Build / Plan 模式',
+        projectRun: '运行项目',
+        modelCycleVariant: '切换模型变体',
+        navFileSearch: '搜索文件',
+        navCommandPalette: '打开命令面板',
+        navSessionHistory: '打开会话历史',
+        navNewWorktree: '新建 worktree',
+        gitCommit: '聚焦提交表单',
+        gitPush: '推送到远端',
+        gitPull: '从远端拉取',
+        navFilterProjects: '筛选项目',
+        sidebarToggleLeft: '切换左侧边栏',
+        sidebarToggleRight: '切换右侧边栏',
+        focusLeftSidebar: '聚焦左侧边栏',
+        focusMainPane: '聚焦主面板',
+        settingsOpen: '打开设置'
       }
     },
     commandPalette: {
