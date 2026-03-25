@@ -845,6 +845,87 @@ export const messages: Record<AppLocale, MessageTree> = {
       disabled: 'disabled',
       ariaLabel: 'Fast mode {state}'
     },
+    toolCard: {
+      labels: {
+        bash: 'Bash',
+        tasks: 'Tasks',
+        read: 'Read',
+        write: 'Write',
+        edit: 'Edit',
+        search: 'Search',
+        findFiles: 'Find files',
+        skill: 'Skill',
+        question: 'Question',
+        agent: 'Agent',
+        plan: 'Plan',
+        fetch: 'Fetch',
+        lsp: 'LSP',
+        figma: 'Figma'
+      },
+      actions: {
+        view: 'View',
+        hide: 'Hide'
+      },
+      fallback: {
+        unknown: 'unknown'
+      },
+      summary: {
+        completed: '{completed}/{total} completed',
+        active: '{count} active',
+        lines: '{count} lines',
+        more: '+{count} more',
+        inPath: 'in {path}',
+        questions: '{count} questions',
+        accepted: 'accepted',
+        rejected: 'rejected',
+        review: 'review',
+        implementPlan: 'Implement the plan'
+      }
+    },
+    questionPrompt: {
+      custom: {
+        typeOwn: 'Type your own answer',
+        placeholder: 'Type your answer...'
+      },
+      actions: {
+        submit: 'Submit',
+        submitAll: 'Submit All',
+        cancel: 'Cancel',
+        back: 'Back',
+        next: 'Next',
+        dismiss: 'Dismiss',
+        sending: 'Sending...'
+      }
+    },
+    bottomPanel: {
+      tabs: {
+        setup: 'Setup',
+        run: 'Run',
+        terminal: 'Terminal'
+      },
+      chrome: {
+        openTitle: 'Open {url} in browser (right-click to configure)',
+        customCommand: 'Custom Chrome Command',
+        placeholderHelp: 'Use {url} as placeholder. Leave empty for default browser.',
+        cancel: 'Cancel',
+        save: 'Save',
+        saved: 'Chrome command saved'
+      }
+    },
+    fileContextMenu: {
+      viewChanges: 'View Changes',
+      stageFile: 'Stage File',
+      unstageFile: 'Unstage File',
+      discardChanges: 'Discard Changes',
+      confirmDiscard: 'Click again to confirm',
+      addToGitignore: 'Add to .gitignore',
+      openInEditor: 'Open in Editor',
+      openInFileManager: 'Open in {manager}',
+      revealInFinder: 'Reveal in Finder',
+      revealInExplorer: 'Show in Explorer',
+      copyPath: 'Copy Path',
+      copyRelativePath: 'Copy Relative Path'
+    },
     permissionPrompt: {
       header: {
         required: 'Permission Required',
@@ -2285,6 +2366,87 @@ export const messages: Record<AppLocale, MessageTree> = {
       enabled: '已启用',
       disabled: '已禁用',
       ariaLabel: '快速模式{state}'
+    },
+    toolCard: {
+      labels: {
+        bash: 'Bash',
+        tasks: '任务',
+        read: '读取',
+        write: '写入',
+        edit: '编辑',
+        search: '搜索',
+        findFiles: '查找文件',
+        skill: '技能',
+        question: '问题',
+        agent: 'Agent',
+        plan: '计划',
+        fetch: '抓取',
+        lsp: 'LSP',
+        figma: 'Figma'
+      },
+      actions: {
+        view: '查看',
+        hide: '收起'
+      },
+      fallback: {
+        unknown: '未知'
+      },
+      summary: {
+        completed: '已完成 {completed}/{total}',
+        active: '{count} 个进行中',
+        lines: '{count} 行',
+        more: '+{count} 个更多',
+        inPath: '位于 {path}',
+        questions: '{count} 个问题',
+        accepted: '已接受',
+        rejected: '已拒绝',
+        review: '待审阅',
+        implementPlan: '开始实现该计划'
+      }
+    },
+    questionPrompt: {
+      custom: {
+        typeOwn: '输入你自己的答案',
+        placeholder: '输入你的答案...'
+      },
+      actions: {
+        submit: '提交',
+        submitAll: '全部提交',
+        cancel: '取消',
+        back: '上一步',
+        next: '下一步',
+        dismiss: '忽略',
+        sending: '发送中...'
+      }
+    },
+    bottomPanel: {
+      tabs: {
+        setup: 'Setup',
+        run: '运行',
+        terminal: '终端'
+      },
+      chrome: {
+        openTitle: '在浏览器中打开 {url}（右键可配置）',
+        customCommand: '自定义 Chrome 命令',
+        placeholderHelp: '使用 {url} 作为占位符。留空则使用默认浏览器。',
+        cancel: '取消',
+        save: '保存',
+        saved: 'Chrome 命令已保存'
+      }
+    },
+    fileContextMenu: {
+      viewChanges: '查看变更',
+      stageFile: '暂存文件',
+      unstageFile: '取消暂存文件',
+      discardChanges: '丢弃变更',
+      confirmDiscard: '再次点击以确认',
+      addToGitignore: '添加到 .gitignore',
+      openInEditor: '在编辑器中打开',
+      openInFileManager: '在 {manager} 中打开',
+      revealInFinder: '在 Finder 中显示',
+      revealInExplorer: '在资源管理器中显示',
+      copyPath: '复制路径',
+      copyRelativePath: '复制相对路径'
     },
     permissionPrompt: {
       header: {

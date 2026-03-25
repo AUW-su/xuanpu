@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { revealLabel } from '@/lib/platform'
+import { fileManagerName, isMac } from '@/lib/platform'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { useGitStore, type GitStatusCode } from '@/stores/useGitStore'
 import { DiffModal } from '@/components/diff'
+import { useI18n } from '@/i18n/useI18n'
 
 interface FileTreeNode {
   name: string
@@ -48,6 +49,7 @@ export function FileContextMenu({
   onClose,
   hideGitContextActions
 }: FileContextMenuProps): React.JSX.Element {
+  const { t } = useI18n()
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [showDiffModal, setShowDiffModal] = useState(false)
   const { stageFile, unstageFile, discardChanges, addToGitignore } = useGitStore()
@@ -130,19 +132,19 @@ export function FileContextMenu({
               {showViewChanges && (
                 <ContextMenuItem onClick={handleViewChanges}>
                   <FileDiff className="mr-2 h-4 w-4 text-blue-500" />
-                  View Changes
+                  {t('fileContextMenu.viewChanges')}
                 </ContextMenuItem>
               )}
               {showStage && (
                 <ContextMenuItem onClick={handleStage}>
                   <GitBranch className="mr-2 h-4 w-4 text-green-500" />
-                  Stage File
+                  {t('fileContextMenu.stageFile')}
                 </ContextMenuItem>
               )}
               {showUnstage && (
                 <ContextMenuItem onClick={handleUnstage}>
                   <GitBranch className="mr-2 h-4 w-4 text-yellow-500" />
-                  Unstage File
+                  {t('fileContextMenu.unstageFile')}
                 </ContextMenuItem>
               )}
               {showDiscard && (
@@ -151,14 +153,16 @@ export function FileContextMenu({
                   className={showDiscardConfirm ? 'text-red-500' : ''}
                 >
                   <Trash2 className="mr-2 h-4 w-4 text-red-500" />
-                  {showDiscardConfirm ? 'Click again to confirm' : 'Discard Changes'}
+                  {showDiscardConfirm
+                    ? t('fileContextMenu.confirmDiscard')
+                    : t('fileContextMenu.discardChanges')}
                   {showDiscardConfirm && <AlertCircle className="ml-auto h-4 w-4 text-red-500" />}
                 </ContextMenuItem>
               )}
               {showGitignore && (
                 <ContextMenuItem onClick={handleAddToGitignore}>
                   <EyeOff className="mr-2 h-4 w-4 text-gray-500" />
-                  Add to .gitignore
+                  {t('fileContextMenu.addToGitignore')}
                 </ContextMenuItem>
               )}
               <ContextMenuSeparator />
@@ -168,11 +172,13 @@ export function FileContextMenu({
           {/* File actions */}
           <ContextMenuItem onClick={handleOpenInEditor}>
             <FileCode className="mr-2 h-4 w-4" />
-            Open in Editor
+            {t('fileContextMenu.openInEditor')}
           </ContextMenuItem>
           <ContextMenuItem onClick={handleOpenInFinder}>
             <FolderOpen className="mr-2 h-4 w-4" />
-            {revealLabel(node.isDirectory)}
+            {node.isDirectory
+              ? t('fileContextMenu.openInFileManager', { manager: fileManagerName() })
+              : t(isMac() ? 'fileContextMenu.revealInFinder' : 'fileContextMenu.revealInExplorer')}
           </ContextMenuItem>
 
           <ContextMenuSeparator />
@@ -180,12 +186,12 @@ export function FileContextMenu({
           {/* Copy actions */}
           <ContextMenuItem onClick={handleCopyPath}>
             <Copy className="mr-2 h-4 w-4" />
-            Copy Path
+            {t('fileContextMenu.copyPath')}
             <ContextMenuShortcut>Abs</ContextMenuShortcut>
           </ContextMenuItem>
           <ContextMenuItem onClick={handleCopyRelativePath}>
             <Copy className="mr-2 h-4 w-4" />
-            Copy Relative Path
+            {t('fileContextMenu.copyRelativePath')}
             <ContextMenuShortcut>Rel</ContextMenuShortcut>
           </ContextMenuItem>
         </ContextMenuContent>

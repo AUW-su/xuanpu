@@ -12,6 +12,7 @@ import { SetupTab } from './SetupTab'
 import { RunTab } from './RunTab'
 import { toast } from '@/lib/toast'
 import { useGhosttyPromotion } from '@/hooks/useGhosttyPromotion'
+import { useI18n } from '@/i18n/useI18n'
 
 const tabs: { id: BottomPanelTab; label: string; keybind: string }[] = [
   { id: 'setup', label: 'Setup', keybind: 'S' },
@@ -30,6 +31,7 @@ export function BottomPanel({
   terminalSlot,
   isConnectionMode
 }: BottomPanelProps): React.JSX.Element {
+  const { t, supportsFirstCharHint } = useI18n()
   const activeTab = useLayoutStore((s) => s.bottomPanelTab)
   const effectiveTab = isConnectionMode ? 'terminal' : activeTab
   useGhosttyPromotion(effectiveTab === 'terminal')
@@ -59,7 +61,8 @@ export function BottomPanel({
       if (selectedWorktreeId) {
         setDetectedUrls((prev) => {
           if (!(selectedWorktreeId in prev)) return prev
-          const { [selectedWorktreeId]: _, ...rest } = prev
+          const rest = { ...prev }
+          delete rest[selectedWorktreeId]
           return rest
         })
       }
@@ -92,13 +95,13 @@ export function BottomPanel({
             data-testid={`bottom-panel-tab-${tab.id}`}
             data-active={effectiveTab === tab.id}
           >
-            {vimModeEnabled ? (
+            {vimModeEnabled && supportsFirstCharHint ? (
               <>
                 <span className="text-primary">{tab.keybind}</span>
                 {tab.label.slice(1)}
               </>
             ) : (
-              tab.label
+              t(`bottomPanel.tabs.${tab.id}`)
             )}
             {effectiveTab === tab.id && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -119,7 +122,7 @@ export function BottomPanel({
                 setChromeConfigOpen(true)
               }}
               className="flex items-center gap-1 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              title={`Open ${detectedUrl} in browser (right-click to configure)`}
+              title={t('bottomPanel.chrome.openTitle', { url: detectedUrl })}
               data-testid="open-in-chrome"
             >
               <Globe className="h-3.5 w-3.5" />
@@ -127,9 +130,11 @@ export function BottomPanel({
             </button>
             {chromeConfigOpen && (
               <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-md shadow-md p-3 w-80">
-                <label className="text-xs font-medium block mb-1">Custom Chrome Command</label>
+                <label className="text-xs font-medium block mb-1">
+                  {t('bottomPanel.chrome.customCommand')}
+                </label>
                 <p className="text-[10px] text-muted-foreground mb-2">
-                  Use {'{url}'} as placeholder. Leave empty for default browser.
+                  {t('bottomPanel.chrome.placeholderHelp')}
                 </p>
                 <input
                   value={chromeCommandInput}
@@ -143,7 +148,7 @@ export function BottomPanel({
                     onClick={() => setChromeConfigOpen(false)}
                     className="text-xs px-2 py-1 rounded hover:bg-accent"
                   >
-                    Cancel
+                    {t('bottomPanel.chrome.cancel')}
                   </button>
                   <button
                     onClick={() => {
@@ -151,11 +156,11 @@ export function BottomPanel({
                         .getState()
                         .updateSetting('customChromeCommand', chromeCommandInput)
                       setChromeConfigOpen(false)
-                      toast.success('Chrome command saved')
+                      toast.success(t('bottomPanel.chrome.saved'))
                     }}
                     className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90"
                   >
-                    Save
+                    {t('bottomPanel.chrome.save')}
                   </button>
                 </div>
               </div>

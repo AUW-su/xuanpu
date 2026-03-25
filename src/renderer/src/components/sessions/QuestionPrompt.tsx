@@ -3,6 +3,7 @@ import { MessageCircleQuestion, Check, X, ChevronRight, Pencil } from 'lucide-re
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import type { QuestionRequest, QuestionAnswer } from '@/stores/useQuestionStore'
+import { useI18n } from '@/i18n/useI18n'
 
 interface QuestionPromptProps {
   request: QuestionRequest
@@ -11,6 +12,7 @@ interface QuestionPromptProps {
 }
 
 export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptProps) {
+  const { t } = useI18n()
   const [currentTab, setCurrentTab] = useState(0)
   const [answers, setAnswers] = useState<QuestionAnswer[]>(request.questions.map(() => []))
   const [customInputs, setCustomInputs] = useState<string[]>(request.questions.map(() => ''))
@@ -178,7 +180,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
           onClick={handleDismiss}
           disabled={sending}
           className="ml-auto text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 shrink-0"
-          aria-label="Dismiss"
+          aria-label={t('questionPrompt.actions.dismiss')}
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -257,7 +259,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
             >
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Pencil className="h-3.5 w-3.5 shrink-0" />
-                <span className="text-sm">Type your own answer</span>
+                <span className="text-sm">{t('questionPrompt.custom.typeOwn')}</span>
               </div>
             </button>
           )}
@@ -281,7 +283,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                   }
                 }}
                 className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500/50 transition-colors resize-none min-h-[36px] max-h-[200px]"
-                placeholder="Type your answer..."
+                placeholder={t('questionPrompt.custom.placeholder')}
                 rows={1}
                 disabled={sending}
               />
@@ -290,7 +292,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                 type="submit"
                 disabled={!customInputs[currentTab]?.trim() || sending}
               >
-                Submit
+                {t('questionPrompt.actions.submit')}
               </Button>
               <Button
                 size="sm"
@@ -299,7 +301,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                 onClick={() => setEditingCustom(false)}
                 disabled={sending}
               >
-                Cancel
+                {t('questionPrompt.actions.cancel')}
               </Button>
             </form>
           )}
@@ -314,7 +316,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
               onClick={() => handleSubmit()}
               disabled={!hasCurrentAnswer || sending}
             >
-              {sending ? 'Sending...' : 'Submit'}
+              {sending ? t('questionPrompt.actions.sending') : t('questionPrompt.actions.submit')}
             </Button>
           )}
 
@@ -331,7 +333,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                   }}
                   disabled={sending}
                 >
-                  Back
+                  {t('questionPrompt.actions.back')}
                 </Button>
               )}
               <Button
@@ -342,12 +344,12 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                 }
               >
                 {sending ? (
-                  'Sending...'
+                  t('questionPrompt.actions.sending')
                 ) : isLastTab ? (
-                  'Submit All'
+                  t('questionPrompt.actions.submitAll')
                 ) : (
                   <>
-                    Next
+                    {t('questionPrompt.actions.next')}
                     <ChevronRight className="h-3.5 w-3.5" />
                   </>
                 )}
@@ -363,7 +365,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
             disabled={sending}
             className="text-muted-foreground"
           >
-            Dismiss
+            {t('questionPrompt.actions.dismiss')}
           </Button>
         </div>
       </div>

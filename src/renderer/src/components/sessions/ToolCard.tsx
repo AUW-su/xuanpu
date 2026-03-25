@@ -407,7 +407,7 @@ function CollapsedContent({
         <span className="text-muted-foreground shrink-0">
           <Terminal className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Bash</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.bash')}</span>
         <span className="font-mono text-muted-foreground truncate min-w-0">
           <span className="text-green-500">$</span> {truncCmd}
         </span>
@@ -425,13 +425,13 @@ function CollapsedContent({
         <span className="text-muted-foreground shrink-0">
           <ListTodo className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Tasks</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.tasks')}</span>
         <span className="text-muted-foreground truncate min-w-0">
-          {completed}/{todos.length} completed
+          {t('toolCard.summary.completed', { completed, total: todos.length })}
         </span>
         {inProgress > 0 && (
           <span className="text-[10px] bg-blue-500/15 text-blue-500 dark:text-blue-400 rounded px-1 py-0.5 font-medium shrink-0">
-            {inProgress} active
+            {t('toolCard.summary.active', { count: inProgress })}
           </span>
         )}
       </>
@@ -447,12 +447,14 @@ function CollapsedContent({
         <span className="text-muted-foreground shrink-0">
           <FileText className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Read</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.read')}</span>
         <span className="font-mono text-muted-foreground truncate min-w-0">
           {shortenPath(filePath, cwd)}
         </span>
         {lineCount !== null && (
-          <span className="text-muted-foreground/60 shrink-0 text-[10px]">{lineCount} lines</span>
+          <span className="text-muted-foreground/60 shrink-0 text-[10px]">
+            {t('toolCard.summary.lines', { count: lineCount })}
+          </span>
         )}
       </>
     )
@@ -468,12 +470,14 @@ function CollapsedContent({
         <span className="text-muted-foreground shrink-0">
           <FilePlus className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Write</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.write')}</span>
         <span className="font-mono text-muted-foreground truncate min-w-0">
           {shortenPath(filePath, cwd)}
         </span>
         {lineCount !== null && (
-          <span className="text-muted-foreground/60 shrink-0 text-[10px]">{lineCount} lines</span>
+          <span className="text-muted-foreground/60 shrink-0 text-[10px]">
+            {t('toolCard.summary.lines', { count: lineCount })}
+          </span>
         )}
       </>
     )
@@ -491,13 +495,13 @@ function CollapsedContent({
         <span className="text-muted-foreground shrink-0">
           <Pencil className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Edit</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.edit')}</span>
         <span className="font-mono text-muted-foreground truncate min-w-0">
           {shortenPath(firstPath, cwd)}
         </span>
         {changeCount > 1 && (
           <span className="text-[10px] bg-blue-500/15 text-blue-500 dark:text-blue-400 rounded px-1 py-0.5 font-medium shrink-0">
-            +{changeCount - 1} more
+            {t('toolCard.summary.more', { count: changeCount - 1 })}
           </span>
         )}
       </>
@@ -516,7 +520,7 @@ function CollapsedContent({
         <span className="text-muted-foreground shrink-0">
           <Pencil className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Edit</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.edit')}</span>
         <span className="font-mono text-muted-foreground truncate min-w-0">
           {shortenPath(filePath, cwd)}
         </span>
@@ -538,9 +542,13 @@ function CollapsedContent({
     return (
       <>
         <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-        <span className="text-muted-foreground">Search</span>
+        <span className="text-muted-foreground">{t('toolCard.labels.search')}</span>
         <span className="truncate">&quot;{pattern}&quot;</span>
-        {searchPath && <span className="text-muted-foreground truncate">in {searchPath}</span>}
+        {searchPath && (
+          <span className="text-muted-foreground truncate">
+            {t('toolCard.summary.inPath', { path: searchPath })}
+          </span>
+        )}
         {matchCount !== null && matchCount > 0 && (
           <span className="text-muted-foreground">({matchCount})</span>
         )}
@@ -555,7 +563,7 @@ function CollapsedContent({
     return (
       <>
         <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-        <span className="text-muted-foreground">Find files</span>
+        <span className="text-muted-foreground">{t('toolCard.labels.findFiles')}</span>
         <span className="truncate">{pattern}</span>
         {fileCount !== null && fileCount > 0 && (
           <span className="text-muted-foreground">({fileCount})</span>
@@ -570,7 +578,7 @@ function CollapsedContent({
     return (
       <>
         <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-        <span className="font-medium text-foreground shrink-0">Skill</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.skill')}</span>
         <span className="text-muted-foreground truncate min-w-0">{skillName}</span>
       </>
     )
@@ -582,15 +590,19 @@ function CollapsedContent({
       ? (input.questions as Array<{ header: string; question: string }>)
       : []
     const questionCount = questions.length
-    const firstHeader = questions[0]?.header || 'Question'
+    const firstHeader = questions[0]?.header || t('toolCard.labels.question')
     return (
       <>
         <span className="text-muted-foreground shrink-0">
           <MessageCircleQuestion className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Question</span>
+        <span className="font-medium text-foreground shrink-0">
+          {t('toolCard.labels.question')}
+        </span>
         <span className="text-muted-foreground truncate min-w-0">
-          {questionCount > 1 ? `${questionCount} questions` : firstHeader}
+          {questionCount > 1
+            ? t('toolCard.summary.questions', { count: questionCount })
+            : firstHeader}
         </span>
       </>
     )
@@ -605,7 +617,7 @@ function CollapsedContent({
         <span className="text-muted-foreground shrink-0">
           <Bot className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Agent</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.agent')}</span>
         {subagentType && (
           <span className="text-[10px] bg-blue-500/15 text-blue-500 dark:text-blue-400 rounded px-1 py-0.5 font-medium shrink-0">
             {subagentType}
@@ -620,13 +632,17 @@ function CollapsedContent({
   if (lowerName === 'exitplanmode') {
     const isAccepted = toolUse.status === 'success'
     const isRejected = toolUse.status === 'error'
-    const badgeText = isAccepted ? 'accepted' : isRejected ? 'rejected' : 'review'
+    const badgeText = isAccepted
+      ? t('toolCard.summary.accepted')
+      : isRejected
+        ? t('toolCard.summary.rejected')
+        : t('toolCard.summary.review')
     return (
       <>
         <span className={cn(isRejected ? 'text-red-500' : 'text-emerald-500', 'shrink-0')}>
           <ClipboardCheck className="h-3.5 w-3.5" />
         </span>
-        <span className="font-medium text-foreground shrink-0">Plan</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.plan')}</span>
         <span
           className={cn(
             'text-[10px] rounded px-1 py-0.5 font-medium shrink-0',
@@ -653,7 +669,7 @@ function CollapsedContent({
     return (
       <>
         <Globe className="h-3.5 w-3.5 text-blue-400 shrink-0" />
-        <span className="font-medium text-foreground shrink-0">Fetch</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.fetch')}</span>
         <span className="font-mono text-muted-foreground truncate min-w-0">{hostname}</span>
       </>
     )
@@ -669,7 +685,7 @@ function CollapsedContent({
     return (
       <>
         <Code2 className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-        <span className="font-medium text-foreground shrink-0">LSP</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.lsp')}</span>
         <span
           className={cn(
             'text-[10px] rounded px-1 py-0.5 font-medium shrink-0',
@@ -702,7 +718,7 @@ function CollapsedContent({
     return (
       <>
         <Figma className={cn('h-3.5 w-3.5 shrink-0', FIGMA_ICON_COLOR)} />
-        <span className="font-medium text-foreground shrink-0">Figma</span>
+        <span className="font-medium text-foreground shrink-0">{t('toolCard.labels.figma')}</span>
         <span
           className={cn(
             'text-[10px] rounded px-1 py-0.5 font-medium shrink-0',
@@ -763,11 +779,12 @@ export function isSearchOperation(name: string): boolean {
 }
 
 /** Resolve a short display label for a file operation tool */
-function getFileToolLabel(name: string): string {
+function getFileToolLabelKey(name: string): string {
   const lower = name.toLowerCase()
-  if (lower.includes('read') || lower === 'cat' || lower === 'view') return 'Read'
-  if (lower.includes('write') || lower === 'create') return 'Write'
-  if (lower.includes('edit') || lower.includes('replace') || lower.includes('patch')) return 'Edit'
+  if (lower.includes('read') || lower === 'cat' || lower === 'view') return 'toolCard.labels.read'
+  if (lower.includes('write') || lower === 'create') return 'toolCard.labels.write'
+  if (lower.includes('edit') || lower.includes('replace') || lower.includes('patch'))
+    return 'toolCard.labels.edit'
   return name
 }
 
@@ -779,6 +796,7 @@ const CompactFileToolCard = memo(function CompactFileToolCard({
   toolUse: ToolUseInfo
   cwd?: string | null
 }): React.JSX.Element {
+  const { t } = useI18n()
   const [isExpanded, setIsExpanded] = useState(false)
 
   const isSearch = isSearchOperation(toolUse.name)
@@ -791,9 +809,11 @@ const CompactFileToolCard = memo(function CompactFileToolCard({
     toolUse.input.path ||
     '') as string
   const shortPath = shortenPath(filePath, cwd)
-  const label = isSkill ? 'Skill' : getFileToolLabel(toolUse.name)
+  const label = isSkill ? t('toolCard.labels.skill') : t(getFileToolLabelKey(toolUse.name))
   const detail = isSkill
-    ? (toolUse.input.skill as string) || (toolUse.input.name as string) || 'unknown'
+    ? (toolUse.input.skill as string) ||
+      (toolUse.input.name as string) ||
+      t('toolCard.fallback.unknown')
     : shortPath
   const isRunning = toolUse.status === 'pending' || toolUse.status === 'running'
   const isError = toolUse.status === 'error'
@@ -896,6 +916,7 @@ export const ToolCard = memo(function ToolCard({
   cwd,
   compact = false
 }: ToolCardProps): React.JSX.Element {
+  const { t } = useI18n()
   const [isExpanded, setIsExpanded] = useState(false)
 
   const duration = useMemo(() => {
@@ -1069,7 +1090,9 @@ export const ToolCard = memo(function ToolCard({
           {planAccepted && (
             <div className="flex justify-end px-6 py-4" data-testid="plan-accepted-message">
               <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-primary/10 text-foreground">
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">Implement the plan</p>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                  {t('toolCard.summary.implementPlan')}
+                </p>
               </div>
             </div>
           )}
@@ -1141,7 +1164,7 @@ export const ToolCard = memo(function ToolCard({
           {/* Expand/Collapse affordance */}
           {hasDetail && (
             <span className="ml-1 inline-flex items-center gap-1 rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
-              {isExpanded ? 'Hide' : 'View'}
+              {isExpanded ? t('toolCard.actions.hide') : t('toolCard.actions.view')}
               <ChevronDown
                 className={cn(
                   'h-2.5 w-2.5 shrink-0 transition-transform duration-150',
