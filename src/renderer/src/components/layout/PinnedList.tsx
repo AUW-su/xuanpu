@@ -135,7 +135,6 @@ function PinnedWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
   const vimMode = useVimModeStore((s) => s.mode)
   const vimModeEnabled = useSettingsStore((s) => s.vimModeEnabled)
   const { t } = useI18n()
-  const { t } = useI18n()
 
   const worktree = useWorktreeStore((s) => {
     for (const worktrees of s.worktreesByProject.values()) {
