@@ -12,9 +12,11 @@ import {
   Circle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/i18n/useI18n'
 import type { ToolViewProps } from './types'
 
 const MAX_PREVIEW_ITEMS = 20
+type TranslateFn = (key: string, params?: Record<string, string | number | boolean>) => string
 
 type LspOperation =
   | 'goToDefinition'
@@ -48,36 +50,37 @@ function shortenPath(filePath: string): string {
 }
 
 /** Map LSP SymbolKind number to a short label */
-function symbolKindLabel(kind: number): string {
-  const map: Record<number, string> = {
-    1: 'file',
-    2: 'module',
-    3: 'namespace',
-    4: 'package',
-    5: 'class',
-    6: 'method',
-    7: 'property',
-    8: 'field',
-    9: 'constructor',
-    10: 'enum',
-    11: 'interface',
-    12: 'function',
-    13: 'variable',
-    14: 'constant',
-    15: 'string',
-    16: 'number',
-    17: 'boolean',
-    18: 'array',
-    19: 'object',
-    20: 'key',
-    21: 'null',
-    22: 'enum member',
-    23: 'struct',
-    24: 'event',
-    25: 'operator',
-    26: 'type param'
+function symbolKindLabel(kind: number, t?: TranslateFn): string {
+  const keyMap: Record<number, string> = {
+    1: 'toolViews.lsp.symbolKinds.file',
+    2: 'toolViews.lsp.symbolKinds.module',
+    3: 'toolViews.lsp.symbolKinds.namespace',
+    4: 'toolViews.lsp.symbolKinds.package',
+    5: 'toolViews.lsp.symbolKinds.class',
+    6: 'toolViews.lsp.symbolKinds.method',
+    7: 'toolViews.lsp.symbolKinds.property',
+    8: 'toolViews.lsp.symbolKinds.field',
+    9: 'toolViews.lsp.symbolKinds.constructor',
+    10: 'toolViews.lsp.symbolKinds.enum',
+    11: 'toolViews.lsp.symbolKinds.interface',
+    12: 'toolViews.lsp.symbolKinds.function',
+    13: 'toolViews.lsp.symbolKinds.variable',
+    14: 'toolViews.lsp.symbolKinds.constant',
+    15: 'toolViews.lsp.symbolKinds.string',
+    16: 'toolViews.lsp.symbolKinds.number',
+    17: 'toolViews.lsp.symbolKinds.boolean',
+    18: 'toolViews.lsp.symbolKinds.array',
+    19: 'toolViews.lsp.symbolKinds.object',
+    20: 'toolViews.lsp.symbolKinds.key',
+    21: 'toolViews.lsp.symbolKinds.null',
+    22: 'toolViews.lsp.symbolKinds.enumMember',
+    23: 'toolViews.lsp.symbolKinds.struct',
+    24: 'toolViews.lsp.symbolKinds.event',
+    25: 'toolViews.lsp.symbolKinds.operator',
+    26: 'toolViews.lsp.symbolKinds.typeParam'
   }
-  return map[kind] || `kind:${kind}`
+  const key = keyMap[kind]
+  return key && t ? t(key) : `kind:${kind}`
 }
 
 /** Color for symbol kind badge */
@@ -155,6 +158,7 @@ function LocationList({
   showAll: boolean
   onToggle: () => void
 }) {
+  const { t } = useI18n()
   const locations = items.map((item) => {
     const loc = item as Record<string, unknown>
     const uri = (loc.uri || loc.targetUri || '') as string
@@ -186,7 +190,7 @@ function LocationList({
         <ShowAllButton
           showAll={showAll}
           count={locations.length}
-          label="locations"
+          label={t('toolViews.lsp.labels.locations')}
           onToggle={onToggle}
         />
       )}
@@ -196,9 +200,10 @@ function LocationList({
 
 /** Hover info display */
 function HoverView({ data }: { data: unknown[] }) {
+  const { t } = useI18n()
   const content = extractHoverContent(data)
   if (!content) {
-    return <div className="text-muted-foreground text-xs italic">No hover information</div>
+    return <div className="text-muted-foreground text-xs italic">{t('toolViews.lsp.noHover')}</div>
   }
 
   const lang = detectLanguage(content)
@@ -247,12 +252,13 @@ function CallHierarchyList({
   showAll: boolean
   onToggle: () => void
 }) {
+  const { t } = useI18n()
   const calls = items.map((item) => {
     const obj = item as Record<string, unknown>
     const target = (direction === 'incoming' ? obj.from : obj.to) as
       | Record<string, unknown>
       | undefined
-    const name = (target?.name || 'unknown') as string
+    const name = (target?.name || t('toolViews.lsp.unknown')) as string
     const uri = (target?.uri || '') as string
     const range = (target?.range || target?.selectionRange || {}) as Record<string, unknown>
     const start = (range.start || {}) as Record<string, number>
@@ -283,7 +289,12 @@ function CallHierarchyList({
         ))}
       </div>
       {needsTruncation && (
-        <ShowAllButton showAll={showAll} count={calls.length} label="calls" onToggle={onToggle} />
+        <ShowAllButton
+          showAll={showAll}
+          count={calls.length}
+          label={t('toolViews.lsp.labels.calls')}
+          onToggle={onToggle}
+        />
       )}
     </div>
   )
@@ -301,6 +312,7 @@ function SymbolList({
   showAll: boolean
   onToggle: () => void
 }) {
+  const { t } = useI18n()
   const symbols = flattenSymbols(items)
   const needsTruncation = symbols.length > MAX_PREVIEW_ITEMS
   const displayed = showAll ? symbols : symbols.slice(0, MAX_PREVIEW_ITEMS)
@@ -320,7 +332,7 @@ function SymbolList({
                 symbolKindColor(sym.kind)
               )}
             >
-              {symbolKindLabel(sym.kind)}
+              {symbolKindLabel(sym.kind, t)}
             </span>
             <span className="text-xs font-medium text-foreground truncate">{sym.name}</span>
             {sym.line !== null && (
@@ -338,7 +350,7 @@ function SymbolList({
         <ShowAllButton
           showAll={showAll}
           count={symbols.length}
-          label="symbols"
+          label={t('toolViews.lsp.labels.symbols')}
           onToggle={onToggle}
         />
       )}
@@ -423,6 +435,7 @@ function DiagnosticsView({
   showAll: boolean
   onToggle: () => void
 }) {
+  const { t } = useI18n()
   const allDiags = flattenDiagnostics(data)
   const needsTruncation = allDiags.length > MAX_PREVIEW_ITEMS
   const displayed = showAll ? allDiags : allDiags.slice(0, MAX_PREVIEW_ITEMS)
@@ -468,7 +481,7 @@ function DiagnosticsView({
         <ShowAllButton
           showAll={showAll}
           count={allDiags.length}
-          label="diagnostics"
+          label={t('toolViews.lsp.labels.diagnostics')}
           onToggle={onToggle}
         />
       )}
@@ -488,6 +501,7 @@ function ShowAllButton({
   label: string
   onToggle: () => void
 }) {
+  const { t } = useI18n()
   return (
     <button
       onClick={onToggle}
@@ -497,7 +511,7 @@ function ShowAllButton({
       <ChevronDown
         className={cn('h-3 w-3 transition-transform duration-150', showAll && 'rotate-180')}
       />
-      {showAll ? 'Show less' : `Show all ${count} ${label}`}
+      {showAll ? t('toolViews.common.showLess') : t('toolViews.lsp.showAll', { count, label })}
     </button>
   )
 }
@@ -505,6 +519,7 @@ function ShowAllButton({
 // --- Main Component ---
 
 export function LspToolView({ input, output, error }: ToolViewProps) {
+  const { t } = useI18n()
   const [showAll, setShowAll] = useState(false)
 
   const operation = (input.operation || '') as LspOperation
@@ -518,8 +533,15 @@ export function LspToolView({ input, output, error }: ToolViewProps) {
   if (!output) return null
 
   // Handle "No results found" / "No diagnostics found"
-  if (output === 'No results found' || output === 'No diagnostics found') {
-    return <div className="text-muted-foreground text-xs italic">{output}</div>
+  if (output === 'No results found') {
+    return (
+      <div className="text-muted-foreground text-xs italic">{t('toolViews.lsp.noResults')}</div>
+    )
+  }
+  if (output === 'No diagnostics found') {
+    return (
+      <div className="text-muted-foreground text-xs italic">{t('toolViews.lsp.noDiagnostics')}</div>
+    )
   }
 
   const parsed = tryParseJson(output)
@@ -623,16 +645,16 @@ export function LspToolView({ input, output, error }: ToolViewProps) {
 
 // --- Exported helpers for ToolCard collapsed content ---
 
-const OPERATION_LABELS: Record<string, string> = {
-  goToDefinition: 'definition',
-  hover: 'hover',
-  findReferences: 'references',
-  documentSymbol: 'symbols',
-  workspaceSymbol: 'workspace symbols',
-  goToImplementation: 'implementation',
-  incomingCalls: 'callers',
-  outgoingCalls: 'callees',
-  diagnostics: 'diagnostics'
+const OPERATION_LABEL_KEYS: Record<string, string> = {
+  goToDefinition: 'toolViews.lsp.operations.definition',
+  hover: 'toolViews.lsp.operations.hover',
+  findReferences: 'toolViews.lsp.operations.references',
+  documentSymbol: 'toolViews.lsp.operations.symbols',
+  workspaceSymbol: 'toolViews.lsp.operations.workspaceSymbols',
+  goToImplementation: 'toolViews.lsp.operations.implementation',
+  incomingCalls: 'toolViews.lsp.operations.callers',
+  outgoingCalls: 'toolViews.lsp.operations.callees',
+  diagnostics: 'toolViews.lsp.operations.diagnostics'
 }
 
 const OPERATION_COLORS: Record<string, string> = {
@@ -648,8 +670,9 @@ const OPERATION_COLORS: Record<string, string> = {
 }
 
 /** Get human-readable label for an LSP operation */
-export function getLspOperationLabel(operation: string): string {
-  return OPERATION_LABELS[operation] || operation
+export function getLspOperationLabel(operation: string, t?: TranslateFn): string {
+  const key = OPERATION_LABEL_KEYS[operation]
+  return key && t ? t(key) : operation
 }
 
 /** Get badge color class for an LSP operation */

@@ -46,6 +46,7 @@ import { FileChangeToolView } from './tools/FileChangeToolView'
 import { ToolCallContextMenu } from './ToolCallContextMenu'
 import { extractCommandText } from '@/lib/tool-input-utils'
 import { useSessionStore } from '@/stores/useSessionStore'
+import { useI18n } from '@/i18n/useI18n'
 
 export type ToolStatus = 'pending' | 'running' | 'success' | 'error'
 
@@ -393,6 +394,7 @@ function CollapsedContent({
   toolUse: ToolUseInfo
   cwd?: string | null
 }): React.JSX.Element {
+  const { t } = useI18n()
   const { name, input, output } = toolUse
   const lowerName = name.toLowerCase()
 
@@ -674,7 +676,7 @@ function CollapsedContent({
             getLspOperationColor(operation)
           )}
         >
-          {getLspOperationLabel(operation)}
+          {getLspOperationLabel(operation, t)}
         </span>
         {filePath && (
           <span className="font-mono text-muted-foreground truncate min-w-0">

@@ -570,6 +570,58 @@ export const messages: Record<AppLocale, MessageTree> = {
         kb: '{value} KB',
         mb: '{value} MB'
       },
+      lsp: {
+        noHover: 'No hover information',
+        noResults: 'No results found',
+        noDiagnostics: 'No diagnostics found',
+        unknown: 'unknown',
+        showAll: 'Show all {count} {label}',
+        labels: {
+          locations: 'locations',
+          calls: 'calls',
+          symbols: 'symbols',
+          diagnostics: 'diagnostics'
+        },
+        operations: {
+          definition: 'definition',
+          hover: 'hover',
+          references: 'references',
+          symbols: 'symbols',
+          workspaceSymbols: 'workspace symbols',
+          implementation: 'implementation',
+          callers: 'callers',
+          callees: 'callees',
+          diagnostics: 'diagnostics'
+        },
+        symbolKinds: {
+          file: 'file',
+          module: 'module',
+          namespace: 'namespace',
+          package: 'package',
+          class: 'class',
+          method: 'method',
+          property: 'property',
+          field: 'field',
+          constructor: 'constructor',
+          enum: 'enum',
+          interface: 'interface',
+          function: 'function',
+          variable: 'variable',
+          constant: 'constant',
+          string: 'string',
+          number: 'number',
+          boolean: 'boolean',
+          array: 'array',
+          object: 'object',
+          key: 'key',
+          null: 'null',
+          enumMember: 'enum member',
+          struct: 'struct',
+          event: 'event',
+          operator: 'operator',
+          typeParam: 'type param'
+        }
+      },
       task: {
         defaultTitle: 'Sub-agent',
         prompt: 'Prompt'
@@ -1446,6 +1498,58 @@ export const messages: Record<AppLocale, MessageTree> = {
         bytesPlural: '{count} 字节',
         kb: '{value} KB',
         mb: '{value} MB'
+      },
+      lsp: {
+        noHover: '没有悬停信息',
+        noResults: '没有结果',
+        noDiagnostics: '没有诊断信息',
+        unknown: '未知',
+        showAll: '显示全部 {count} 条{label}',
+        labels: {
+          locations: '位置',
+          calls: '调用',
+          symbols: '符号',
+          diagnostics: '诊断'
+        },
+        operations: {
+          definition: '定义',
+          hover: '悬停',
+          references: '引用',
+          symbols: '符号',
+          workspaceSymbols: '工作区符号',
+          implementation: '实现',
+          callers: '调用方',
+          callees: '被调用方',
+          diagnostics: '诊断'
+        },
+        symbolKinds: {
+          file: '文件',
+          module: '模块',
+          namespace: '命名空间',
+          package: '包',
+          class: '类',
+          method: '方法',
+          property: '属性',
+          field: '字段',
+          constructor: '构造函数',
+          enum: '枚举',
+          interface: '接口',
+          function: '函数',
+          variable: '变量',
+          constant: '常量',
+          string: '字符串',
+          number: '数字',
+          boolean: '布尔值',
+          array: '数组',
+          object: '对象',
+          key: '键',
+          null: '空值',
+          enumMember: '枚举成员',
+          struct: '结构体',
+          event: '事件',
+          operator: '运算符',
+          typeParam: '类型参数'
+        }
       },
       task: {
         defaultTitle: '子代理',

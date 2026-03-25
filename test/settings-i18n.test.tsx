@@ -218,6 +218,10 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'toolViews.skill.loading')).toBe('正在加载技能内容...')
     expect(translate('zh-CN', 'toolViews.todo.empty')).toBe('没有任务')
     expect(translate('zh-CN', 'toolViews.webFetch.bytesPlural', { count: 512 })).toBe('512 字节')
+    expect(translate('zh-CN', 'toolViews.lsp.operations.workspaceSymbols')).toBe('工作区符号')
+    expect(translate('zh-CN', 'toolViews.lsp.showAll', { count: 3, label: '位置' })).toBe(
+      '显示全部 3 条位置'
+    )
     expect(translate('zh-CN', 'contextIndicator.title')).toBe('上下文窗口')
     expect(translate('zh-CN', 'contextIndicator.cost.session', { cost: '$1.2345' })).toBe(
       '会话成本：$1.2345'
