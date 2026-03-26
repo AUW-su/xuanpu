@@ -136,7 +136,7 @@ export function FileViewer({ filePath }: FileViewerProps): React.JSX.Element {
       lastSaveTimestampRef.current = Date.now()
       const result = await window.fileOps.writeFile(pendingClose, latestContentRef.current)
       if (result.success) {
-        toast.success('File saved')
+        toast.success(t('fileViewer.toasts.saved'))
         const tab = useFileViewerStore.getState().openFiles.get(pendingClose)
         if (tab && tab.type === 'file') {
           const worktree = useWorktreeStore
@@ -147,12 +147,12 @@ export function FileViewer({ filePath }: FileViewerProps): React.JSX.Element {
           }
         }
       } else {
-        toast.error('Failed to save: ' + result.error)
+        toast.error(t('fileViewer.toasts.saveError', { error: result.error || '' }))
         return
       }
       useFileViewerStore.getState().confirmCloseFile(pendingClose)
     }
-  }, [pendingClose])
+  }, [pendingClose, t])
 
   const handleDialogDontSave = useCallback(() => {
     if (pendingClose) {
@@ -172,7 +172,7 @@ export function FileViewer({ filePath }: FileViewerProps): React.JSX.Element {
         (e) => e.changedPath === filePath && e.eventType === 'unlink'
       )
       if (wasDeleted) {
-        setError('File was deleted from disk')
+        setError(t('fileViewer.errors.deletedFromDisk'))
         setContent(null)
         setImageDataUri(null)
         // Clean up store metadata so dirty indicator and dialogs don't fire
@@ -200,7 +200,7 @@ export function FileViewer({ filePath }: FileViewerProps): React.JSX.Element {
     return () => {
       unsubscribe()
     }
-  }, [filePath, markExternallyChanged])
+  }, [filePath, markExternallyChanged, t])
 
   const handleReload = useCallback(async () => {
     const result = await window.fileOps.readFile(filePath)

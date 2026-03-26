@@ -402,7 +402,8 @@ export const messages: Record<AppLocale, MessageTree> = {
       preview: 'Preview',
       errors: {
         readImage: 'Failed to read image',
-        readFile: 'Failed to read file'
+        readFile: 'Failed to read file',
+        deletedFromDisk: 'File was deleted from disk'
       },
       toasts: {
         saved: 'File saved',
@@ -420,6 +421,15 @@ export const messages: Record<AppLocale, MessageTree> = {
         cancel: 'Cancel',
         save: 'Save'
       }
+    },
+    quickActions: {
+      openInXcode: 'Open in Xcode',
+      openInAndroidStudio: 'Open in Android Studio',
+      openInApp: 'Open in {app}',
+      revealInManager: 'Reveal in {manager}',
+      copyPath: 'Copy Path',
+      copyBranchName: 'Copy branch name',
+      copied: 'Copied'
     },
     terminalToolbar: {
       status: {
@@ -2177,7 +2187,8 @@ export const messages: Record<AppLocale, MessageTree> = {
       preview: '预览',
       errors: {
         readImage: '读取图片失败',
-        readFile: '读取文件失败'
+        readFile: '读取文件失败',
+        deletedFromDisk: '文件已从磁盘删除'
       },
       toasts: {
         saved: '文件已保存',
@@ -2195,6 +2206,15 @@ export const messages: Record<AppLocale, MessageTree> = {
         cancel: '取消',
         save: '保存'
       }
+    },
+    quickActions: {
+      openInXcode: '在 Xcode 中打开',
+      openInAndroidStudio: '在 Android Studio 中打开',
+      openInApp: '在 {app} 中打开',
+      revealInManager: '在 {manager} 中显示',
+      copyPath: '复制路径',
+      copyBranchName: '复制分支名',
+      copied: '已复制'
     },
     terminalToolbar: {
       status: {

@@ -6,6 +6,7 @@ import { useWorktreeStore } from '@/stores/useWorktreeStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useSettingsStore, type EditorOption, type TerminalOption } from '@/stores/useSettingsStore'
 import { useProjectStore } from '@/stores/useProjectStore'
+import { useI18n } from '@/i18n/useI18n'
 
 function CursorIcon({ className }: { className?: string }): React.JSX.Element {
   return (
@@ -308,6 +309,7 @@ function TerminalIcon({
 }
 
 export function QuickActions(): React.JSX.Element | null {
+  const { t } = useI18n()
   const { selectedWorktreeId, worktreesByProject } = useWorktreeStore()
   const selectedConnectionId = useConnectionStore((s) => s.selectedConnectionId)
   const selectedConnection = useConnectionStore((s) =>
@@ -439,7 +441,7 @@ export function QuickActions(): React.JSX.Element | null {
           className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
           disabled={disabled}
           onClick={() => window.projectOps.openPath(xcworkspacePath)}
-          title="Open in Xcode"
+          title={t('quickActions.openInXcode')}
           data-testid="quick-action-xcode"
         >
           <XcodeIcon className="h-3.5 w-3.5" />
@@ -456,7 +458,7 @@ export function QuickActions(): React.JSX.Element | null {
             const openPath = activePath || selectedProject?.path
             if (openPath) window.systemOps.openInApp('android-studio', openPath)
           }}
-          title="Open in Android Studio"
+          title={t('quickActions.openInAndroidStudio')}
           data-testid="quick-action-android-studio"
         >
           <AndroidStudioIcon className="h-3.5 w-3.5" />
@@ -469,7 +471,7 @@ export function QuickActions(): React.JSX.Element | null {
         className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('editor')}
-        title={`Open in ${editorLabel}`}
+        title={t('quickActions.openInApp', { app: editorLabel })}
         data-testid="quick-action-editor"
       >
         {defaultEditor === 'cursor' ? (
@@ -485,7 +487,7 @@ export function QuickActions(): React.JSX.Element | null {
         className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('terminal')}
-        title={`Open in ${terminalLabel}`}
+        title={t('quickActions.openInApp', { app: terminalLabel })}
         data-testid="quick-action-terminal"
       >
         <TerminalIcon terminal={defaultTerminal} className="h-3.5 w-3.5" />
@@ -497,7 +499,7 @@ export function QuickActions(): React.JSX.Element | null {
         className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('copy-path')}
-        title="Copy Path"
+        title={t('quickActions.copyPath')}
         data-testid="quick-action-copy-path"
       >
         {copied ? (
@@ -505,7 +507,7 @@ export function QuickActions(): React.JSX.Element | null {
         ) : (
           <Copy className="h-3.5 w-3.5" />
         )}
-        <span>{copied ? 'Copied' : 'Copy Path'}</span>
+        <span>{copied ? t('quickActions.copied') : t('quickActions.copyPath')}</span>
       </Button>
       <Button
         variant="ghost"
@@ -513,7 +515,7 @@ export function QuickActions(): React.JSX.Element | null {
         className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('finder')}
-        title={`Reveal in ${fileManagerName()}`}
+        title={t('quickActions.revealInManager', { manager: fileManagerName() })}
         data-testid="quick-action-finder"
       >
         <FolderOpen className="h-3.5 w-3.5" />
@@ -525,7 +527,7 @@ export function QuickActions(): React.JSX.Element | null {
           size="sm"
           className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
           onClick={() => handleAction('copy-branch')}
-          title="Copy branch name"
+          title={t('quickActions.copyBranchName')}
           data-testid="quick-action-copy-branch"
         >
           {branchCopied ? (
@@ -533,7 +535,7 @@ export function QuickActions(): React.JSX.Element | null {
           ) : (
             <GitBranch className="h-3.5 w-3.5" />
           )}
-          <span>{branchCopied ? 'Copied' : 'Copy branch name'}</span>
+          <span>{branchCopied ? t('quickActions.copied') : t('quickActions.copyBranchName')}</span>
         </Button>
       )}
     </div>
