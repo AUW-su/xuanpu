@@ -283,6 +283,14 @@ export const messages: Record<AppLocale, MessageTree> = {
     },
     fileTree: {
       ariaLabel: 'File tree',
+      node: {
+        ariaLabel: '{prefix}{kind}: {name}{status}',
+        symlinkedPrefix: 'Symlinked',
+        folder: 'Folder',
+        file: 'File',
+        staged: 'staged',
+        modified: 'modified'
+      },
       header: {
         title: 'Files',
         collapseAll: 'Collapse all folders',
@@ -675,7 +683,11 @@ export const messages: Record<AppLocale, MessageTree> = {
       error: {
         title: 'Connection Error',
         retry: 'Retry Connection',
-        fallback: 'Failed to connect to session'
+        fallback: 'Failed to connect to session',
+        connectOpencode: 'Failed to connect to OpenCode',
+        connectSession: 'Failed to connect to session',
+        connectGeneric: 'Failed to connect',
+        sessionNotFound: 'Session not found'
       },
       empty: {
         title: 'Start a conversation',
@@ -1989,6 +2001,14 @@ export const messages: Record<AppLocale, MessageTree> = {
     },
     fileTree: {
       ariaLabel: '文件树',
+      node: {
+        ariaLabel: '{prefix}{kind}：{name}{status}',
+        symlinkedPrefix: '符号链接',
+        folder: '文件夹',
+        file: '文件',
+        staged: '已暂存',
+        modified: '已修改'
+      },
       header: {
         title: '文件',
         collapseAll: '折叠所有文件夹',
@@ -2381,7 +2401,11 @@ export const messages: Record<AppLocale, MessageTree> = {
       error: {
         title: '连接错误',
         retry: '重新连接',
-        fallback: '连接会话失败'
+        fallback: '连接会话失败',
+        connectOpencode: '连接 OpenCode 失败',
+        connectSession: '连接会话失败',
+        connectGeneric: '连接失败',
+        sessionNotFound: '找不到会话'
       },
       empty: {
         title: '开始一段对话',

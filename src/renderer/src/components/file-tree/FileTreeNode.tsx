@@ -5,6 +5,7 @@ import { FileIcon } from './FileIcon'
 import { GitStatusIndicator, type GitStatusCode } from './GitStatusIndicator'
 import { FileContextMenu } from './FileContextMenu'
 import { ContextMenuTrigger } from '@/components/ui/context-menu'
+import { useI18n } from '@/i18n/useI18n'
 
 // File tree node structure
 interface FileTreeNode {
@@ -99,6 +100,7 @@ export const VirtualFileTreeNode = memo(function VirtualFileTreeNode({
   hideGitIndicators,
   hideGitContextActions
 }: VirtualFileTreeNodeProps) {
+  const { t } = useI18n()
   const handleClick = useCallback(() => {
     if (node.isDirectory) {
       onToggle(node.path)
@@ -134,7 +136,14 @@ export const VirtualFileTreeNode = memo(function VirtualFileTreeNode({
       role="treeitem"
       aria-expanded={node.isDirectory ? isExpanded : undefined}
       aria-selected={false}
-      aria-label={`${node.isSymlink ? 'Symlinked ' : ''}${node.isDirectory ? 'Folder' : 'File'}: ${node.name}${gitStatus ? `, ${gitStatus.staged ? 'staged' : 'modified'}` : ''}`}
+      aria-label={t('fileTree.node.ariaLabel', {
+        prefix: node.isSymlink ? `${t('fileTree.node.symlinkedPrefix')} ` : '',
+        kind: node.isDirectory ? t('fileTree.node.folder') : t('fileTree.node.file'),
+        name: node.name,
+        status: gitStatus
+          ? `, ${gitStatus.staged ? t('fileTree.node.staged') : t('fileTree.node.modified')}`
+          : ''
+      })}
     >
       {/* Expand/collapse chevron for directories */}
       {node.isDirectory ? (

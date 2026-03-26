@@ -2789,13 +2789,14 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
           await sendPendingMessage(wtPath, connectResult.sessionId)
         } else {
-          throw new Error(connectResult.error || 'Failed to connect to OpenCode')
+          throw new Error(connectResult.error || t('sessionView.error.connectOpencode'))
         }
       } catch (error) {
         console.error('Failed to initialize session:', error)
         setViewState({
           status: 'error',
-          errorMessage: error instanceof Error ? error.message : 'Failed to connect to session'
+          errorMessage:
+            error instanceof Error ? error.message : t('sessionView.error.connectSession')
         })
       }
     }
@@ -2813,7 +2814,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       // event subscriptions alive so responses are not lost.
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId])
+  }, [sessionId, t])
 
   // Save draft on unmount or session change
   useEffect(() => {
@@ -2843,7 +2844,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     try {
       const session = (await window.db.session.get(sessionId)) as DbSession | null
       if (!session) {
-        throw new Error('Session not found')
+        throw new Error(t('sessionView.error.sessionNotFound'))
       }
 
       if (!session.worktree_id) {
@@ -2895,7 +2896,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       if (!activeOpcSessionId) {
         const connectResult = await window.opencodeOps.connect(worktree.path, sessionId)
         if (!connectResult.success || !connectResult.sessionId) {
-          throw new Error(connectResult.error || 'Failed to connect')
+          throw new Error(connectResult.error || t('sessionView.error.connectGeneric'))
         }
 
         activeOpcSessionId = connectResult.sessionId
@@ -2933,10 +2934,10 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       console.error('Retry failed:', error)
       setViewState({
         status: 'error',
-        errorMessage: error instanceof Error ? error.message : 'Failed to connect'
+        errorMessage: error instanceof Error ? error.message : t('sessionView.error.connectGeneric')
       })
     }
-  }, [sessionId])
+  }, [sessionId, t])
 
   // Handle question reply
   const handleQuestionReply = useCallback(
