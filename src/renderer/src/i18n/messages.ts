@@ -281,6 +281,9 @@ export const messages: Record<AppLocale, MessageTree> = {
     fileMentionPopover: {
       noFiles: 'No files found'
     },
+    attachmentButton: {
+      label: 'Attach image or file'
+    },
     fileTree: {
       ariaLabel: 'File tree',
       node: {
@@ -893,6 +896,60 @@ export const messages: Record<AppLocale, MessageTree> = {
         superchargeLocal: 'Supercharge plan locally',
         supercharge: 'Supercharge plan',
         implement: 'Implement plan'
+      }
+    },
+    scrollToBottomFab: {
+      ariaLabel: 'Scroll to bottom'
+    },
+    forkMessageButton: {
+      ariaLabel: 'Fork message'
+    },
+    leftSidebar: {
+      ariaLabel: 'Projects and worktrees'
+    },
+    rightSidebar: {
+      ariaLabel: 'File sidebar',
+      fileSidebarError: 'File sidebar error'
+    },
+    reasoningBlock: {
+      thinking: 'Thinking...'
+    },
+    queuedIndicator: {
+      label: '{count} message(s) queued'
+    },
+    queuedMessageBubble: {
+      badge: 'QUEUED'
+    },
+    toolCallContextMenu: {
+      actions: {
+        copyDetails: 'Copy Details',
+        inspect: 'Inspect Tool Call'
+      },
+      toasts: {
+        nothingToCopy: 'Nothing to copy',
+        copied: 'Copied to clipboard',
+        copyError: 'Failed to copy'
+      }
+    },
+    toolCallDebugModal: {
+      title: 'Tool Call Inspector',
+      tabs: {
+        input: 'Input',
+        output: 'Output'
+      },
+      actions: {
+        copied: 'Copied',
+        copy: 'Copy {label}'
+      },
+      toasts: {
+        copied: '{label} copied to clipboard',
+        copyError: 'Failed to copy'
+      },
+      status: {
+        pending: 'pending',
+        running: 'running',
+        success: 'success',
+        error: 'error'
       }
     },
     runTab: {
@@ -1999,6 +2056,9 @@ export const messages: Record<AppLocale, MessageTree> = {
     fileMentionPopover: {
       noFiles: '没有找到文件'
     },
+    attachmentButton: {
+      label: '附加图片或文件'
+    },
     fileTree: {
       ariaLabel: '文件树',
       node: {
@@ -2610,6 +2670,60 @@ export const messages: Record<AppLocale, MessageTree> = {
         superchargeLocal: '在本地增强执行计划',
         supercharge: '增强执行计划',
         implement: '实现计划'
+      }
+    },
+    scrollToBottomFab: {
+      ariaLabel: '滚动到底部'
+    },
+    forkMessageButton: {
+      ariaLabel: '分叉消息'
+    },
+    leftSidebar: {
+      ariaLabel: '项目和 worktree'
+    },
+    rightSidebar: {
+      ariaLabel: '文件侧边栏',
+      fileSidebarError: '文件侧边栏出错'
+    },
+    reasoningBlock: {
+      thinking: '思考中...'
+    },
+    queuedIndicator: {
+      label: '{count} 条消息排队中'
+    },
+    queuedMessageBubble: {
+      badge: '排队中'
+    },
+    toolCallContextMenu: {
+      actions: {
+        copyDetails: '复制详情',
+        inspect: '查看工具调用'
+      },
+      toasts: {
+        nothingToCopy: '没有可复制的内容',
+        copied: '已复制到剪贴板',
+        copyError: '复制失败'
+      }
+    },
+    toolCallDebugModal: {
+      title: '工具调用查看器',
+      tabs: {
+        input: '输入',
+        output: '输出'
+      },
+      actions: {
+        copied: '已复制',
+        copy: '复制{label}'
+      },
+      toasts: {
+        copied: '{label}已复制到剪贴板',
+        copyError: '复制失败'
+      },
+      status: {
+        pending: '等待中',
+        running: '运行中',
+        success: '成功',
+        error: '失败'
       }
     },
     runTab: {

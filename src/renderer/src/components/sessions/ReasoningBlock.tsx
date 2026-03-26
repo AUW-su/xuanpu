@@ -3,6 +3,7 @@ import { ChevronRight, Brain } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Ansi from 'ansi-to-react'
 import { containsAnsi } from '@/lib/ansi-utils'
+import { useI18n } from '@/i18n/useI18n'
 
 interface ReasoningBlockProps {
   text: string
@@ -10,6 +11,7 @@ interface ReasoningBlockProps {
 }
 
 export function ReasoningBlock({ text, isStreaming = false }: ReasoningBlockProps) {
+  const { t } = useI18n()
   const [isExpanded, setIsExpanded] = useState(false)
   const userOverrideRef = useRef(false)
 
@@ -40,7 +42,7 @@ export function ReasoningBlock({ text, isStreaming = false }: ReasoningBlockProp
   }
 
   const lines = text.split('\n')
-  const firstLine = lines[0]?.slice(0, 100) || 'Thinking...'
+  const firstLine = lines[0]?.slice(0, 100) || t('reasoningBlock.thinking')
   const preview = firstLine.length < (lines[0]?.length ?? 0) ? firstLine + '...' : firstLine
 
   return (
@@ -60,7 +62,7 @@ export function ReasoningBlock({ text, isStreaming = false }: ReasoningBlockProp
         />
         <Brain className="h-3 w-3 shrink-0 text-muted-foreground/70" />
         <span className="text-xs text-muted-foreground italic">
-          {isExpanded ? 'Thinking...' : preview}
+          {isExpanded ? t('reasoningBlock.thinking') : preview}
         </span>
       </button>
 

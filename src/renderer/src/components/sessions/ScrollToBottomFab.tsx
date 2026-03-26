@@ -1,5 +1,6 @@
 import { ArrowDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/i18n/useI18n'
 
 interface ScrollToBottomFabProps {
   onClick: () => void
@@ -12,6 +13,7 @@ export function ScrollToBottomFab({
   visible,
   bottomClass = 'bottom-4'
 }: ScrollToBottomFabProps): React.JSX.Element {
+  const { t } = useI18n()
   return (
     <button
       onClick={onClick}
@@ -25,7 +27,7 @@ export function ScrollToBottomFab({
         'cursor-pointer',
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
       )}
-      aria-label="Scroll to bottom"
+      aria-label={t('scrollToBottomFab.ariaLabel')}
       data-testid="scroll-to-bottom-fab"
     >
       <ArrowDown className="h-4 w-4" />

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from '@/lib/toast'
 import type { ToolUseInfo, ToolStatus } from './ToolCard'
+import { useI18n } from '@/i18n/useI18n'
 
 function statusColor(status: ToolStatus): string {
   switch (status) {
@@ -32,23 +33,26 @@ function formatDuration(ms: number): string {
 }
 
 function CopyButton({ text, label }: { text: string; label: string }) {
+  const { t } = useI18n()
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
-      toast.success(`${label} copied to clipboard`)
+      toast.success(t('toolCallDebugModal.toasts.copied', { label }))
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast.error('Failed to copy')
+      toast.error(t('toolCallDebugModal.toasts.copyError'))
     }
   }
 
   return (
     <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 gap-1.5 text-xs">
       {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-      {copied ? 'Copied' : `Copy ${label}`}
+      {copied
+        ? t('toolCallDebugModal.actions.copied')
+        : t('toolCallDebugModal.actions.copy', { label })}
     </Button>
   )
 }
@@ -60,6 +64,7 @@ interface ToolCallDebugModalProps {
 }
 
 export function ToolCallDebugModal({ open, onOpenChange, toolUse }: ToolCallDebugModalProps) {
+  const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<'input' | 'output'>('input')
 
   useEffect(() => {
@@ -93,7 +98,7 @@ export function ToolCallDebugModal({ open, onOpenChange, toolUse }: ToolCallDebu
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <Bug className="h-4 w-4 text-muted-foreground" />
-            Tool Call Inspector
+            {t('toolCallDebugModal.title')}
           </DialogTitle>
           <DialogDescription asChild>
             <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -107,7 +112,7 @@ export function ToolCallDebugModal({ open, onOpenChange, toolUse }: ToolCallDebu
                   statusColor(toolUse.status)
                 )}
               >
-                {toolUse.status}
+                {t(`toolCallDebugModal.status.${toolUse.status}`)}
               </span>
               {duration && (
                 <span className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -133,7 +138,7 @@ export function ToolCallDebugModal({ open, onOpenChange, toolUse }: ToolCallDebu
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             )}
           >
-            Input
+            {t('toolCallDebugModal.tabs.input')}
           </button>
           <button
             role="tab"
@@ -147,12 +152,16 @@ export function ToolCallDebugModal({ open, onOpenChange, toolUse }: ToolCallDebu
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             )}
           >
-            Output
+            {t('toolCallDebugModal.tabs.output')}
           </button>
           <div className="flex-1" />
           <CopyButton
             text={activeTab === 'input' ? inputJson : outputText}
-            label={activeTab === 'input' ? 'Input' : 'Output'}
+            label={
+              activeTab === 'input'
+                ? t('toolCallDebugModal.tabs.input')
+                : t('toolCallDebugModal.tabs.output')
+            }
           />
         </div>
 

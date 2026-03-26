@@ -9,8 +9,10 @@ import { FileSidebar } from '@/components/file-tree'
 import { BottomPanel } from './BottomPanel'
 import { TerminalManager } from '@/components/terminal/TerminalManager'
 import { ErrorBoundary, ErrorFallback } from '@/components/error'
+import { useI18n } from '@/i18n/useI18n'
 
 export function RightSidebar(): React.JSX.Element {
+  const { t } = useI18n()
   const { rightSidebarWidth, rightSidebarCollapsed, setRightSidebarWidth, toggleRightSidebar } =
     useLayoutStore()
   const bottomPanelTab = useLayoutStore((s) => s.bottomPanelTab)
@@ -106,7 +108,7 @@ export function RightSidebar(): React.JSX.Element {
         data-testid="right-sidebar"
         data-width={rightSidebarWidth}
         role="complementary"
-        aria-label="File sidebar"
+        aria-label={t('rightSidebar.ariaLabel')}
       >
         {/* Top half: Tabbed sidebar (Changes / Files) */}
         <div
@@ -118,7 +120,7 @@ export function RightSidebar(): React.JSX.Element {
             componentName="FileSidebar"
             fallback={
               <div className="flex-1 p-2">
-                <ErrorFallback compact title="File sidebar error" />
+                <ErrorFallback compact title={t('rightSidebar.fileSidebarError')} />
               </div>
             }
           >

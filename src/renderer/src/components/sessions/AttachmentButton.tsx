@@ -3,6 +3,7 @@ import { Paperclip } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { isImageMime } from '@/lib/file-attachment-utils'
 import type { Attachment } from './AttachmentPreview'
+import { useI18n } from '@/i18n/useI18n'
 
 interface AttachmentButtonProps {
   onAttach: (file: Omit<Attachment, 'id'>) => void
@@ -10,6 +11,7 @@ interface AttachmentButtonProps {
 }
 
 export function AttachmentButton({ onAttach, disabled }: AttachmentButtonProps) {
+  const { t } = useI18n()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleClick = () => {
@@ -67,8 +69,8 @@ export function AttachmentButton({ onAttach, disabled }: AttachmentButtonProps) 
         className="h-7 w-7 p-0"
         onClick={handleClick}
         disabled={disabled}
-        title="Attach image or file"
-        aria-label="Attach image or file"
+        title={t('attachmentButton.label')}
+        aria-label={t('attachmentButton.label')}
         data-testid="attachment-button"
       >
         <Paperclip className="h-3.5 w-3.5" />

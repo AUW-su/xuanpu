@@ -114,7 +114,7 @@ export function LeftSidebar(): React.JSX.Element {
         data-testid="left-sidebar"
         data-width={leftSidebarWidth}
         role="navigation"
-        aria-label="Projects and worktrees"
+        aria-label={t('leftSidebar.ariaLabel')}
       >
         {connectionModeActive ? (
           <div className="p-3 border-b flex items-center justify-between bg-muted/50">
