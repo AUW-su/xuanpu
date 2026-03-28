@@ -1,4 +1,4 @@
-name: Build Windows Native Modules
+name: Build Xuanpu Windows Native Modules
 
 on:
   workflow_dispatch:
@@ -90,8 +90,8 @@ jobs:
 
           # Create or update the release
           gh release create win-natives-v1 \
-            --title "Windows Native Modules" \
-            --notes "Prebuilt Windows native .node binaries for cross-compilation from macOS" \
+            --title "Xuanpu Windows Native Modules" \
+            --notes "Prebuilt Windows native .node binaries for Xuanpu cross-compilation from macOS" \
             --prerelease 2>/dev/null || true
 
           gh release upload win-natives-v1 win-natives.tar.gz --clobber

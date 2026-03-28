@@ -240,7 +240,7 @@ Connect any two worktrees to:
 - **Code review mode** — Special connection type optimized for reviews
 - **Time tracking** — Per-worktree and per-connection activity analytics
 
-Want to influence the roadmap? [Join the discussion](https://github.com/morapelker/hive/discussions/categories/ideas) or [contribute](CONTRIBUTING.md)!
+Want to influence the roadmap? [Join the discussion](https://github.com/slicenferqin/xuanpu/discussions/categories/ideas) or [contribute](CONTRIBUTING.md)!
 
 ---
 

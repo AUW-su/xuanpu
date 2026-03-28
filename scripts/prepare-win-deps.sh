@@ -23,7 +23,7 @@ warn()  { echo -e "${YELLOW}⚠${NC} $1"; }
 err()   { echo -e "${RED}✗${NC} $1" >&2; }
 fatal() { err "$1"; exit 1; }
 
-REPO="morapelker/hive"
+WIN_NATIVES_REPO="${WIN_NATIVES_REPO:-slicenferqin/xuanpu}"
 WIN_NATIVES_TAG="win-natives-v1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -59,6 +59,7 @@ info "Preparing Windows native binaries for cross-build..."
 
 # Download prebuilt binaries (cached)
 EXTRACT_DIR="$CACHE_DIR/extracted"
+ARCHIVE_PATH="$CACHE_DIR/win-natives.tar.gz"
 
 if [[ -d "$EXTRACT_DIR" && -n "$(ls -A "$EXTRACT_DIR" 2>/dev/null)" ]]; then
   ok "Using cached Windows natives ($EXTRACT_DIR)"
@@ -66,14 +67,25 @@ else
   info "Downloading Windows native binaries from GitHub..."
   mkdir -p "$CACHE_DIR"
   rm -rf "$EXTRACT_DIR"
+  rm -f "$ARCHIVE_PATH"
 
-  # Download the Actions artifact from the latest successful workflow run
-  gh run download \
-    --name win-natives \
-    --dir "$EXTRACT_DIR" \
-    --repo "$REPO" \
-    || fatal "Failed to download win-natives artifact. Run the build-win-natives workflow first."
-  ok "Downloaded Windows natives"
+  if gh release download \
+    "$WIN_NATIVES_TAG" \
+    -p "win-natives.tar.gz" \
+    -D "$CACHE_DIR" \
+    --repo "$WIN_NATIVES_REPO"; then
+    mkdir -p "$EXTRACT_DIR"
+    tar xzf "$ARCHIVE_PATH" -C "$EXTRACT_DIR"
+    ok "Downloaded Windows natives from release ${WIN_NATIVES_TAG}"
+  else
+    warn "Release asset not available in ${WIN_NATIVES_REPO}; falling back to workflow artifact"
+    gh run download \
+      --name win-natives \
+      --dir "$EXTRACT_DIR" \
+      --repo "$WIN_NATIVES_REPO" \
+      || fatal "Failed to download win-natives artifact from ${WIN_NATIVES_REPO}. Publish win-natives-v1 first."
+    ok "Downloaded Windows natives from workflow artifact"
+  fi
 fi
 
 ls -la "$EXTRACT_DIR"

@@ -1,9 +1,9 @@
-name: Release
+name: Release Xuanpu
 
 on:
   push:
     tags:
-      - 'gh-v*'
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   build:
+    if: ${{ github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-canary.') }}
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +25,7 @@ jobs:
       - name: Download libghostty
         run: |
           mkdir -p vendor
-          gh release download ghostty-deps-v1 -p libghostty.a -D vendor/
+          gh release download ghostty-deps-v1 -p libghostty.a -D vendor/ --repo slicenferqin/xuanpu
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: pip3 install --break-system-packages setuptools
