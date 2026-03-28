@@ -2,12 +2,16 @@ import { cn } from '@/lib/utils'
 
 interface UserBubbleProps {
   content: string
-  timestamp: string
+  timestamp?: string
   isPlanMode?: boolean
   isAskMode?: boolean
 }
 
-export function UserBubble({ content, isPlanMode, isAskMode }: UserBubbleProps): React.JSX.Element {
+export function UserBubble({
+  content,
+  isPlanMode,
+  isAskMode
+}: UserBubbleProps): React.JSX.Element {
   return (
     <div className="flex justify-end px-6 py-4" data-testid="message-user">
       <div

@@ -144,14 +144,42 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
 
   return (
     <div
-      className="rounded-md border border-border bg-zinc-900/50 overflow-hidden"
+      className="overflow-hidden rounded-3xl border border-border/75 bg-card/96 shadow-[0_8px_24px_rgba(15,23,42,0.055)] backdrop-blur-sm"
       data-testid="question-prompt"
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
-        <MessageCircleQuestion className="h-4 w-4 text-blue-400 shrink-0" />
+      <div className="border-b border-border/60 bg-gradient-to-b from-background/95 to-muted/20 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex size-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-300">
+            <MessageCircleQuestion className="h-4 w-4 shrink-0" />
+          </span>
+          <div className="min-w-0 flex-1">
+            {!isMultiQuestion ? (
+              <span className="block truncate text-sm font-semibold text-foreground">
+                {currentQuestion.header}
+              </span>
+            ) : (
+              <span className="block truncate text-sm font-semibold text-foreground">
+                {t('toolCard.labels.question')}
+              </span>
+            )}
+            <span className="text-[11px] text-muted-foreground">
+              {isMultiQuestion
+                ? `${currentTab + 1}/${request.questions.length}`
+                : t('questionPrompt.actions.submit')}
+            </span>
+          </div>
+          <button
+            onClick={handleDismiss}
+            disabled={sending}
+            className="ml-auto inline-flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground disabled:opacity-50 shrink-0"
+            aria-label={t('questionPrompt.actions.dismiss')}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
         {isMultiQuestion ? (
-          <div className="flex gap-1 flex-1 min-w-0" data-testid="question-tabs">
+          <div className="mt-3 flex flex-wrap gap-1.5" data-testid="question-tabs">
             {request.questions.map((q, i) => (
               <button
                 key={i}
@@ -160,10 +188,10 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                   setEditingCustom(false)
                 }}
                 className={cn(
-                  'px-2 py-1 text-xs rounded transition-colors',
+                  'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
                   i === currentTab
-                    ? 'bg-muted text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'border-sky-300/80 bg-sky-500/10 text-sky-700 shadow-[0_0_0_1px_rgba(125,211,252,0.14)] dark:border-sky-400/40 dark:text-sky-200'
+                    : 'border-border/65 bg-background/70 text-muted-foreground hover:border-border hover:bg-background hover:text-foreground'
                 )}
               >
                 {q.header}
@@ -171,27 +199,17 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
               </button>
             ))}
           </div>
-        ) : (
-          <span className="text-sm font-medium text-foreground truncate flex-1">
-            {currentQuestion.header}
-          </span>
-        )}
-        <button
-          onClick={handleDismiss}
-          disabled={sending}
-          className="ml-auto text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 shrink-0"
-          aria-label={t('questionPrompt.actions.dismiss')}
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
+        ) : null}
       </div>
 
-      <div className="px-3 py-2.5">
+      <div className="px-4 py-4">
         {/* Question text */}
-        <p className="text-sm text-foreground mb-3">{currentQuestion.question}</p>
+        <p className="mb-4 text-[15px] font-medium leading-6 text-foreground/95">
+          {currentQuestion.question}
+        </p>
 
         {/* Options */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {currentQuestion.options.map((option) => {
             const isSelected = currentAnswers.includes(option.label)
             return (
@@ -200,10 +218,10 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                 onClick={() => handleOptionClick(option.label)}
                 disabled={sending}
                 className={cn(
-                  'w-full text-left px-3 py-2 rounded-md border transition-colors disabled:opacity-50',
+                  'w-full rounded-2xl border px-4 py-3 text-left transition-[border-color,background-color,box-shadow,transform] duration-200 disabled:opacity-50',
                   isSelected
-                    ? 'border-blue-500/50 bg-blue-500/10'
-                    : 'border-border hover:border-muted-foreground/30 hover:bg-muted/50'
+                    ? 'border-sky-300/90 bg-sky-500/10 shadow-[0_6px_18px_rgba(56,189,248,0.07)]'
+                    : 'border-border/70 bg-background/75 hover:-translate-y-[1px] hover:border-border hover:bg-background hover:shadow-[0_6px_16px_rgba(15,23,42,0.045)]'
                 )}
                 data-testid={`option-${option.label}`}
               >
@@ -211,17 +229,24 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                   {isMultiple && (
                     <div
                       className={cn(
-                        'h-4 w-4 rounded border flex items-center justify-center shrink-0',
-                        isSelected ? 'bg-blue-500 border-blue-500' : 'border-muted-foreground/40'
+                        'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors',
+                        isSelected
+                          ? 'border-sky-500 bg-sky-500'
+                          : 'border-muted-foreground/35 bg-background'
                       )}
                     >
                       {isSelected && <Check className="h-3 w-3 text-white" />}
                     </div>
                   )}
-                  <span className="text-sm font-medium">{option.label}</span>
+                  <span className="text-sm font-semibold text-foreground">{option.label}</span>
                 </div>
                 {option.description && (
-                  <p className={cn('text-xs text-muted-foreground mt-0.5', isMultiple && 'ml-6')}>
+                  <p
+                    className={cn(
+                      'mt-1 text-xs leading-5 text-muted-foreground',
+                      isMultiple && 'ml-6'
+                    )}
+                  >
                     {option.description}
                   </p>
                 )}
@@ -237,12 +262,12 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                 handleCustomInputChange(customAnswer)
               }}
               disabled={sending}
-              className="w-full text-left px-3 py-2 rounded-md border border-blue-500/50 bg-blue-500/10 transition-colors disabled:opacity-50"
+              className="w-full rounded-2xl border border-sky-300/80 bg-sky-500/10 px-4 py-3 text-left transition-colors disabled:opacity-50"
               data-testid="custom-answer-display"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <Pencil className="h-3.5 w-3.5 shrink-0 text-blue-400" />
-                <span className="text-sm font-medium whitespace-pre-wrap line-clamp-3">
+                <Pencil className="h-3.5 w-3.5 shrink-0 text-sky-500" />
+                <span className="line-clamp-3 whitespace-pre-wrap text-sm font-medium text-foreground">
                   {customAnswer}
                 </span>
               </div>
@@ -254,7 +279,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
             <button
               onClick={() => setEditingCustom(true)}
               disabled={sending}
-              className="w-full text-left px-3 py-2 rounded-md border border-dashed border-border hover:border-muted-foreground/30 hover:bg-muted/50 transition-colors disabled:opacity-50"
+              className="w-full rounded-2xl border border-dashed border-border/75 bg-background/55 px-4 py-3 text-left transition-colors hover:border-border hover:bg-background/80 disabled:opacity-50"
               data-testid="custom-option"
             >
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -268,7 +293,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
           {editingCustom && (
             <form
               onSubmit={handleCustomSubmit}
-              className="flex gap-2"
+              className="flex flex-col gap-2 rounded-2xl border border-border/65 bg-background/75 p-3 sm:flex-row"
               data-testid="custom-input-form"
             >
               <textarea
@@ -282,7 +307,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                     handleCustomSubmit(e)
                   }
                 }}
-                className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500/50 transition-colors resize-none min-h-[36px] max-h-[200px]"
+                className="min-h-[44px] max-h-[200px] flex-1 resize-none rounded-xl border border-border/70 bg-background px-3 py-2 text-sm transition-colors focus:border-sky-400/70 focus:outline-none"
                 placeholder={t('questionPrompt.custom.placeholder')}
                 rows={1}
                 disabled={sending}
@@ -308,13 +333,14 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/50">
+        <div className="mt-4 flex items-center gap-2 border-t border-border/60 pt-3">
           {/* Single-question submit */}
           {!isMultiQuestion && (
             <Button
               size="sm"
               onClick={() => handleSubmit()}
               disabled={!hasCurrentAnswer || sending}
+              className="rounded-full px-4"
             >
               {sending ? t('questionPrompt.actions.sending') : t('questionPrompt.actions.submit')}
             </Button>
@@ -332,6 +358,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                     setEditingCustom(false)
                   }}
                   disabled={sending}
+                  className="rounded-full px-4"
                 >
                   {t('questionPrompt.actions.back')}
                 </Button>
@@ -342,6 +369,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
                 disabled={
                   (isLastTab && !allAnswered) || (!isLastTab && !hasCurrentAnswer) || sending
                 }
+                className="rounded-full px-4"
               >
                 {sending ? (
                   t('questionPrompt.actions.sending')
@@ -363,7 +391,7 @@ export function QuestionPrompt({ request, onReply, onReject }: QuestionPromptPro
             variant="ghost"
             onClick={handleDismiss}
             disabled={sending}
-            className="text-muted-foreground"
+            className="rounded-full px-4 text-muted-foreground"
           >
             {t('questionPrompt.actions.dismiss')}
           </Button>

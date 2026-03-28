@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Build for Future - Hi-Fi V2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f6f1ea;
+        --panel: rgba(255, 252, 248, 0.84);
+        --panel-strong: rgba(255, 253, 249, 0.94);
+        --line: rgba(40, 32, 26, 0.08);
+        --line-strong: rgba(40, 32, 26, 0.14);
+        --ink: #1b1714;
+        --muted: #6e655d;
+        --soft: #978d82;
+        --accent: #ea6a2a;
+        --accent-soft: rgba(234, 106, 42, 0.1);
+        --teal: #1d5f58;
+        --teal-soft: rgba(29, 95, 88, 0.08);
+        --shadow: 0 24px 60px rgba(33, 26, 22, 0.08);
+        --radius-xl: 26px;
+        --radius-lg: 20px;
+        --radius-md: 16px;
+        --radius-sm: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background:
+          radial-gradient(circle at top left, rgba(234, 106, 42, 0.12), transparent 28%),
+          linear-gradient(180deg, #fbf8f4 0%, #f2ece4 100%);
+        color: var(--ink);
+        font-family: 'Noto Sans SC', sans-serif;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.2)),
+          radial-gradient(rgba(20, 20, 20, 0.04) 0.7px, transparent 0.8px);
+        background-size: auto, 12px 12px;
+        opacity: 0.28;
+        pointer-events: none;
+      }
+
+      .page {
+        padding: 18px;
+        min-height: 100vh;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: 16px;
+        min-height: calc(100vh - 36px);
+      }
+
+      .sidebar,
+      .topbar,
+      .hero,
+      .feature-strip,
+      .content-card,
+      .insight-card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(14px);
+      }
+
+      .sidebar {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.58);
+        border: 1px solid rgba(40, 32, 26, 0.06);
+      }
+
+      .brand__mark {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        background: #171311;
+        color: #fff3ea;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+      }
+
+      .brand__text strong,
+      .section-title strong,
+      .project-item strong,
+      .worktree-item strong,
+      .session-row strong,
+      .detail-title h2,
+      .board-title h3,
+      .insight-title h3 {
+        font-family: 'Manrope', sans-serif;
+      }
+
+      .brand__text {
+        display: grid;
+        gap: 4px;
+      }
+
+      .brand__text small,
+      .project-item small,
+      .worktree-item small,
+      .session-row small,
+      .hero p,
+      .detail-title p,
+      .list-note,
+      .insight-card p {
+        color: var(--muted);
+      }
+
+      .pills {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(40, 32, 26, 0.07);
+        background: rgba(255, 255, 255, 0.62);
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .pill--dark {
+        background: #1d1916;
+        color: #fff4ea;
+      }
+
+      .section-title {
+        display: grid;
+        gap: 4px;
+        padding: 0 4px;
+      }
+
+      .section-title strong {
+        font-size: 14px;
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .project-item,
+      .worktree-item,
+      .session-row {
+        display: grid;
+        gap: 6px;
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid rgba(40, 32, 26, 0.06);
+        background: var(--panel-strong);
+      }
+
+      .project-item.active {
+        background: linear-gradient(180deg, rgba(29, 95, 88, 0.1), rgba(29, 95, 88, 0.03));
+        border-color: rgba(29, 95, 88, 0.14);
+      }
+
+      .project-item__meta,
+      .worktree-item__meta,
+      .session-meta,
+      .detail-meta,
+      .chip-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .mini {
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: rgba(234, 106, 42, 0.08);
+        color: #c65a22;
+        font-size: 11px;
+      }
+
+      .main {
+        display: grid;
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        border-radius: 24px;
+      }
+
+      .search {
+        flex: 1;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(40, 32, 26, 0.06);
+        color: var(--soft);
+      }
+
+      .hero {
+        padding: 22px;
+        border-radius: 26px;
+      }
+
+      .hero__grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.7fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: rgba(234, 106, 42, 0.08);
+        color: #c65a22;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 14px 0 0;
+        font-family: 'Manrope', sans-serif;
+        font-size: clamp(34px, 4vw, 54px);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
+
+      .hero p {
+        margin: 16px 0 0;
+        font-size: 15px;
+        line-height: 1.85;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
+
+      .btn {
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(40, 32, 26, 0.07);
+        background: rgba(255, 255, 255, 0.7);
+        font-family: 'Manrope', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .btn--dark {
+        background: #191513;
+        color: #fff3ea;
+      }
+
+      .hero-side {
+        display: grid;
+        gap: 12px;
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(160deg, rgba(29, 95, 88, 0.95), rgba(18, 50, 47, 0.92));
+        color: #f5f3ef;
+      }
+
+      .hero-side small,
+      .hero-side p {
+        color: rgba(245, 243, 239, 0.74);
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metric {
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 8px;
+        font-family: 'Manrope', sans-serif;
+        font-size: 28px;
+      }
+
+      .feature-strip {
+        padding: 16px;
+        border-radius: 22px;
+      }
+
+      .board-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .board-title,
+      .insight-title {
+        display: grid;
+        gap: 4px;
+      }
+
+      .board-title h3,
+      .insight-title h3 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .feature-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .feature-tile {
+        display: grid;
+        gap: 10px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(40, 32, 26, 0.07);
+        background: var(--panel-strong);
+      }
+
+      .feature-tile.active {
+        outline: 2px solid rgba(234, 106, 42, 0.12);
+        background: linear-gradient(180deg, rgba(234, 106, 42, 0.08), rgba(255, 255, 255, 0.82));
+      }
+
+      .feature-tile h4 {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .feature-tile p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.76fr);
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .content-card,
+      .insight-card {
+        padding: 18px;
+        border-radius: 24px;
+        min-height: 0;
+      }
+
+      .content-card {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+        gap: 14px;
+      }
+
+      .detail-main,
+      .stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .detail-block,
+      .stack-panel {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(40, 32, 26, 0.07);
+        background: rgba(255, 255, 255, 0.56);
+      }
+
+      .detail-title {
+        display: grid;
+        gap: 10px;
+      }
+
+      .detail-title h2 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.12;
+      }
+
+      .story-list,
+      .checkpoint-list,
+      .session-list,
+      .evidence-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .story-item,
+      .checkpoint,
+      .session-row,
+      .evidence-row {
+        padding: 12px 0;
+        border-bottom: 1px dashed rgba(40, 32, 26, 0.08);
+      }
+
+      .story-item:last-child,
+      .checkpoint:last-child,
+      .session-row:last-child,
+      .evidence-row:last-child {
+        border-bottom: 0;
+      }
+
+      .story-item strong,
+      .checkpoint strong,
+      .evidence-row strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .status {
+        min-height: 28px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+
+      .status--progress {
+        background: rgba(234, 106, 42, 0.1);
+        color: #c65a22;
+      }
+
+      .status--ready {
+        background: rgba(29, 95, 88, 0.1);
+        color: #1d5f58;
+      }
+
+      .status--watch {
+        background: rgba(147, 109, 17, 0.11);
+        color: #8a6510;
+      }
+
+      .insight-card {
+        display: grid;
+        gap: 16px;
+      }
+
+      .insight-box {
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.56);
+        border: 1px solid rgba(40, 32, 26, 0.07);
+      }
+
+      .progress-bar {
+        position: relative;
+        height: 10px;
+        margin-top: 12px;
+        border-radius: 999px;
+        background: rgba(40, 32, 26, 0.08);
+        overflow: hidden;
+      }
+
+      .progress-bar > span {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--value);
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ea6a2a, #f7c2a5);
+      }
+
+      .mini-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .mini-metric {
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(29, 95, 88, 0.06);
+        border: 1px solid rgba(29, 95, 88, 0.08);
+      }
+
+      .mini-metric strong {
+        display: block;
+        margin-top: 8px;
+        font-family: 'Manrope', sans-serif;
+        font-size: 24px;
+      }
+
+      .footer-note {
+        color: var(--soft);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      @media (max-width: 1260px) {
+        .feature-row {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .content,
+        .detail-grid,
+        .hero__grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-rows: none;
+        }
+
+        .feature-row,
+        .mini-metrics,
+        .metric-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="shell">
+        <aside class="sidebar">
+          <div class="brand">
+            <div class="brand__mark">B/F</div>
+            <div class="brand__text">
+              <strong>Build for Future</strong>
+              <small>不是推翻，而是把主视角慢慢从 Session 挪到 Feature。</small>
+            </div>
+          </div>
+
+          <div class="pills">
+            <span class="pill pill--dark">Project-first, but softer</span>
+            <span class="pill">Feature overlay</span>
+            <span class="pill">Incremental UX</span>
+          </div>
+
+          <div class="list">
+            <div class="section-title">
+              <strong>Projects</strong>
+              <small class="list-note">先保留熟悉的左侧项目结构，不强行推翻。</small>
+            </div>
+            <div class="project-item active">
+              <strong>Hive CN</strong>
+              <small>正在推进 3 个 feature</small>
+              <div class="project-item__meta">
+                <span class="mini">2 review-ready</span>
+                <span class="mini">1 blocked</span>
+              </div>
+            </div>
+            <div class="project-item">
+              <strong>Next Product Lab</strong>
+              <small>正在探索 IA / UX / visual system</small>
+              <div class="project-item__meta">
+                <span class="mini">concept</span>
+                <span class="mini">design</span>
+              </div>
+            </div>
+            <div class="project-item">
+              <strong>Build Infra</strong>
+              <small>打包和本地安装流程</small>
+              <div class="project-item__meta">
+                <span class="mini">maintenance</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="list">
+            <div class="section-title">
+              <strong>Worktrees</strong>
+              <small class="list-note">worktree 继续存在，只是和 feature 绑定得更明显。</small>
+            </div>
+            <div class="worktree-item">
+              <strong>feature/ime-enter-flow</strong>
+              <small>绑定到“中文输入法 Enter 修复”</small>
+              <div class="worktree-item__meta">
+                <span class="status status--progress">in progress</span>
+              </div>
+            </div>
+            <div class="worktree-item">
+              <strong>concept/feature-home</strong>
+              <small>绑定到“首页重设计”</small>
+              <div class="worktree-item__meta">
+                <span class="status status--ready">review</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <section class="topbar">
+            <div class="search">今天最重要的不是“进哪个 session”，而是“继续推进哪个 feature”。</div>
+            <div class="chip-row">
+              <span class="pill pill--dark">Feature Overlay</span>
+              <span class="pill">Delivery Pulse</span>
+              <span class="pill">Evidence-aware</span>
+            </div>
+          </section>
+
+          <section class="hero">
+            <div class="hero__grid">
+              <div>
+                <span class="eyebrow">A softer transition</span>
+                <h1>先不推翻 Hive，只把“推进中的 Feature”抬到更前面。</h1>
+                <p>
+                  这版不是完全重构对象模型，而是更温和的过渡方案：保留熟悉的
+                  project / worktree / session 结构，同时在主界面上新增一层 Feature
+                  视角，让你一打开就知道“现在在推进什么、差什么、下一步做什么”。
+                </p>
+                <div class="hero-actions">
+                  <button class="btn btn--dark">Resume Feature</button>
+                  <button class="btn">Open Worktree</button>
+                  <button class="btn">Review Evidence</button>
+                </div>
+              </div>
+
+              <div class="hero-side">
+                <div>
+                  <small>Today</small>
+                  <h3 style="margin: 8px 0 0; font-family: 'Manrope', sans-serif; font-size: 28px">
+                    你还是在熟悉的项目里工作，<br />只是系统先替你看到“推进状态”。
+                  </h3>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric">
+                    <small>Running Features</small>
+                    <strong>03</strong>
+                  </div>
+                  <div class="metric">
+                    <small>Need Review</small>
+                    <strong>02</strong>
+                  </div>
+                  <div class="metric">
+                    <small>Open Sessions</small>
+                    <strong>06</strong>
+                  </div>
+                  <div class="metric">
+                    <small>Blocked</small>
+                    <strong>01</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="feature-strip">
+            <div class="board-head">
+              <div class="board-title">
+                <h3>Feature Focus</h3>
+                <p class="list-note">不是替代 project，而是在 project 之上给你一个更贴近交付的视角。</p>
+              </div>
+              <div class="chip-row">
+                <span class="pill pill--dark">Current Project: Hive CN</span>
+                <span class="pill">3 active</span>
+              </div>
+            </div>
+
+            <div class="feature-row">
+              <article class="feature-tile active">
+                <div class="chip-row">
+                  <span class="status status--progress">In Progress</span>
+                  <span class="mini">2 sessions</span>
+                </div>
+                <h4>中文输入法 Enter 误发送修复</h4>
+                <p>你点进来的不再只是某个 session，而是这个改动目标本身。</p>
+              </article>
+
+              <article class="feature-tile">
+                <div class="chip-row">
+                  <span class="status status--ready">Ready for Review</span>
+                  <span class="mini">PR draft</span>
+                </div>
+                <h4>首页改成 feature-aware 入口</h4>
+                <p>保留项目骨架，但让首页先表达“当前推进状态”。</p>
+              </article>
+
+              <article class="feature-tile">
+                <div class="chip-row">
+                  <span class="status status--watch">Blocked</span>
+                  <span class="mini">needs tests</span>
+                </div>
+                <h4>补齐 evidence 链路</h4>
+                <p>diff、test、review 不再散在对话里，而要显式可见。</p>
+              </article>
+
+              <article class="feature-tile">
+                <div class="chip-row">
+                  <span class="status status--ready">Stable</span>
+                  <span class="mini">4 runs</span>
+                </div>
+                <h4>多 agent run 视图</h4>
+                <p>多 session 继续保留，但被收纳到更易理解的 feature 语境下。</p>
+              </article>
+            </div>
+          </section>
+
+          <div class="content">
+            <section class="content-card">
+              <div class="board-head">
+                <div class="board-title">
+                  <h3>Feature Detail</h3>
+                  <p class="list-note">中心区域不再只显示聊天，而是“这个功能目前推进到了哪一步”。</p>
+                </div>
+                <div class="detail-meta">
+                  <span class="pill pill--dark">feature/ime-enter-flow</span>
+                  <span class="pill">worktree attached</span>
+                </div>
+              </div>
+
+              <div class="detail-grid">
+                <div class="detail-main">
+                  <div class="detail-block">
+                    <div class="detail-title">
+                      <div class="chip-row">
+                        <span class="status status--progress">In Progress</span>
+                        <span class="pill">project: Hive CN</span>
+                        <span class="pill">2 linked sessions</span>
+                      </div>
+                      <h2>修复中文输入法 Enter 误发送</h2>
+                      <p>
+                        这个区块保留你熟悉的工作上下文，但主对象已经从 session 变成 feature。
+                        session 仍然存在，只是变成这个功能下的执行线程，而不是整个页面的中心。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="detail-block">
+                    <div class="board-title">
+                      <h3>Progress Story</h3>
+                      <p class="list-note">帮助你快速恢复上下文，而不是去翻很长的对话历史。</p>
+                    </div>
+                    <div class="story-list">
+                      <div class="story-item">
+                        <strong>目标已锁定</strong>
+                        <small>Enter 在中文输入法 composing 状态下不能触发发送。</small>
+                      </div>
+                      <div class="story-item">
+                        <strong>执行线程已分开</strong>
+                        <small>一条 session 负责输入事件，一条 session 负责设置页行为说明。</small>
+                      </div>
+                      <div class="story-item">
+                        <strong>当前卡点</strong>
+                        <small>还缺一条回归验证证据，无法直接判断是否可以 merge。</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="detail-block">
+                    <div class="board-title">
+                      <h3>Linked Sessions</h3>
+                      <p class="list-note">Session 继续保留，但更像 feature 下的执行记录。</p>
+                    </div>
+                    <div class="session-list">
+                      <div class="session-row">
+                        <strong>Session A · Input Event Audit</strong>
+                        <small>已完成 composing / keyCode 229 路径梳理</small>
+                        <div class="session-meta">
+                          <span class="mini">Claude Code</span>
+                          <span class="status status--ready">stable</span>
+                        </div>
+                      </div>
+                      <div class="session-row">
+                        <strong>Session B · Shortcut Policy Copy</strong>
+                        <small>正在整理用户能理解的“发送 / 换行”文案</small>
+                        <div class="session-meta">
+                          <span class="mini">Codex</span>
+                          <span class="status status--progress">active</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="stack">
+                  <div class="stack-panel">
+                    <div class="insight-title">
+                      <h3>Delivery Pulse</h3>
+                      <p>比现在多一步：不是只看 agent 做了什么，而是看离交付还差什么。</p>
+                    </div>
+                    <div class="progress-bar"><span style="--value: 74%"></span></div>
+                    <div class="mini-metrics" style="margin-top: 14px">
+                      <div class="mini-metric">
+                        <small>Readiness</small>
+                        <strong>74%</strong>
+                      </div>
+                      <div class="mini-metric">
+                        <small>Risk</small>
+                        <strong>Low+</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="stack-panel">
+                    <div class="insight-title">
+                      <h3>Evidence</h3>
+                      <p>这一层是新增的，但不会压倒现有工作流。</p>
+                    </div>
+                    <div class="evidence-list">
+                      <div class="evidence-row">
+                        <strong>Diff</strong>
+                        <small>快捷键与 composing 判断逻辑已改</small>
+                        <span class="status status--ready">ready</span>
+                      </div>
+                      <div class="evidence-row">
+                        <strong>Tests</strong>
+                        <small>缺一条 IME 行为回归验证</small>
+                        <span class="status status--watch">need</span>
+                      </div>
+                      <div class="evidence-row">
+                        <strong>Review Notes</strong>
+                        <small>发送规则文案已草拟，待最后润色</small>
+                        <span class="status status--progress">draft</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="stack-panel">
+                    <div class="insight-title">
+                      <h3>Next Recommended Action</h3>
+                      <p>系统直接提示下一步，而不是让你自己去推断。</p>
+                    </div>
+                    <div class="checkpoint-list">
+                      <div class="checkpoint">
+                        <strong>1. 先补 smoke proof</strong>
+                        <small>验证中文输入法 composing 下按 Enter 不发送。</small>
+                      </div>
+                      <div class="checkpoint">
+                        <strong>2. 再做文案确认</strong>
+                        <small>把设置页描述收口成用户语言。</small>
+                      </div>
+                      <div class="checkpoint">
+                        <strong>3. 最后进入 review</strong>
+                        <small>确认英文输入与 shift+enter 路径无回归。</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="insight-card">
+              <div class="insight-title">
+                <h3>Why This Version</h3>
+                <p>这是一个更容易接受的过渡方案，不需要你立刻放弃现在熟悉的操作方式。</p>
+              </div>
+
+              <div class="insight-box">
+                <strong style="font-family: 'Manrope', sans-serif">保留的东西</strong>
+                <p style="margin-top: 10px">
+                  Project、Worktree、Session、Diff、Terminal 都还在。只是界面把它们重新编排，让“推进中的
+                  Feature”更早被看见。
+                </p>
+              </div>
+
+              <div class="insight-box">
+                <strong style="font-family: 'Manrope', sans-serif">新加的一层</strong>
+                <p style="margin-top: 10px">
+                  新增的是 Feature Focus、Delivery Pulse、Evidence、Next Action
+                  这些视图。它们是辅助你推进结果，不是强行替代现有结构。
+                </p>
+              </div>
+
+              <div class="insight-box">
+                <strong style="font-family: 'Manrope', sans-serif">设计语气</strong>
+                <p style="margin-top: 10px">
+                  这一版故意比上一版更克制，更接近成熟工具，而不是概念海报。重点是“我愿意迁过去用”，不是“我看到了一个遥远未来”。
+                </p>
+              </div>
+
+              <p class="footer-note">
+                这版的设计原则是：<br />
+                70% 熟悉，30% 新范式。<br />
+                先让用户感觉“顺手”，再慢慢把对象模型迁过去。
+              </p>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

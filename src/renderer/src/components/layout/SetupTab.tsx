@@ -68,36 +68,39 @@ export function SetupTab({ worktreeId }: SetupTabProps): React.JSX.Element {
   const isFailed = !setupRunning && !!setupError
 
   return (
-    <div className="flex flex-col h-full" data-testid="setup-tab">
+    <div className="flex h-full flex-col bg-transparent" data-testid="setup-tab">
       {/* Output area */}
       <div
         ref={outputRef}
-        className="flex-1 min-h-0 overflow-auto p-2 font-mono text-xs leading-relaxed"
+        className="flex-1 min-h-0 overflow-auto px-3 py-2.5 font-mono text-[11px] leading-6"
         data-testid="setup-tab-output"
       >
         {setupOutput.length === 0 && !setupRunning && (
-          <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground text-xs">
-            {hasSetupScript ? (
-              t('setupTab.empty.noOutput')
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (info?.project) useProjectStore.getState().openProjectSettings(info.project.id)
-                }}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                {t('setupTab.empty.configure')}
-              </Button>
-            )}
+          <div className="flex h-full items-center justify-center">
+            <div className="max-w-[260px] rounded-xl border border-dashed border-border/80 bg-background/72 px-4 py-4 text-center text-xs text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+              {hasSetupScript ? (
+                t('setupTab.empty.noOutput')
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (info?.project)
+                      useProjectStore.getState().openProjectSettings(info.project.id)
+                  }}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  {t('setupTab.empty.configure')}
+                </Button>
+              )}
+            </div>
           </div>
         )}
         {setupOutput.map((line, i) => {
           if (line.startsWith('\x00CMD:')) {
             const cmd = line.slice(5)
             return (
-              <div key={i} className="text-muted-foreground font-semibold mt-1">
+              <div key={i} className="mt-1 font-semibold text-muted-foreground">
                 $ {cmd}
               </div>
             )
@@ -119,7 +122,7 @@ export function SetupTab({ worktreeId }: SetupTabProps): React.JSX.Element {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between px-2 py-1 border-t border-border text-xs">
+      <div className="flex items-center justify-between border-t border-border/60 bg-background/72 px-3 py-2 text-xs">
         <div className="flex items-center gap-1.5">
           {setupRunning && (
             <>
@@ -145,7 +148,7 @@ export function SetupTab({ worktreeId }: SetupTabProps): React.JSX.Element {
           <button
             onClick={handleRerunSetup}
             disabled={setupRunning}
-            className="flex items-center gap-1 px-2 py-0.5 text-xs rounded hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs transition-colors hover:border-border/70 hover:bg-background/80 disabled:cursor-not-allowed disabled:opacity-50"
             data-testid="rerun-setup-button"
           >
             <RotateCcw className="h-3 w-3" />

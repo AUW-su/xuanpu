@@ -7,7 +7,7 @@ const LEFT_SIDEBAR_DEFAULT = 240
 const LEFT_SIDEBAR_MIN = 200
 const LEFT_SIDEBAR_MAX = 400
 const RIGHT_SIDEBAR_DEFAULT = 280
-const SPLIT_FRACTION_DEFAULT = 0.5
+const SPLIT_FRACTION_DEFAULT = 0.54
 const SPLIT_FRACTION_MIN = 0.15
 const SPLIT_FRACTION_MAX = 0.85
 
@@ -43,7 +43,7 @@ export const useLayoutStore = create<LayoutState>()(
       leftSidebarCollapsed: false,
       rightSidebarWidth: RIGHT_SIDEBAR_DEFAULT,
       rightSidebarCollapsed: false,
-      bottomPanelTab: 'setup' as BottomPanelTab,
+      bottomPanelTab: 'terminal' as BottomPanelTab,
       ghosttyOverlaySuppressed: false,
       splitFractionByEntity: {} as Record<string, number>,
 

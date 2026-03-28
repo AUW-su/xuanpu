@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hive CN Modernization - Layout Faithful Hi-Fi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --app-bg: #f5f6f2;
+        --surface: rgba(255, 255, 255, 0.74);
+        --surface-strong: rgba(255, 255, 255, 0.92);
+        --surface-muted: rgba(249, 250, 247, 0.88);
+        --sidebar: rgba(242, 243, 239, 0.92);
+        --border: rgba(26, 32, 29, 0.075);
+        --border-strong: rgba(26, 32, 29, 0.11);
+        --text: #1c2220;
+        --muted: #67706d;
+        --soft: #8c9490;
+        --accent: #237a68;
+        --accent-soft: rgba(35, 122, 104, 0.1);
+        --accent-soft-2: rgba(35, 122, 104, 0.16);
+        --warning: #a87426;
+        --warning-soft: rgba(168, 116, 38, 0.12);
+        --danger: #b35f4a;
+        --danger-soft: rgba(179, 95, 74, 0.12);
+        --radius-xl: 22px;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+        --radius-sm: 9px;
+        --shadow: 0 8px 28px rgba(17, 23, 20, 0.04);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(35, 122, 104, 0.08), transparent 18%),
+          linear-gradient(180deg, #fafbf8 0%, #f4f5f1 100%);
+        font-family: 'Noto Sans SC', sans-serif;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(rgba(16, 20, 18, 0.03) 0.7px, transparent 0.8px);
+        background-size: 13px 13px;
+        opacity: 0.14;
+        pointer-events: none;
+      }
+
+      .window {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 278px minmax(0, 1fr);
+      }
+
+      .sidebar {
+        background: linear-gradient(180deg, rgba(243, 244, 240, 0.96), rgba(241, 242, 238, 0.9));
+        border-right: 1px solid var(--border);
+        display: grid;
+        grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+        gap: 14px;
+        padding: 14px 12px 12px;
+      }
+
+      .traffic {
+        display: flex;
+        gap: 8px;
+        padding: 4px 0 4px 6px;
+      }
+
+      .traffic span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .traffic span:nth-child(1) {
+        background: #ff5f57;
+      }
+
+      .traffic span:nth-child(2) {
+        background: #febc2e;
+      }
+
+      .traffic span:nth-child(3) {
+        background: #28c840;
+      }
+
+      .side-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 4px 6px;
+      }
+
+      .side-header strong,
+      .context-title,
+      .session-tab,
+      .title,
+      .panel-title,
+      .composer-title {
+        font-family: 'Manrope', sans-serif;
+      }
+
+      .icon-btn,
+      .mini-btn,
+      .tab-btn,
+      .meta-chip,
+      .status-chip,
+      .action-btn {
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 11px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .icon-btn {
+        width: 32px;
+        padding: 0;
+      }
+
+      .icon-row {
+        display: flex;
+        gap: 6px;
+      }
+
+      .search {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.58);
+        border: 1px solid var(--border);
+        color: var(--soft);
+        font-size: 14px;
+      }
+
+      .section {
+        display: grid;
+        gap: 8px;
+      }
+
+      .section-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 0 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .project-scroll {
+        overflow: auto;
+        min-height: 0;
+        padding-right: 4px;
+        display: grid;
+        gap: 3px;
+      }
+
+      .connection-item,
+      .project-item,
+      .worktree-item {
+        display: grid;
+        gap: 7px;
+        padding: 10px 10px 10px 12px;
+        border-radius: 14px;
+        transition: background 160ms ease;
+      }
+
+      .connection-item:hover,
+      .project-item:hover,
+      .worktree-item:hover {
+        background: rgba(255, 255, 255, 0.46);
+      }
+
+      .project-item.active {
+        background: rgba(255, 255, 255, 0.76);
+        box-shadow: inset 0 0 0 1px rgba(26, 32, 29, 0.03);
+      }
+
+      .connection-title,
+      .project-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .bullet {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex: 0 0 auto;
+      }
+
+      .project-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 15px;
+      }
+
+      .subline {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .worktree-list {
+        display: grid;
+        gap: 2px;
+        padding-left: 18px;
+      }
+
+      .status-chip {
+        min-height: 26px;
+        padding: 0 10px;
+        background: rgba(255, 255, 255, 0.65);
+        color: var(--soft);
+      }
+
+      .status-chip.ready {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: transparent;
+      }
+
+      .status-chip.warning {
+        background: var(--warning-soft);
+        color: var(--warning);
+        border-color: transparent;
+      }
+
+      .sidebar-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 6px 2px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .main {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(249, 250, 247, 0.86);
+        backdrop-filter: blur(10px);
+      }
+
+      .context {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .context-icon {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 13px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        flex: 0 0 auto;
+      }
+
+      .context-copy {
+        min-width: 0;
+      }
+
+      .context-title {
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .context-copy small {
+        display: block;
+        margin-top: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--muted);
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .mini-btn.active {
+        background: #202624;
+        color: #eef5f2;
+        border-color: transparent;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 336px;
+        min-height: 0;
+      }
+
+      .center {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        min-height: 0;
+      }
+
+      .tabs-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 22px 10px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .session-tab {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 14px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .session-tab.active {
+        background: rgba(255, 255, 255, 0.82);
+        color: var(--text);
+        box-shadow: inset 0 -2px 0 var(--accent);
+      }
+
+      .center-scroll {
+        min-height: 0;
+        overflow: auto;
+        padding: 6px 22px 22px;
+      }
+
+      .conversation {
+        max-width: 860px;
+        margin: 0 auto;
+        display: grid;
+        gap: 14px;
+      }
+
+      .context-strip,
+      .block,
+      .review-card,
+      .composer-shell {
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      .context-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+      }
+
+      .block {
+        padding: 16px;
+      }
+
+      .block.compact {
+        padding: 12px 14px;
+      }
+
+      .block-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .title {
+        font-size: 16px;
+      }
+
+      .code-chip {
+        min-height: 28px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(26, 32, 29, 0.05);
+        background: rgba(242, 244, 242, 0.92);
+        color: #53605b;
+        font-size: 13px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(26, 32, 29, 0.05);
+      }
+
+      th,
+      td {
+        padding: 12px 13px;
+        text-align: left;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(26, 32, 29, 0.05);
+      }
+
+      th {
+        background: rgba(243, 245, 243, 0.92);
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .block p,
+      .block li {
+        color: #303634;
+        line-height: 1.82;
+      }
+
+      .block ul,
+      .block ol {
+        margin: 0;
+        padding-left: 21px;
+      }
+
+      .sidepanel {
+        border-left: 1px solid var(--border);
+        background: rgba(248, 249, 246, 0.84);
+        padding: 14px;
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        gap: 12px;
+        min-height: 0;
+      }
+
+      .panel-title {
+        font-size: 15px;
+      }
+
+      .side-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tab-btn.active {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text);
+      }
+
+      .side-scroll {
+        overflow: auto;
+        min-height: 0;
+        display: grid;
+        gap: 10px;
+        padding-right: 4px;
+      }
+
+      .review-card {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .review-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .file-list,
+      .summary-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .file-item,
+      .summary-item {
+        display: grid;
+        gap: 3px;
+        padding: 8px 0;
+        border-bottom: 1px dashed rgba(26, 32, 29, 0.06);
+      }
+
+      .file-item:last-child,
+      .summary-item:last-child {
+        border-bottom: 0;
+      }
+
+      .file-item strong,
+      .summary-item strong {
+        font-size: 14px;
+      }
+
+      .file-item small,
+      .summary-item small {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .action-btn {
+        min-height: 40px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.86);
+        color: var(--text);
+        font-family: 'Manrope', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .action-btn.primary {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: transparent;
+      }
+
+      .composer {
+        padding: 16px 20px 22px;
+        border-top: 1px solid rgba(26, 32, 29, 0.04);
+        background: linear-gradient(180deg, rgba(246, 247, 244, 0.2), rgba(246, 247, 244, 0.94));
+      }
+
+      .composer-shell {
+        max-width: 920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+      }
+
+      .composer-main {
+        min-width: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .composer-title {
+        font-size: 15px;
+      }
+
+      .composer-input {
+        min-height: 62px;
+        color: var(--soft);
+        font-size: 19px;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 4px;
+      }
+
+      .composer-toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .composer-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .send {
+        width: 50px;
+        height: 50px;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        border: 0;
+        background: #222928;
+        color: #edf4f2;
+      }
+
+      .icon {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        stroke-width: 1.85;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex: 0 0 auto;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(8px);
+        animation: rise 360ms ease forwards;
+        animation-delay: var(--delay, 0ms);
+      }
+
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1280px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .sidepanel {
+          border-left: 0;
+          border-top: 1px solid var(--border);
+        }
+      }
+
+      @media (max-width: 920px) {
+        .window {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .topbar,
+        .composer-shell {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window">
+      <aside class="sidebar reveal" style="--delay: 30ms">
+        <div class="traffic" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <div class="side-actions">
+          <div class="action-row">
+            <strong class="context-title" style="font-size: 15px">项目</strong>
+            <div class="icon-row">
+              <button class="icon-btn" aria-label="最近">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M12 8v4l3 2" />
+                  <circle cx="12" cy="12" r="8" />
+                </svg>
+              </button>
+              <button class="icon-btn" aria-label="排序">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M8 6h10" />
+                  <path d="M8 12h7" />
+                  <path d="M8 18h4" />
+                </svg>
+              </button>
+              <button class="icon-btn" aria-label="新增">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="search">
+            <svg class="icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="6" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            筛选项目…
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-label">
+            <span>连接</span>
+            <span>1</span>
+          </div>
+          <div class="project-scroll">
+            <div class="connection-item">
+              <div class="connection-title">
+                <span class="bullet"></span>
+                <span class="project-name">internal-control-biz + …</span>
+              </div>
+              <div class="project-meta">
+                <span class="status-chip ready">Ready</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-label">
+            <span>项目</span>
+            <span>3</span>
+          </div>
+          <div class="project-scroll">
+            <div class="project-item active">
+              <div class="project-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: var(--accent)">
+                  <path d="M4 7h16" />
+                  <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                  <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+                </svg>
+                <span class="project-name">internal-starlight-base</span>
+              </div>
+              <div class="worktree-list">
+                <div class="worktree-item">
+                  <div class="project-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                      <path d="M6 6h12v12H6z" />
+                    </svg>
+                    <span class="project-name">feat_20260127_starlight</span>
+                  </div>
+                  <div class="project-meta">
+                    <span class="status-chip ready">Ready</span>
+                    <span class="status-chip">40 分钟前</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-item">
+              <div class="project-title">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M4 7h16" />
+                  <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                  <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+                </svg>
+                <span class="project-name">yw-finance</span>
+              </div>
+              <div class="project-meta">
+                <span class="status-chip">18 小时前</span>
+              </div>
+            </div>
+
+            <div class="project-item">
+              <div class="project-title">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M4 7h16" />
+                  <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                  <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+                </svg>
+                <span class="project-name">account-base</span>
+              </div>
+              <div class="project-meta">
+                <span class="status-chip warning">待评审</span>
+                <span class="status-chip">2 个改动</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <span>设置</span>
+          <span>Hive CN</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar reveal" style="--delay: 80ms">
+          <div class="context">
+            <div class="context-icon">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M4 7h16" />
+                <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+              </svg>
+            </div>
+            <div class="context-copy">
+              <div class="context-title">internal-starlight-base</div>
+              <small>当前分支：feat_20260127_starlight · 会话：Session 1</small>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <span class="mini-btn active">评审</span>
+            <span class="mini-btn">VS Code</span>
+            <span class="mini-btn">Warp</span>
+            <span class="mini-btn">复制路径</span>
+            <span class="mini-btn">Finder</span>
+            <span class="mini-btn">历史</span>
+            <span class="mini-btn">设置</span>
+          </div>
+        </header>
+
+        <div class="workspace">
+          <section class="center reveal" style="--delay: 120ms">
+            <div class="tabs-row">
+              <div class="tabs">
+                <div class="session-tab active">Session 1</div>
+              </div>
+              <div class="content-meta">
+                <span class="status-pill">Gathered for 44s</span>
+              </div>
+            </div>
+
+            <div class="center-scroll">
+              <div class="conversation">
+                <div class="context-strip">
+                  <div>
+                    <div class="title" style="font-size: 15px">当前工作摘要</div>
+                    <div class="muted" style="margin-top: 4px; font-size: 13px">
+                      继续比较 Sonnet 4.6 与 Opus 4.6 的输出差异，判断是否需要进一步调整 prompt 与 max_tokens。
+                    </div>
+                  </div>
+                  <span class="status-pill ready">可继续推进</span>
+                </div>
+
+                <div class="block compact">
+                  <div class="block-head">
+                    <span class="title">停止应用</span>
+                    <span class="code-chip">Bash</span>
+                  </div>
+                  <div class="content-meta">
+                    <span class="code-chip">kill $(lsof -t -i :8998)</span>
+                    <span class="status-pill">已执行</span>
+                  </div>
+                </div>
+
+                <div class="block">
+                  <div class="block-head">
+                    <span class="title">Sonnet 4.6 测试完成，结果对比如下</span>
+                    <span class="status-pill ready">内容完整</span>
+                  </div>
+
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>指标</th>
+                        <th>Opus 4.6</th>
+                        <th>Sonnet 4.6</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>模型</td>
+                        <td>claude-opus-4-6</td>
+                        <td>claude-sonnet-4-6</td>
+                      </tr>
+                      <tr>
+                        <td>LLM 调用耗时</td>
+                        <td>上次未精确记录</td>
+                        <td><strong>约 77s</strong></td>
+                      </tr>
+                      <tr>
+                        <td>input tokens</td>
+                        <td>约 50987</td>
+                        <td>50987</td>
+                      </tr>
+                      <tr>
+                        <td>output tokens</td>
+                        <td>约 6200</td>
+                        <td>6223 / 6299</td>
+                      </tr>
+                      <tr>
+                        <td>生成质量</td>
+                        <td>内容完整</td>
+                        <td>内容完整，样式一致</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <p>由于输入 token 比较大，当前真正的瓶颈仍然在 prompt 处理量，而不是单纯模型速度。要继续提速，可以优先考虑：</p>
+                  <ol>
+                    <li>精简 prompt，只保留关键业务字段</li>
+                    <li>尝试更轻量的 Sonnet 变体</li>
+                    <li>适度下调 max_tokens，减少冗余输出</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="sidepanel reveal" style="--delay: 150ms">
+            <div class="panel-title">改动与评审</div>
+
+            <div class="side-tabs">
+              <button class="tab-btn active">Changes</button>
+              <button class="tab-btn">Files</button>
+              <button class="tab-btn">Diffs</button>
+            </div>
+
+            <div class="side-scroll">
+              <div class="review-card">
+                <div class="review-head">
+                  <strong>当前分支</strong>
+                  <span class="status-chip">6 个改动</span>
+                </div>
+                <div class="summary-list">
+                  <div class="summary-item">
+                    <strong>feat_20260127_starlight</strong>
+                    <small>当前分支已关联评审模式，右侧聚合改动、文件和后续动作。</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <div class="review-head">
+                  <strong>当前判断</strong>
+                  <span class="status-chip warning">待确认</span>
+                </div>
+                <div class="summary-list">
+                  <div class="summary-item">
+                    <strong>输出内容已经成型</strong>
+                    <small>仍建议补一轮稳定性确认，再决定是否直接推送。</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <div class="review-head">
+                  <strong>变更文件</strong>
+                  <span class="status-chip">自动汇总</span>
+                </div>
+                <div class="file-list">
+                  <div class="file-item">
+                    <strong>.claude/settings.local.json</strong>
+                    <small>本地评审设置调整</small>
+                  </div>
+                  <div class="file-item">
+                    <strong>pom.xml</strong>
+                    <small>依赖配置修改</small>
+                  </div>
+                  <div class="file-item">
+                    <strong>src/main/java/…</strong>
+                    <small>实现逻辑更新</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <div class="review-head">
+                  <strong>底部面板</strong>
+                  <span class="status-chip ready">Setup / Run / Terminal</span>
+                </div>
+                <small class="muted">仍保留原有结构，只是视觉更安静，关系更清楚。</small>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="action-btn primary">推送</button>
+              <button class="action-btn">拉取</button>
+              <button class="action-btn">查看 Diff</button>
+              <button class="action-btn">进入评审</button>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="composer reveal" style="--delay: 190ms">
+          <div class="composer-shell">
+            <div class="composer-main">
+              <div class="composer-title">继续当前会话</div>
+              <div class="composer-input">输入下一步要求，继续推进当前工作树的实现或评审…</div>
+              <div class="composer-toolbar">
+                <div class="composer-group">
+                  <span class="status-pill ready">Plan</span>
+                  <span class="meta-chip">Opus 4.6 MAX</span>
+                  <span class="meta-chip">附件</span>
+                  <span class="meta-chip">0:43</span>
+                </div>
+                <div class="composer-group">
+                  <span class="muted" style="font-size: 13px">更像桌面端输入 dock，而不是漂浮卡片。</span>
+                </div>
+              </div>
+            </div>
+            <button class="send" aria-label="发送">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M22 2 11 13" />
+                <path d="m22 2-7 20-4-9-9-4Z" />
+              </svg>
+            </button>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

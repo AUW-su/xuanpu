@@ -13,6 +13,45 @@ export function formatRelativeTime(timestamp: number): string {
   return `${diffWeek}w`
 }
 
+function toValidDate(timestamp: string | number): Date | null {
+  const date = new Date(timestamp)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function pad(value: number): string {
+  return value.toString().padStart(2, '0')
+}
+
+export function formatMessageTimestamp(timestamp: string | number): string {
+  const date = toValidDate(timestamp)
+  if (!date) return ''
+
+  const now = new Date()
+  const isToday =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+
+  const timePart = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  if (isToday) return timePart
+
+  const monthDayPart = `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+  if (date.getFullYear() === now.getFullYear()) {
+    return `${monthDayPart} ${timePart}`
+  }
+
+  return `${date.getFullYear()}-${monthDayPart} ${timePart}`
+}
+
+export function formatFullTimestamp(timestamp: string | number): string {
+  const date = toValidDate(timestamp)
+  if (!date) return ''
+
+  const monthDayPart = `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+  const timePart = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  return `${date.getFullYear()}-${monthDayPart} ${timePart}`
+}
+
 export function formatCompletionDuration(ms: number): string {
   const seconds = Math.round(ms / 1000)
   if (seconds < 60) return `${seconds}s`

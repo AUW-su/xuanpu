@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AlertCircle, Link, Loader2, Map as MapIcon, Zap } from 'lucide-react'
 import { cn, parseColorQuad } from '@/lib/utils'
 import {
@@ -15,6 +15,7 @@ import { ModelIcon } from '@/components/worktrees/ModelIcon'
 import { PulseAnimation } from '@/components/worktrees/PulseAnimation'
 import { LanguageIcon } from '@/components/projects/LanguageIcon'
 import { useI18n } from '@/i18n/useI18n'
+import { formatRelativeTime } from '@/lib/format-utils'
 
 type RecentItem =
   | { kind: 'worktree'; id: string; timestamp: number }
@@ -102,9 +103,19 @@ function RecentWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
   const selectProject = useProjectStore((s) => s.selectProject)
 
   const worktreeStatus = useWorktreeStatusStore((s) => s.getWorktreeStatus(worktreeId))
+  const lastMessageTime = useWorktreeStatusStore(
+    (s) => s.lastMessageTimeByWorktree[worktreeId] ?? null
+  )
   const isSelected = selectedWorktreeId === worktreeId
   const isRunProcessAlive = useScriptStore((s) => s.scriptStates[worktreeId]?.runRunning ?? false)
   const { t } = useI18n()
+
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    if (!lastMessageTime) return
+    const timer = setInterval(() => setTick((n) => n + 1), 60000)
+    return () => clearInterval(timer)
+  }, [lastMessageTime])
 
   // Look up worktree and project
   const worktree = useWorktreeStore((s) => {
@@ -178,6 +189,16 @@ function RecentWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
         <div className="flex items-center">
           <ModelIcon worktreeId={worktreeId} className="h-2.5 w-2.5 mr-1 shrink-0" />
           <StatusText status={worktreeStatus} t={t} />
+          <span className="flex-1" />
+          {lastMessageTime && (
+            <span
+              className="text-[10px] text-muted-foreground/60 tabular-nums shrink-0"
+              title={new Date(lastMessageTime).toLocaleString()}
+              data-testid="recent-last-message-time"
+            >
+              {formatRelativeTime(lastMessageTime)}
+            </span>
+          )}
         </div>
       </div>
 

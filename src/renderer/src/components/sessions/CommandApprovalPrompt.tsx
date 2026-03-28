@@ -374,13 +374,15 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
 
   return (
     <div
-      className="rounded-md border border-border bg-zinc-900/50 overflow-hidden"
+      className="overflow-hidden rounded-3xl border border-border/75 bg-card/96 shadow-[0_8px_24px_rgba(15,23,42,0.055)] backdrop-blur-sm"
       data-testid="command-approval-prompt"
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
-        <Shield className={cn('h-4 w-4 shrink-0', color)} />
-        <span className="text-xs font-medium text-foreground">
+      <div className="flex items-center gap-2 border-b border-border/60 bg-gradient-to-b from-background/95 to-muted/20 px-4 py-3">
+        <span className="inline-flex size-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-300">
+          <Shield className={cn('h-4 w-4 shrink-0', color)} />
+        </span>
+        <span className="text-xs font-semibold text-foreground">
           {t('commandApprovalPrompt.header.required')}
         </span>
         <span className="text-xs text-muted-foreground">—</span>
@@ -388,7 +390,7 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
 
-      <div className="px-3 py-2.5">
+      <div className="px-4 py-4">
         {/* Command display — bash && chains split into rows */}
         <div className="mb-3">
           <div className="text-xs font-semibold mb-1 text-muted-foreground">
@@ -399,7 +401,7 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
 
         {/* Pattern picker */}
         {patternPickerMode && (
-          <div className="mb-3 rounded-md border border-border bg-muted/20 p-2.5">
+          <div className="mb-3 rounded-2xl border border-border/65 bg-background/65 p-3">
             <div className="text-xs font-medium mb-2 text-foreground">
               {patternPickerMode === 'allow'
                 ? hasSubCommands
@@ -428,12 +430,13 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
               )}
             </div>
 
-            <div className="flex items-center gap-2 mt-2.5">
+            <div className="mt-3 flex items-center gap-2">
               <Button
                 size="sm"
                 onClick={handleConfirmPattern}
                 disabled={sending}
                 className={cn(
+                  'rounded-full px-4',
                   patternPickerMode === 'block' &&
                     'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
                 )}
@@ -450,6 +453,7 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
                 variant="ghost"
                 onClick={handleCancelPicker}
                 disabled={sending}
+                className="rounded-full px-4"
                 data-testid="cancel-pattern"
               >
                 {t('commandApprovalPrompt.patternPicker.cancel')}
@@ -460,11 +464,12 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
 
         {/* Action buttons */}
         {!patternPickerMode && (
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
             <Button
               size="sm"
               onClick={handleAllow}
               disabled={sending}
+              className="rounded-full px-4"
               data-testid="command-approve-once"
             >
               {sending
@@ -476,6 +481,7 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
               variant="outline"
               onClick={handleAllowAlways}
               disabled={sending}
+              className="rounded-full px-4"
               title={t('commandApprovalPrompt.actions.allowAlwaysTitle')}
               data-testid="command-approve-always"
             >
@@ -487,7 +493,7 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
               variant="outline"
               onClick={handleBlockAlways}
               disabled={sending}
-              className="text-destructive hover:text-destructive"
+              className="rounded-full px-4 text-destructive hover:text-destructive"
               title={t('commandApprovalPrompt.actions.blockAlwaysTitle')}
               data-testid="command-block-always"
             >
@@ -499,7 +505,7 @@ export function CommandApprovalPrompt({ request, onReply }: CommandApprovalPromp
               variant="ghost"
               onClick={handleDeny}
               disabled={sending}
-              className="text-destructive hover:text-destructive"
+              className="rounded-full px-4 text-destructive hover:text-destructive"
               data-testid="command-deny"
             >
               {t('commandApprovalPrompt.actions.deny')}

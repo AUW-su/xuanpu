@@ -182,5 +182,38 @@ describe('Session 8: Copy on Hover', () => {
       fireEvent.click(screen.getByTestId('fork-message-button'))
       expect(onFork).toHaveBeenCalledWith(message)
     })
+
+    test('renders timestamp meta only when explicitly enabled', () => {
+      const message = {
+        id: 'msg-with-time',
+        role: 'assistant' as const,
+        content: 'Assistant response',
+        timestamp: '2025-01-01T12:34:56.000Z'
+      }
+
+      const { rerender } = render(<MessageRenderer message={message} />)
+      expect(screen.queryByTestId('message-timestamp')).not.toBeInTheDocument()
+
+      rerender(<MessageRenderer message={message} showTimestamp={true} />)
+      expect(screen.getByTestId('message-timestamp')).toBeInTheDocument()
+    })
+
+    test('renders execution status meta below the latest message', () => {
+      const message = {
+        id: 'msg-running',
+        role: 'user' as const,
+        content: 'Run it',
+        timestamp: '2025-01-01T12:34:56.000Z'
+      }
+
+      render(
+        <MessageRenderer
+          message={message}
+          executionStatus={{ label: '执行中', elapsedMs: 31_000 }}
+        />
+      )
+
+      expect(screen.getByTestId('message-execution-status')).toHaveTextContent('执行中... 0:31')
+    })
   })
 })

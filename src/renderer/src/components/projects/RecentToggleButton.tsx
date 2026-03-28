@@ -13,7 +13,10 @@ export function RecentToggleButton(): React.JSX.Element {
     <Button
       variant="ghost"
       size="icon"
-      className={cn('h-6 w-6', recentVisible && 'text-primary bg-accent')}
+      className={cn(
+        'h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70',
+        recentVisible && 'text-primary bg-sidebar-accent'
+      )}
       title={t('sidebar.recentToggleTitle')}
       onClick={toggleRecent}
       data-testid="recent-toggle-button"

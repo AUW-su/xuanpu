@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hive CN Modernization - Home Workspace V2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --app-bg: #f6f7f4;
+        --sidebar-bg: #f3f4f1;
+        --surface: rgba(255, 255, 255, 0.72);
+        --surface-strong: rgba(255, 255, 255, 0.92);
+        --border: rgba(29, 34, 32, 0.07);
+        --border-strong: rgba(29, 34, 32, 0.11);
+        --text: #1d2120;
+        --muted: #6d7471;
+        --soft: #8f9793;
+        --accent: #1c8873;
+        --accent-soft: rgba(28, 136, 115, 0.1);
+        --warning: #a9771f;
+        --warning-soft: rgba(169, 119, 31, 0.12);
+        --danger: #ac5c44;
+        --radius-xl: 24px;
+        --radius-lg: 18px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+        --shadow: 0 8px 24px rgba(19, 28, 24, 0.04);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(28, 136, 115, 0.08), transparent 20%),
+          linear-gradient(180deg, #fafaf8 0%, #f3f4f1 100%);
+        font-family: 'Noto Sans SC', sans-serif;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(rgba(16, 21, 19, 0.03) 0.7px, transparent 0.8px);
+        background-size: 14px 14px;
+        opacity: 0.18;
+        pointer-events: none;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 318px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        gap: 18px;
+        padding: 18px 16px 16px;
+        background: linear-gradient(180deg, rgba(243, 244, 241, 0.96), rgba(242, 243, 239, 0.9));
+        border-right: 1px solid var(--border);
+      }
+
+      .window-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 4px 0 0 6px;
+      }
+
+      .window-controls span {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+      }
+
+      .window-controls span:nth-child(1) {
+        background: #ff5f57;
+      }
+
+      .window-controls span:nth-child(2) {
+        background: #febc2e;
+      }
+
+      .window-controls span:nth-child(3) {
+        background: #28c840;
+      }
+
+      .side-actions {
+        display: grid;
+        gap: 8px;
+      }
+
+      .action-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .ghost-btn,
+      .subtle-btn,
+      .toolbar-pill,
+      .status-pill {
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .ghost-btn.primary {
+        background: var(--surface-strong);
+        color: var(--text);
+        box-shadow: var(--shadow);
+      }
+
+      .side-filter {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.58);
+        color: var(--soft);
+        font-size: 14px;
+      }
+
+      .nav-section {
+        display: grid;
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .section-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 4px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .project-list {
+        display: grid;
+        gap: 4px;
+        overflow: auto;
+        min-height: 0;
+        padding-right: 4px;
+      }
+
+      .project-card,
+      .thread-card {
+        display: grid;
+        gap: 8px;
+        padding: 12px 12px 12px 14px;
+        border-radius: 16px;
+        transition:
+          background 180ms ease,
+          transform 180ms ease;
+      }
+
+      .project-card:hover,
+      .thread-card:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .project-card.active {
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: inset 0 0 0 1px rgba(29, 34, 32, 0.04);
+      }
+
+      .project-title,
+      .thread-title,
+      .content-title,
+      .panel-title,
+      .composer-title {
+        font-family: 'Manrope', sans-serif;
+      }
+
+      .project-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+      }
+
+      .project-meta,
+      .thread-meta,
+      .content-meta,
+      .panel-meta,
+      .composer-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .status-pill {
+        min-height: 28px;
+        padding: 0 10px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--soft);
+      }
+
+      .status-pill.ready {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: transparent;
+      }
+
+      .status-pill.warn {
+        background: var(--warning-soft);
+        color: var(--warning);
+        border-color: transparent;
+      }
+
+      .status-pill.danger {
+        background: rgba(172, 92, 68, 0.12);
+        color: var(--danger);
+        border-color: transparent;
+      }
+
+      .sidebar-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 4px 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .main {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 22px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(248, 249, 246, 0.86);
+        backdrop-filter: blur(12px);
+      }
+
+      .context {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .context-icon {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      .context-copy {
+        min-width: 0;
+      }
+
+      .context-copy .content-title {
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .context-copy small {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .toolbar-pill.active {
+        background: #1d2321;
+        color: #eff6f4;
+        border-color: transparent;
+      }
+
+      .content-wrap {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 336px;
+        min-height: 0;
+      }
+
+      .content {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        min-height: 0;
+      }
+
+      .session-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 18px 28px 12px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 14px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .tab.active {
+        background: rgba(255, 255, 255, 0.82);
+        color: var(--text);
+        box-shadow: inset 0 -2px 0 var(--accent);
+      }
+
+      .content-scroll {
+        overflow: auto;
+        min-height: 0;
+        padding: 8px 28px 24px;
+      }
+
+      .article {
+        max-width: 840px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+
+      .context-note {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.56);
+        border: 1px solid var(--border);
+      }
+
+      .context-note__copy {
+        display: grid;
+        gap: 4px;
+      }
+
+      .content-block {
+        display: grid;
+        gap: 14px;
+        padding: 18px 18px 20px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.54);
+        border: 1px solid var(--border);
+      }
+
+      .content-block.command {
+        padding: 14px 16px;
+      }
+
+      .content-block__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .content-block__head strong {
+        font-size: 16px;
+      }
+
+      .code-inline,
+      .label-inline {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 10px;
+        border-radius: 10px;
+        background: rgba(240, 242, 239, 0.94);
+        border: 1px solid rgba(29, 34, 32, 0.05);
+        color: #4f5753;
+        font-size: 13px;
+      }
+
+      .content-block p,
+      .content-block li {
+        line-height: 1.86;
+        color: #313735;
+      }
+
+      .content-block ul,
+      .content-block ol {
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(29, 34, 32, 0.06);
+      }
+
+      th,
+      td {
+        padding: 13px 14px;
+        text-align: left;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(29, 34, 32, 0.05);
+      }
+
+      th {
+        color: var(--muted);
+        font-weight: 700;
+        background: rgba(244, 246, 244, 0.92);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .review {
+        border-left: 1px solid var(--border);
+        background: rgba(247, 248, 245, 0.88);
+        padding: 18px 16px;
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        gap: 14px;
+        min-height: 0;
+      }
+
+      .review-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .review-scroll {
+        overflow: auto;
+        min-height: 0;
+        display: grid;
+        gap: 10px;
+        padding-right: 4px;
+      }
+
+      .review-card {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid var(--border);
+      }
+
+      .review-card__head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .review-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .review-item {
+        display: grid;
+        gap: 3px;
+        padding: 8px 0;
+        border-bottom: 1px dashed rgba(29, 34, 32, 0.06);
+      }
+
+      .review-item:last-child {
+        border-bottom: 0;
+      }
+
+      .review-item strong {
+        font-size: 14px;
+      }
+
+      .review-item small {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .review-footer {
+        display: grid;
+        gap: 10px;
+      }
+
+      .action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .action-btn {
+        min-height: 42px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.86);
+        color: var(--text);
+        font-family: 'Manrope', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .action-btn.primary {
+        background: rgba(29, 136, 115, 0.1);
+        color: var(--accent);
+        border-color: transparent;
+      }
+
+      .composer {
+        padding: 18px 24px 24px;
+        border-top: 1px solid rgba(29, 34, 32, 0.04);
+        background: linear-gradient(180deg, rgba(246, 247, 244, 0.2), rgba(246, 247, 244, 0.88));
+      }
+
+      .composer-dock {
+        max-width: 960px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px;
+        border-radius: 22px;
+      }
+
+      .composer-main {
+        display: grid;
+        gap: 10px;
+        padding: 14px 16px;
+        border-radius: 18px;
+      }
+
+      .composer-title {
+        font-size: 15px;
+      }
+
+      .composer-input {
+        min-height: 68px;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 8px;
+        color: var(--soft);
+        font-size: 20px;
+      }
+
+      .composer-toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .composer-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .composer-chip {
+        min-height: 30px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: rgba(245, 247, 244, 0.92);
+        border: 1px solid rgba(29, 34, 32, 0.05);
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .composer-chip.active {
+        color: var(--accent);
+        background: var(--accent-soft);
+        border-color: transparent;
+      }
+
+      .send {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        border: 0;
+        background: #1f2624;
+        color: #edf5f2;
+      }
+
+      .icon {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        stroke-width: 1.85;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex: 0 0 auto;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: rise 460ms ease forwards;
+        animation-delay: var(--delay, 0ms);
+      }
+
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1280px) {
+        .content-wrap {
+          grid-template-columns: 1fr;
+        }
+
+        .review {
+          border-left: 0;
+          border-top: 1px solid var(--border);
+        }
+      }
+
+      @media (max-width: 920px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .topbar,
+        .composer-dock {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar reveal" style="--delay: 30ms">
+        <div class="window-controls" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <div class="side-actions">
+          <div class="action-row">
+            <button class="ghost-btn primary">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+              </svg>
+              新建会话
+            </button>
+            <button class="subtle-btn">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M4 12h16" />
+                <path d="M12 4v16" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="side-filter">
+            <svg class="icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="6"></circle>
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+            筛选项目或工作树
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="section-label">
+            <span>当前项目</span>
+            <span>3</span>
+          </div>
+
+          <div class="project-list">
+            <div class="project-card active">
+              <div class="project-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: var(--accent)">
+                  <path d="M4 7h16" />
+                  <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                  <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+                </svg>
+                <span>internal-starlight-base</span>
+              </div>
+              <div class="project-meta">
+                <span class="status-pill ready">已连接</span>
+                <span class="status-pill">1 个活跃会话</span>
+              </div>
+            </div>
+
+            <div class="thread-card">
+              <div class="thread-title">feat_20260127_starlight</div>
+              <div class="thread-meta">
+                <span class="status-pill ready">Ready</span>
+                <span class="status-pill">40 分钟前</span>
+              </div>
+            </div>
+
+            <div class="project-card">
+              <div class="project-title">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M4 7h16" />
+                  <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                  <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+                </svg>
+                <span>yw-finance</span>
+              </div>
+              <div class="project-meta">
+                <span class="status-pill">18 小时前</span>
+              </div>
+            </div>
+
+            <div class="project-card">
+              <div class="project-title">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M4 7h16" />
+                  <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                  <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+                </svg>
+                <span>account-base</span>
+              </div>
+              <div class="project-meta">
+                <span class="status-pill warn">待评审</span>
+                <span class="status-pill">2 个改动</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="section-label">
+            <span>最近工作树</span>
+            <span>2</span>
+          </div>
+
+          <div class="project-list">
+            <div class="thread-card">
+              <div class="thread-title">fix_20260326_copy</div>
+              <div class="thread-meta">
+                <span class="status-pill">无未提交改动</span>
+              </div>
+            </div>
+            <div class="thread-card">
+              <div class="thread-title">review_20260327_style</div>
+              <div class="thread-meta">
+                <span class="status-pill warn">待确认</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <span>设置</span>
+          <span class="muted">Hive CN</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar reveal" style="--delay: 90ms">
+          <div class="context">
+            <div class="context-icon">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M4 7h16" />
+                <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+              </svg>
+            </div>
+            <div class="context-copy">
+              <div class="content-title">internal-starlight-base</div>
+              <small>当前分支：feat_20260127_starlight · Session 1 · 评审模式</small>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <span class="toolbar-pill active">评审</span>
+            <span class="toolbar-pill">VS Code</span>
+            <span class="toolbar-pill">Warp</span>
+            <span class="toolbar-pill">Finder</span>
+            <span class="toolbar-pill">历史</span>
+          </div>
+        </header>
+
+        <div class="content-wrap">
+          <section class="content reveal" style="--delay: 140ms">
+            <div class="session-header">
+              <div class="tabs">
+                <div class="tab active">Session 1</div>
+                <div class="tab">对比记录</div>
+              </div>
+              <div class="content-meta">
+                <span class="status-pill">Gathered for 44s</span>
+              </div>
+            </div>
+
+            <div class="content-scroll">
+              <article class="article">
+                <div class="context-note">
+                  <div class="context-note__copy">
+                    <strong class="content-title" style="font-size: 15px">当前任务摘要</strong>
+                    <span class="muted">比较 Sonnet 4.6 与 Opus 4.6 的输出一致性，并判断是否继续调整 prompt 与 max_tokens。</span>
+                  </div>
+                  <span class="status-pill ready">可继续推进</span>
+                </div>
+
+                <div class="content-block command">
+                  <div class="content-block__head">
+                    <strong>停止应用</strong>
+                    <span class="label-inline">Bash</span>
+                  </div>
+                  <div class="content-meta">
+                    <span class="code-inline">kill $(lsof -t -i :8998)</span>
+                    <span class="status-pill">已执行</span>
+                  </div>
+                </div>
+
+                <div class="content-block">
+                  <div class="content-block__head">
+                    <strong>Sonnet 4.6 测试完成，结果对比如下</strong>
+                    <span class="status-pill ready">内容完整</span>
+                  </div>
+
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>指标</th>
+                        <th>Opus 4.6</th>
+                        <th>Sonnet 4.6</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>模型</td>
+                        <td>claude-opus-4-6</td>
+                        <td>claude-sonnet-4-6</td>
+                      </tr>
+                      <tr>
+                        <td>LLM 调用耗时</td>
+                        <td>上次未精确记录</td>
+                        <td><strong>约 77s</strong></td>
+                      </tr>
+                      <tr>
+                        <td>input tokens</td>
+                        <td>约 50987</td>
+                        <td>50987</td>
+                      </tr>
+                      <tr>
+                        <td>output tokens</td>
+                        <td>约 6200</td>
+                        <td>6223 / 6299</td>
+                      </tr>
+                      <tr>
+                        <td>生成质量</td>
+                        <td>内容完整</td>
+                        <td>内容完整，样式一致</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <p>
+                    由于输入 token 较大，当前真正的瓶颈仍然在 prompt 的处理量，而不是单纯的模型速度。
+                    如果下一步要进一步提速，可以优先考虑：
+                  </p>
+
+                  <ol>
+                    <li>精简 prompt，只保留关键业务字段</li>
+                    <li>尝试更轻量的 Sonnet 变体</li>
+                    <li>适度下调 max_tokens，减少无效冗余输出</li>
+                  </ol>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <aside class="review reveal" style="--delay: 170ms">
+            <div class="panel-title">改动与评审</div>
+
+            <div class="review-tabs">
+              <span class="toolbar-pill active">Changes</span>
+              <span class="toolbar-pill">Files</span>
+              <span class="toolbar-pill">Diffs</span>
+            </div>
+
+            <div class="review-scroll">
+              <div class="review-card">
+                <div class="review-card__head">
+                  <strong>当前分支</strong>
+                  <span class="status-pill">6 个改动</span>
+                </div>
+                <div class="review-list">
+                  <div class="review-item">
+                    <strong>.claude/settings.local.json</strong>
+                    <small>本地评审配置调整</small>
+                  </div>
+                  <div class="review-item">
+                    <strong>pom.xml</strong>
+                    <small>依赖更新</small>
+                  </div>
+                  <div class="review-item">
+                    <strong>src/main/java/...</strong>
+                    <small>实现逻辑改动</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="review-card">
+                <div class="review-card__head">
+                  <strong>当前判断</strong>
+                  <span class="status-pill warn">待确认</span>
+                </div>
+                <small class="muted">内容结论已成型，但仍建议补一轮输出稳定性确认，再决定是否直接推送。</small>
+              </div>
+
+              <div class="review-card">
+                <div class="review-card__head">
+                  <strong>环境状态</strong>
+                  <span class="status-pill ready">Setup 正常</span>
+                </div>
+                <small class="muted">Run / Terminal 保留在右侧，但降噪处理，不再和顶部抢注意力。</small>
+              </div>
+            </div>
+
+            <div class="review-footer">
+              <div class="action-grid">
+                <button class="action-btn primary">推送</button>
+                <button class="action-btn">拉取</button>
+                <button class="action-btn">查看 Diff</button>
+                <button class="action-btn">进入评审</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="composer reveal" style="--delay: 210ms">
+          <div class="composer-dock">
+            <div class="composer-main">
+              <div class="composer-title">继续当前会话</div>
+              <div class="composer-input">输入下一步要求，继续推进当前工作树的实现或评审…</div>
+              <div class="composer-toolbar">
+                <div class="composer-group">
+                  <span class="composer-chip active">Plan</span>
+                  <span class="composer-chip">Opus 4.6 MAX</span>
+                  <span class="composer-chip">附件</span>
+                  <span class="composer-chip">0:43</span>
+                </div>
+                <div class="composer-group">
+                  <span class="muted" style="font-size: 13px">输入区现在更像安静的桌面 dock，而不是漂浮卡片。</span>
+                </div>
+              </div>
+            </div>
+
+            <button class="send" aria-label="发送">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M22 2 11 13" />
+                <path d="m22 2-7 20-4-9-9-4Z" />
+              </svg>
+            </button>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

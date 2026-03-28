@@ -348,7 +348,7 @@ export function ChangesView({
     return (
       <div className="flex flex-col h-full" data-testid="connection-changes-view">
         {/* Summary header */}
-        <div className="flex items-center justify-between px-2 py-1.5 bg-muted/30 border-b border-border">
+        <div className="flex items-center justify-between border-b border-border/60 bg-background/62 px-3 py-2">
           <div className="flex items-center gap-1.5 text-xs">
             <Link className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="font-medium">
@@ -371,7 +371,10 @@ export function ChangesView({
           <Button
             variant="ghost"
             size="icon"
-            className={cn('h-5 w-5', isRefreshing && 'animate-spin')}
+            className={cn(
+              'h-6 w-6 rounded-md border border-transparent',
+              isRefreshing && 'animate-spin'
+            )}
             onClick={handleConnectionRefresh}
             disabled={isRefreshing}
             title={t('fileTree.changes.refreshAll')}
@@ -454,7 +457,7 @@ export function ChangesView({
   return (
     <div className="flex flex-col h-full" data-testid="changes-view">
       {/* Branch header */}
-      <div className="flex items-center justify-between px-2 py-1.5 bg-muted/30 border-b border-border">
+      <div className="flex items-center justify-between border-b border-border/60 bg-background/62 px-3 py-2">
         <div className="flex items-center gap-1.5 text-xs">
           <GitBranch className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="font-medium" data-testid="changes-branch-name">
@@ -487,7 +490,10 @@ export function ChangesView({
           <Button
             variant="ghost"
             size="icon"
-            className={cn('h-5 w-5', (isLoading || isRefreshing) && 'animate-spin')}
+            className={cn(
+              'h-6 w-6 rounded-md border border-transparent',
+              (isLoading || isRefreshing) && 'animate-spin'
+            )}
             onClick={handleRefresh}
             disabled={isLoading || isRefreshing}
             title={t('fileTree.changes.refresh')}
@@ -500,11 +506,11 @@ export function ChangesView({
 
       {/* File list */}
       {!hasChanges ? (
-        <div
-          className="flex-1 flex items-center justify-center text-xs text-muted-foreground"
-          data-testid="changes-empty"
-        >
-          {t('fileTree.changes.noChanges')}
+        <div className="flex-1 overflow-y-auto px-3 py-3" data-testid="changes-empty">
+          <div className="rounded-xl border border-dashed border-border/80 bg-background/68 px-3 py-3 text-xs text-muted-foreground">
+            {t('fileTree.changes.noChanges')}
+          </div>
+          <GitPushPull worktreePath={worktreePath} compact className="mt-3 border-0 px-0 py-0" />
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto">
@@ -735,7 +741,7 @@ export function ChangesView({
       {hasStaged && <GitCommitForm worktreePath={worktreePath} hasConflicts={hasConflicts} />}
 
       {/* Push/Pull controls */}
-      <GitPushPull worktreePath={worktreePath} />
+      {hasChanges && <GitPushPull worktreePath={worktreePath} />}
     </div>
   )
 }
@@ -766,11 +772,11 @@ const GroupHeader = memo(function GroupHeader({
   children
 }: GroupHeaderProps): React.JSX.Element {
   return (
-    <div className="border-b border-border last:border-b-0" data-testid={testId}>
+    <div className="border-b border-border/60 last:border-b-0" data-testid={testId}>
       <button
         type="button"
         className={cn(
-          'flex items-center justify-between w-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent/50',
+          'flex w-full items-center justify-between px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/35',
           headerClassName
         )}
         onClick={onToggle}
@@ -783,7 +789,7 @@ const GroupHeader = memo(function GroupHeader({
               <ChevronDown className="h-3 w-3" />
             ))}
           {title}
-          <span className="text-[10px] px-1 py-0.5 rounded bg-muted">{count}</span>
+          <span className="rounded-md bg-muted/70 px-1.5 py-0.5 text-[10px]">{count}</span>
         </span>
         {action && <span onClick={(e) => e.stopPropagation()}>{action}</span>}
       </button>

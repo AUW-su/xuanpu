@@ -113,21 +113,20 @@ export function FileTree({
   hideGitContextActions
 }: FileTreeProps): React.JSX.Element {
   const { t } = useI18n()
-  const {
-    isLoading,
-    error,
-    getFileTree,
-    getExpandedPaths,
-    getFilter,
-    loadFileTree,
-    toggleExpanded,
-    collapseAll,
-    setFilter,
-    startWatching,
-    stopWatching
-  } = useFileTreeStore()
+  const isLoading = useFileTreeStore((state) => state.isLoading)
+  const error = useFileTreeStore((state) => state.error)
+  const fileTreeByWorktree = useFileTreeStore((state) => state.fileTreeByWorktree)
+  const expandedPathsByWorktree = useFileTreeStore((state) => state.expandedPathsByWorktree)
+  const filterByWorktree = useFileTreeStore((state) => state.filterByWorktree)
+  const loadFileTree = useFileTreeStore((state) => state.loadFileTree)
+  const toggleExpanded = useFileTreeStore((state) => state.toggleExpanded)
+  const collapseAll = useFileTreeStore((state) => state.collapseAll)
+  const setFilter = useFileTreeStore((state) => state.setFilter)
+  const startWatching = useFileTreeStore((state) => state.startWatching)
+  const stopWatching = useFileTreeStore((state) => state.stopWatching)
 
-  const { getFileStatuses, loadFileStatuses } = useGitStore()
+  const fileStatusesByWorktree = useGitStore((state) => state.fileStatusesByWorktree)
+  const loadFileStatuses = useGitStore((state) => state.loadFileStatuses)
 
   const currentWorktreeRef = useRef<string | null>(null)
   const parentRef = useRef<HTMLDivElement>(null)
@@ -162,19 +161,14 @@ export function FileTree({
     }
   }, [stopWatching])
 
-  const tree = useMemo(
-    () => (worktreePath ? getFileTree(worktreePath) : EMPTY_TREE),
-    [worktreePath, getFileTree]
-  )
-  const expandedPaths = useMemo(
-    () => (worktreePath ? getExpandedPaths(worktreePath) : EMPTY_EXPANDED_PATHS),
-    [worktreePath, getExpandedPaths]
-  )
-  const filter = worktreePath ? getFilter(worktreePath) : ''
-  const gitStatuses = useMemo(
-    () => (worktreePath ? getFileStatuses(worktreePath) : EMPTY_GIT_STATUSES),
-    [worktreePath, getFileStatuses]
-  )
+  const tree = worktreePath ? (fileTreeByWorktree.get(worktreePath) ?? EMPTY_TREE) : EMPTY_TREE
+  const expandedPaths = worktreePath
+    ? (expandedPathsByWorktree.get(worktreePath) ?? EMPTY_EXPANDED_PATHS)
+    : EMPTY_EXPANDED_PATHS
+  const filter = worktreePath ? (filterByWorktree.get(worktreePath) ?? '') : ''
+  const gitStatuses = worktreePath
+    ? (fileStatusesByWorktree.get(worktreePath) ?? EMPTY_GIT_STATUSES)
+    : EMPTY_GIT_STATUSES
 
   // Build a Map for fast git status lookup
   const gitStatusMap = useMemo(() => {

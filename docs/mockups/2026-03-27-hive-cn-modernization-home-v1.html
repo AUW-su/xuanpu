@@ -1,0 +1,1197 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hive CN Modernization - Home Workspace V1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f3f3ef;
+        --bg-soft: #ecece6;
+        --panel: rgba(255, 255, 252, 0.78);
+        --panel-strong: rgba(255, 255, 253, 0.94);
+        --panel-tint: rgba(244, 248, 246, 0.92);
+        --line: rgba(28, 31, 29, 0.07);
+        --line-strong: rgba(28, 31, 29, 0.12);
+        --ink: #171b19;
+        --muted: #66706c;
+        --soft: #8b9490;
+        --accent: #1c8b78;
+        --accent-deep: #13685a;
+        --accent-soft: rgba(28, 139, 120, 0.1);
+        --accent-soft-2: rgba(28, 139, 120, 0.16);
+        --warn: #b17319;
+        --warn-soft: rgba(177, 115, 25, 0.12);
+        --shadow-xl: 0 22px 50px rgba(39, 44, 41, 0.08);
+        --shadow-md: 0 10px 24px rgba(39, 44, 41, 0.06);
+        --radius-xl: 26px;
+        --radius-lg: 20px;
+        --radius-md: 16px;
+        --radius-sm: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(28, 139, 120, 0.12), transparent 28%),
+          radial-gradient(circle at 100% 0%, rgba(163, 180, 173, 0.18), transparent 34%),
+          linear-gradient(180deg, #f8f8f4 0%, #f1f0ea 100%);
+        color: var(--ink);
+        font-family: 'Noto Sans SC', sans-serif;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.16)),
+          radial-gradient(rgba(18, 22, 20, 0.035) 0.7px, transparent 0.8px);
+        background-size: auto, 12px 12px;
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      .page {
+        min-height: 100vh;
+        padding: 18px;
+      }
+
+      .window {
+        position: relative;
+        display: grid;
+        grid-template-columns: 284px minmax(0, 1fr);
+        gap: 16px;
+        min-height: calc(100vh - 36px);
+      }
+
+      .sidebar,
+      .topbar,
+      .headline,
+      .workspace,
+      .review-panel,
+      .composer-dock {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-xl);
+        backdrop-filter: blur(16px);
+      }
+
+      .sidebar {
+        display: grid;
+        grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(28, 31, 29, 0.06);
+      }
+
+      .brand-badge {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(145deg, #101413 0%, #24302b 100%);
+        color: #eff8f5;
+        font-family: 'Manrope', sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+      }
+
+      .brand-copy {
+        display: grid;
+        gap: 2px;
+      }
+
+      .brand-copy strong,
+      .section-title strong,
+      .topbar strong,
+      .headline h1,
+      .headline-card strong,
+      .project-item strong,
+      .worktree-item strong,
+      .session-tab strong,
+      .message-block__title,
+      .review-card strong,
+      .composer-main strong {
+        font-family: 'Manrope', sans-serif;
+      }
+
+      .brand-copy small,
+      .section-title small,
+      .project-item small,
+      .worktree-item small,
+      .headline p,
+      .headline-card p,
+      .message-note,
+      .review-card p,
+      .composer-help {
+        color: var(--muted);
+      }
+
+      .mini-nav {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .mini-nav__item,
+      .floating-pill,
+      .status-chip,
+      .meta-chip,
+      .tool-chip,
+      .composer-chip {
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+
+      .mini-nav__item {
+        border: 1px solid rgba(28, 31, 29, 0.06);
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--muted);
+      }
+
+      .mini-nav__item.active {
+        background: #18211e;
+        color: #edf7f4;
+      }
+
+      .focus-card,
+      .project-item,
+      .worktree-item,
+      .message-block,
+      .review-card,
+      .composer-main {
+        background: var(--panel-strong);
+        border: 1px solid rgba(28, 31, 29, 0.06);
+        box-shadow: var(--shadow-md);
+      }
+
+      .focus-card {
+        padding: 14px;
+        border-radius: 18px;
+        background:
+          linear-gradient(155deg, rgba(28, 139, 120, 0.14), rgba(255, 255, 255, 0.78)),
+          var(--panel-strong);
+      }
+
+      .focus-card__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .focus-card__stat {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 13px;
+        background: rgba(28, 139, 120, 0.12);
+        color: var(--accent-deep);
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .section-title {
+        display: grid;
+        gap: 3px;
+        padding: 0 2px;
+      }
+
+      .section-title strong {
+        font-size: 14px;
+      }
+
+      .section-title small {
+        line-height: 1.5;
+      }
+
+      .project-item,
+      .worktree-item,
+      .review-card {
+        display: grid;
+        gap: 8px;
+        padding: 14px;
+        border-radius: 18px;
+      }
+
+      .project-item.active {
+        border-color: rgba(28, 139, 120, 0.12);
+        background:
+          linear-gradient(180deg, rgba(28, 139, 120, 0.1), rgba(255, 255, 253, 0.94)),
+          var(--panel-strong);
+      }
+
+      .project-meta,
+      .worktree-meta,
+      .topbar-meta,
+      .headline-actions,
+      .session-bar,
+      .message-block__meta,
+      .review-actions,
+      .composer-toolbar,
+      .composer-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .status-chip {
+        background: var(--accent-soft);
+        color: var(--accent-deep);
+      }
+
+      .status-chip.warn {
+        background: var(--warn-soft);
+        color: var(--warn);
+      }
+
+      .meta-chip {
+        background: rgba(245, 247, 246, 0.96);
+        color: var(--soft);
+        border: 1px solid rgba(28, 31, 29, 0.05);
+      }
+
+      .main {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 18px;
+        border-radius: 24px;
+      }
+
+      .topbar__left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .window-dots {
+        display: flex;
+        gap: 8px;
+        padding-right: 4px;
+      }
+
+      .window-dots span {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+      }
+
+      .window-dots span:nth-child(1) {
+        background: #ff5f57;
+      }
+
+      .window-dots span:nth-child(2) {
+        background: #febb2e;
+      }
+
+      .window-dots span:nth-child(3) {
+        background: #28c840;
+      }
+
+      .context-block {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .context-project {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 13px;
+        background: linear-gradient(145deg, rgba(28, 139, 120, 0.18), rgba(28, 139, 120, 0.08));
+        color: var(--accent-deep);
+      }
+
+      .context-copy {
+        min-width: 0;
+      }
+
+      .context-copy strong {
+        display: block;
+        font-size: 15px;
+      }
+
+      .context-copy small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--muted);
+      }
+
+      .floating-pill {
+        border: 1px solid rgba(28, 31, 29, 0.06);
+        background: rgba(255, 255, 253, 0.76);
+        color: var(--muted);
+      }
+
+      .floating-pill.active {
+        background: #19221f;
+        color: #ecf7f4;
+      }
+
+      .headline {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.68fr);
+        gap: 16px;
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      .headline__lead {
+        display: grid;
+        gap: 14px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        width: fit-content;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: rgba(28, 139, 120, 0.08);
+        color: var(--accent-deep);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .headline h1 {
+        margin: 0;
+        max-width: 14ch;
+        font-size: clamp(34px, 4.2vw, 56px);
+        line-height: 1.02;
+        letter-spacing: -0.05em;
+      }
+
+      .headline p {
+        margin: 0;
+        max-width: 76ch;
+        font-size: 15px;
+        line-height: 1.88;
+      }
+
+      .tool-chip {
+        border: 1px solid rgba(28, 31, 29, 0.06);
+        background: rgba(255, 255, 255, 0.74);
+        color: var(--muted);
+      }
+
+      .tool-chip.active {
+        background: rgba(28, 139, 120, 0.1);
+        color: var(--accent-deep);
+      }
+
+      .headline-card {
+        display: grid;
+        gap: 12px;
+        padding: 18px;
+        border-radius: 22px;
+        background:
+          linear-gradient(160deg, rgba(18, 68, 61, 0.95), rgba(23, 33, 31, 0.94));
+        color: #eef8f5;
+        box-shadow: 0 18px 30px rgba(21, 42, 39, 0.14);
+      }
+
+      .headline-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .headline-stat {
+        padding: 12px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+      }
+
+      .headline-stat strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 26px;
+      }
+
+      .body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 344px;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 16px;
+        border-radius: 24px;
+        min-height: 0;
+      }
+
+      .workspace-header {
+        display: grid;
+        gap: 12px;
+      }
+
+      .session-bar {
+        justify-content: space-between;
+      }
+
+      .session-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .session-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 253, 0.82);
+        border: 1px solid rgba(28, 31, 29, 0.06);
+        color: var(--muted);
+      }
+
+      .session-tab.active {
+        background: #ffffff;
+        color: var(--ink);
+        box-shadow: inset 0 -2px 0 var(--accent);
+      }
+
+      .session-hint {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background:
+          linear-gradient(180deg, rgba(242, 247, 245, 0.88), rgba(255, 255, 253, 0.9));
+        border: 1px solid rgba(28, 139, 120, 0.08);
+      }
+
+      .session-hint__copy {
+        display: grid;
+        gap: 4px;
+      }
+
+      .workspace-scroll {
+        overflow: auto;
+        min-height: 0;
+        padding-right: 4px;
+      }
+
+      .message-stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .message-block {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .message-block.compact {
+        padding: 14px 16px;
+      }
+
+      .message-block__title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 16px;
+      }
+
+      .message-block__meta {
+        margin-top: 10px;
+      }
+
+      table {
+        width: 100%;
+        margin-top: 14px;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 14px;
+        background: rgba(250, 251, 249, 0.88);
+        border: 1px solid rgba(28, 31, 29, 0.06);
+      }
+
+      th,
+      td {
+        padding: 13px 14px;
+        text-align: left;
+        border-bottom: 1px solid rgba(28, 31, 29, 0.05);
+        font-size: 14px;
+      }
+
+      th {
+        background: rgba(239, 244, 242, 0.9);
+        color: var(--ink);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .callout {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(28, 139, 120, 0.06);
+        border: 1px solid rgba(28, 139, 120, 0.08);
+        line-height: 1.8;
+      }
+
+      .callout ol {
+        margin: 10px 0 0 18px;
+        padding: 0;
+      }
+
+      .callout li + li {
+        margin-top: 8px;
+      }
+
+      .review-panel {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        gap: 14px;
+        padding: 16px;
+        border-radius: 24px;
+        min-height: 0;
+      }
+
+      .review-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .review-body {
+        overflow: auto;
+        min-height: 0;
+        padding-right: 4px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .review-card {
+        gap: 10px;
+      }
+
+      .review-card__head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .review-actions {
+        margin-top: 6px;
+      }
+
+      .action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .action-btn {
+        min-height: 42px;
+        border: 1px solid rgba(28, 31, 29, 0.07);
+        border-radius: 14px;
+        background: rgba(255, 255, 253, 0.92);
+        color: var(--ink);
+        font-family: 'Manrope', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .action-btn.primary {
+        background: linear-gradient(135deg, #18221e, #213832);
+        color: #eef8f5;
+      }
+
+      .composer-dock {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px;
+        border-radius: 24px;
+      }
+
+      .composer-main {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 20px;
+      }
+
+      .composer-input {
+        min-height: 86px;
+        padding: 6px 0 0;
+        font-size: 20px;
+        color: var(--soft);
+      }
+
+      .composer-toolbar {
+        justify-content: space-between;
+      }
+
+      .composer-left,
+      .composer-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .composer-chip {
+        background: rgba(245, 247, 246, 0.96);
+        color: var(--muted);
+        border: 1px solid rgba(28, 31, 29, 0.05);
+      }
+
+      .composer-chip.active {
+        background: rgba(28, 139, 120, 0.1);
+        color: var(--accent-deep);
+      }
+
+      .send {
+        width: 58px;
+        height: 58px;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        border: 0;
+        background: linear-gradient(135deg, #1d8a77, #165e52);
+        color: white;
+        box-shadow: 0 14px 24px rgba(28, 139, 120, 0.2);
+      }
+
+      .icon {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        stroke-width: 1.9;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex: 0 0 auto;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        animation: rise 620ms cubic-bezier(0.18, 0.9, 0.26, 1) forwards;
+        animation-delay: var(--delay, 0ms);
+      }
+
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      button,
+      .project-item,
+      .worktree-item,
+      .session-tab,
+      .floating-pill,
+      .tool-chip,
+      .review-card {
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          background 180ms ease,
+          border-color 180ms ease;
+      }
+
+      .project-item:hover,
+      .worktree-item:hover,
+      .session-tab:hover,
+      .floating-pill:hover,
+      .tool-chip:hover,
+      .review-card:hover,
+      .action-btn:hover,
+      .send:hover {
+        transform: translateY(-1px);
+      }
+
+      @media (max-width: 1320px) {
+        .headline,
+        .body {
+          grid-template-columns: 1fr;
+        }
+
+        .review-panel {
+          grid-template-rows: auto auto auto;
+        }
+      }
+
+      @media (max-width: 960px) {
+        .window {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-rows: none;
+        }
+
+        .topbar,
+        .composer-dock {
+          grid-template-columns: 1fr;
+        }
+
+        .headline-grid,
+        .action-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="window">
+        <aside class="sidebar reveal" style="--delay: 40ms">
+          <div class="brand">
+            <div class="brand-badge">HC</div>
+            <div class="brand-copy">
+              <strong>Hive CN</strong>
+              <small>现代化、本地优先、适合中文开发者的 AI 开发工作台</small>
+            </div>
+          </div>
+
+          <div class="mini-nav">
+            <div class="mini-nav__item active">项目</div>
+            <div class="mini-nav__item">会话</div>
+            <div class="mini-nav__item">评审</div>
+            <div class="mini-nav__item">设置</div>
+          </div>
+
+          <div class="focus-card">
+            <div class="focus-card__head">
+              <div>
+                <small style="color: var(--soft)">当前焦点</small>
+                <strong style="display: block; margin-top: 4px">internal-starlight-base</strong>
+              </div>
+              <div class="focus-card__stat">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
+                </svg>
+              </div>
+            </div>
+            <p style="margin: 10px 0 12px; font-size: 13px; line-height: 1.7; color: var(--muted)">
+              当前 worktree 已连接，右侧变更区和底部输入区会围绕这个上下文持续工作。
+            </p>
+            <div class="project-meta">
+              <span class="status-chip">运行中</span>
+              <span class="meta-chip">2 个会话</span>
+              <span class="meta-chip">6 个改动</span>
+            </div>
+          </div>
+
+          <div class="list">
+            <div class="section-title">
+              <strong>项目</strong>
+              <small>用更清晰的层级展示 project / connection / worktree，而不是纯树节点。</small>
+            </div>
+            <div class="project-item active">
+              <strong>internal-starlight-base</strong>
+              <small>Connected · Ready</small>
+              <div class="project-meta">
+                <span class="status-chip">当前项目</span>
+                <span class="meta-chip">feat_20260127_starlight</span>
+              </div>
+            </div>
+            <div class="project-item">
+              <strong>yw-finance</strong>
+              <small>1 个活跃 worktree</small>
+              <div class="project-meta">
+                <span class="meta-chip">18h 前活跃</span>
+              </div>
+            </div>
+            <div class="project-item">
+              <strong>account-base</strong>
+              <small>2 个待处理改动</small>
+              <div class="project-meta">
+                <span class="status-chip warn">待评审</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="list">
+            <div class="section-title">
+              <strong>当前 worktrees</strong>
+              <small>状态不只显示名字，也更直接表达正在做什么。</small>
+            </div>
+            <div class="worktree-item">
+              <strong>feat_20260127_starlight</strong>
+              <small>Session 1 · 当前输出对比结果</small>
+              <div class="worktree-meta">
+                <span class="status-chip">Ready</span>
+                <span class="meta-chip">40 分钟前</span>
+              </div>
+            </div>
+            <div class="worktree-item">
+              <strong>fix_20260326_copy</strong>
+              <small>无未提交改动</small>
+              <div class="worktree-meta">
+                <span class="meta-chip">18 小时前</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <section class="topbar reveal" style="--delay: 110ms">
+            <div class="topbar__left">
+              <div class="window-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <div class="context-block">
+                <div class="context-project">
+                  <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M4 7h16" />
+                    <path d="M6 7V5.8A1.8 1.8 0 0 1 7.8 4h2.4A1.8 1.8 0 0 1 12 5.8V7" />
+                    <path d="M18 7v10.2A1.8 1.8 0 0 1 16.2 19H7.8A1.8 1.8 0 0 1 6 17.2V7" />
+                  </svg>
+                </div>
+                <div class="context-copy">
+                  <strong>internal-starlight-base</strong>
+                  <small>当前分支：feat_20260127_starlight · 会话：Session 1</small>
+                </div>
+              </div>
+
+              <div class="topbar-meta">
+                <span class="floating-pill active">评审</span>
+                <span class="floating-pill">VS Code</span>
+                <span class="floating-pill">Warp</span>
+                <span class="floating-pill">Finder</span>
+              </div>
+            </div>
+
+            <div class="topbar-meta">
+              <span class="floating-pill">历史</span>
+              <span class="floating-pill">设置</span>
+              <span class="floating-pill">同步</span>
+            </div>
+          </section>
+
+          <section class="headline reveal" style="--delay: 180ms">
+            <div class="headline__lead">
+              <span class="eyebrow">Modern Desktop Refresh</span>
+              <h1>更简洁、更高效、更克制，但仍然是你熟悉的 Hive。</h1>
+              <p>
+                这一版首页不推翻原有骨架，而是把界面从“能用的工具集合”打磨成“成熟的桌面工作台”。
+                重点提升四件事：视觉层级、状态表达、改动判断、输入区质感。
+              </p>
+              <div class="headline-actions">
+                <span class="tool-chip active">当前视图：会话</span>
+                <span class="tool-chip">改动已汇总</span>
+                <span class="tool-chip">右侧可直接评审</span>
+              </div>
+            </div>
+
+            <div class="headline-card">
+              <div>
+                <small>Workspace Pulse</small>
+                <strong style="display: block; margin-top: 6px; font-size: 28px">
+                  信息更聚焦，界面更安静，动作更明确。
+                </strong>
+              </div>
+              <div class="headline-grid">
+                <div class="headline-stat">
+                  <small>活跃会话</small>
+                  <strong>01</strong>
+                </div>
+                <div class="headline-stat">
+                  <small>待评审改动</small>
+                  <strong>06</strong>
+                </div>
+                <div class="headline-stat">
+                  <small>当前模型</small>
+                  <strong style="font-size: 20px">Opus 4.6</strong>
+                </div>
+                <div class="headline-stat">
+                  <small>工作区状态</small>
+                  <strong style="font-size: 20px">Ready</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="body reveal" style="--delay: 250ms">
+            <section class="workspace">
+              <div class="workspace-header">
+                <div class="session-bar">
+                  <div class="session-tabs">
+                    <div class="session-tab active">
+                      <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M4 7h16" />
+                        <path d="M7 12h10" />
+                        <path d="M9 17h6" />
+                      </svg>
+                      <strong>Session 1</strong>
+                    </div>
+                    <div class="session-tab">
+                      <svg class="icon" viewBox="0 0 24 24">
+                        <path d="m12 5 2 4 4 .6-3 3 .7 4.4-3.7-2-3.7 2 .7-4.4-3-3 4-.6z" />
+                      </svg>
+                      对比记录
+                    </div>
+                  </div>
+
+                  <div class="topbar-meta">
+                    <span class="meta-chip">Gathered for 44s</span>
+                    <span class="meta-chip">中文界面</span>
+                  </div>
+                </div>
+
+                <div class="session-hint">
+                  <div class="session-hint__copy">
+                    <strong style="font-size: 15px">当前上下文摘要</strong>
+                    <small>
+                      这条会话正在做 Sonnet / Opus 对比结论整理，右侧已自动聚合当前改动与评审动作。
+                    </small>
+                  </div>
+                  <span class="status-chip">可继续推进</span>
+                </div>
+              </div>
+
+              <div class="workspace-scroll">
+                <div class="message-stack">
+                  <div class="message-block compact">
+                    <div class="message-block__title">
+                      <span>停止应用</span>
+                      <span class="meta-chip">Bash</span>
+                    </div>
+                    <div class="message-block__meta">
+                      <span class="meta-chip">kill $(lsof -t -i :8998)</span>
+                      <span class="meta-chip">已执行</span>
+                    </div>
+                  </div>
+
+                  <div class="message-block">
+                    <div class="message-block__title">
+                      <span>Sonnet 4.6 测试完成，结果对比</span>
+                      <span class="status-chip">内容完整</span>
+                    </div>
+
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>指标</th>
+                          <th>Opus 4.6</th>
+                          <th>Sonnet 4.6</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>模型</td>
+                          <td>claude-opus-4-6</td>
+                          <td>claude-sonnet-4-6</td>
+                        </tr>
+                        <tr>
+                          <td>LLM 调用耗时</td>
+                          <td>上次未精确记录</td>
+                          <td><strong>约 77s</strong></td>
+                        </tr>
+                        <tr>
+                          <td>input tokens</td>
+                          <td>约 50987</td>
+                          <td>50987</td>
+                        </tr>
+                        <tr>
+                          <td>output tokens</td>
+                          <td>约 6200</td>
+                          <td>6223 / 6299</td>
+                        </tr>
+                        <tr>
+                          <td>生成质量</td>
+                          <td>内容完整</td>
+                          <td>内容完整，样式一致</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="callout">
+                      由于输入 token 比较大，当前真正的瓶颈仍然在 prompt 处理量，而不是单纯模型速度。
+                      如果下一步要继续提速，建议优先：
+                      <ol>
+                        <li>精简 prompt，只保留关键业务字段</li>
+                        <li>尝试更轻量的 Sonnet 变体</li>
+                        <li>适当下调 max_tokens，避免无效冗余输出</li>
+                      </ol>
+                    </div>
+
+                    <p class="message-note" style="margin: 14px 0 0; line-height: 1.8">
+                      这里的核心变化不是信息更多，而是内容被包装成更像“结论卡片”，而不是一整片白底长文。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="review-panel">
+              <div class="section-title">
+                <strong>改动与评审</strong>
+                <small>右侧不再像工具抽屉，而更像当前工作结果的判断面板。</small>
+              </div>
+
+              <div class="review-tabs">
+                <span class="floating-pill active">Changes</span>
+                <span class="floating-pill">Files</span>
+                <span class="floating-pill">Diffs</span>
+              </div>
+
+              <div class="review-body">
+                <div class="review-card">
+                  <div class="review-card__head">
+                    <strong>feat_20260127_starlight</strong>
+                    <span class="status-chip">6 个改动</span>
+                  </div>
+                  <p>当前分支已关联评审模式，变更、文件和后续操作集中在同一面板内。</p>
+                </div>
+
+                <div class="review-card">
+                  <div class="review-card__head">
+                    <strong>当前判断</strong>
+                    <span class="status-chip warn">待确认</span>
+                  </div>
+                  <p>内容结论已成型，但仍建议补一轮样式与输出稳定性确认，再决定是否直接 push。</p>
+                  <div class="review-actions">
+                    <span class="meta-chip">内容稳定</span>
+                    <span class="meta-chip">需再验证</span>
+                  </div>
+                </div>
+
+                <div class="review-card">
+                  <div class="review-card__head">
+                    <strong>变更文件</strong>
+                    <span class="meta-chip">自动汇总</span>
+                  </div>
+                  <p>.claude/settings.local.json · pom.xml · src/main/java/... · src/main/resources/...</p>
+                </div>
+
+                <div class="review-card">
+                  <div class="review-card__head">
+                    <strong>动作</strong>
+                    <span class="meta-chip">Push / Pull / Merge</span>
+                  </div>
+                  <div class="action-grid">
+                    <button class="action-btn primary">Push</button>
+                    <button class="action-btn">Pull</button>
+                    <button class="action-btn">查看 Diff</button>
+                    <button class="action-btn">进入评审</button>
+                  </div>
+                </div>
+
+                <div class="review-card">
+                  <div class="review-card__head">
+                    <strong>环境</strong>
+                    <span class="meta-chip">Setup / Run / Terminal</span>
+                  </div>
+                  <p>把原来偏分裂的 Setup / Run / Terminal 区域收成一个更有逻辑的底部信息块。</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <section class="composer-dock reveal" style="--delay: 320ms">
+            <div class="composer-main">
+              <div class="composer-meta">
+                <strong style="font-size: 15px">继续当前会话</strong>
+                <span class="composer-chip active">Plan</span>
+                <span class="composer-chip">Anthropic</span>
+              </div>
+
+              <div class="composer-input">输入下一步要求，继续推进当前 worktree 的实现与评审…</div>
+
+              <div class="composer-toolbar">
+                <div class="composer-left">
+                  <span class="composer-chip">Opus 4.6 MAX</span>
+                  <span class="composer-chip">附件</span>
+                  <span class="composer-chip">代码上下文</span>
+                  <span class="composer-chip">0:43</span>
+                </div>
+                <div class="composer-right">
+                  <span class="composer-help">输入区现在更像稳定的工作底座，而不是一块漂浮输入框。</span>
+                </div>
+              </div>
+            </div>
+
+            <button class="send" aria-label="发送">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M22 2 11 13" />
+                <path d="m22 2-7 20-4-9-9-4Z" />
+              </svg>
+            </button>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

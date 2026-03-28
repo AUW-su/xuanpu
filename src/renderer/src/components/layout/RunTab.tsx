@@ -208,7 +208,7 @@ export function RunTab({ worktreeId }: RunTabProps): React.JSX.Element {
   const hasRunScript = !!project?.run_script
 
   return (
-    <div ref={containerRef} className="flex flex-col h-full" data-testid="run-tab">
+    <div ref={containerRef} className="flex h-full flex-col bg-transparent" data-testid="run-tab">
       {/* Search bar */}
       {searchOpen && buffer && (
         <RunOutputSearch
@@ -222,25 +222,27 @@ export function RunTab({ worktreeId }: RunTabProps): React.JSX.Element {
       {/* Output area */}
       <div
         ref={outputRef}
-        className="flex-1 min-h-0 overflow-auto p-2 font-mono text-xs leading-relaxed"
+        className="flex-1 min-h-0 overflow-auto px-3 py-2.5 font-mono text-[11px] leading-6"
         data-testid="run-tab-output"
       >
         {lineCount === 0 && !runRunning && (
-          <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground text-xs">
-            {hasRunScript ? (
-              t('runTab.empty.noOutput')
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (project) useProjectStore.getState().openProjectSettings(project.id)
-                }}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                {t('runTab.empty.setupScript')}
-              </Button>
-            )}
+          <div className="flex h-full items-center justify-center">
+            <div className="max-w-[260px] rounded-xl border border-dashed border-border/80 bg-background/72 px-4 py-4 text-center text-xs text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+              {hasRunScript ? (
+                t('runTab.empty.noOutput')
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (project) useProjectStore.getState().openProjectSettings(project.id)
+                  }}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  {t('runTab.empty.setupScript')}
+                </Button>
+              )}
+            </div>
           </div>
         )}
         <div
@@ -275,7 +277,7 @@ export function RunTab({ worktreeId }: RunTabProps): React.JSX.Element {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between px-2 py-1 border-t border-border text-xs">
+      <div className="flex items-center justify-between border-t border-border/60 bg-background/72 px-3 py-2 text-xs">
         <div className="flex items-center gap-1.5">
           {runRunning ? (
             <>
@@ -297,7 +299,7 @@ export function RunTab({ worktreeId }: RunTabProps): React.JSX.Element {
           {lineCount > 0 && (
             <button
               onClick={() => clearRunOutput(worktreeId!)}
-              className="flex items-center gap-1 px-2 py-0.5 text-xs rounded hover:bg-accent transition-colors"
+              className="flex items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs transition-colors hover:border-border/70 hover:bg-background/80"
               data-testid="clear-button"
             >
               <Trash2 className="h-3 w-3" />
@@ -310,7 +312,7 @@ export function RunTab({ worktreeId }: RunTabProps): React.JSX.Element {
                 <>
                   <button
                     onClick={handleStop}
-                    className="flex items-center gap-1 px-2 py-0.5 text-xs rounded hover:bg-accent transition-colors"
+                    className="flex items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs transition-colors hover:border-border/70 hover:bg-background/80"
                     data-testid="stop-button"
                   >
                     <Square className="h-3 w-3" />
@@ -318,7 +320,7 @@ export function RunTab({ worktreeId }: RunTabProps): React.JSX.Element {
                   </button>
                   <button
                     onClick={handleRestart}
-                    className="flex items-center gap-1 px-2 py-0.5 text-xs rounded hover:bg-accent transition-colors"
+                    className="flex items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs transition-colors hover:border-border/70 hover:bg-background/80"
                     data-testid="restart-button"
                   >
                     <RotateCcw className="h-3 w-3" />
@@ -328,7 +330,7 @@ export function RunTab({ worktreeId }: RunTabProps): React.JSX.Element {
               ) : (
                 <button
                   onClick={handleRun}
-                  className="flex items-center gap-1 px-2 py-0.5 text-xs rounded hover:bg-accent transition-colors"
+                  className="flex items-center gap-1 rounded-md border border-transparent px-2 py-1 text-xs transition-colors hover:border-border/70 hover:bg-background/80"
                   data-testid="run-button"
                 >
                   <Play className="h-3 w-3" />

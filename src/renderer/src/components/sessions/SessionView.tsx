@@ -1,23 +1,33 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react'
-import { Send, ListPlus, Loader2, AlertCircle, RefreshCw, Square, X, Github } from 'lucide-react'
+import {
+  Send,
+  ListPlus,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Square,
+  X,
+  Github,
+  MessageCircleQuestion,
+  Shield
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from '@/lib/toast'
 import { MessageRenderer } from './MessageRenderer'
-import { ModeToggle } from './ModeToggle'
 import { ModelSelector } from './ModelSelector'
 import { QueuedMessageBubble } from './QueuedMessageBubble'
 import { ContextIndicator } from './ContextIndicator'
 import { AttachmentButton } from './AttachmentButton'
 import { AttachmentPreview } from './AttachmentPreview'
 import { CodexFastToggle } from './CodexFastToggle'
+import { SessionTaskTracker } from './SessionTaskTracker'
 import type { Attachment } from './AttachmentPreview'
 import { buildMessageParts, MAX_ATTACHMENTS } from '@/lib/file-attachment-utils'
 import { SlashCommandPopover } from './SlashCommandPopover'
 import { FileMentionPopover } from './FileMentionPopover'
 import { ScrollToBottomFab } from './ScrollToBottomFab'
 import { PlanReadyImplementFab } from './PlanReadyImplementFab'
-import { IndeterminateProgressBar } from './IndeterminateProgressBar'
 import { useFileMentions } from '@/hooks/useFileMentions'
 import type { FlatFile } from '@/lib/file-search-utils'
 import { useSessionStore } from '@/stores/useSessionStore'
@@ -46,12 +56,18 @@ import { useFileTreeStore } from '@/stores/useFileTreeStore'
 import { mapOpencodeMessagesToSessionViewMessages } from '@/lib/opencode-transcript'
 import { appendStreamedAssistantFallback } from '@/lib/transcript-refresh'
 import { deriveCodexTimelineMessages, mergeCodexActivityMessages } from '@/lib/codex-timeline'
-import { COMPLETION_WORDS, formatCompletionDuration, formatElapsedTimer } from '@/lib/format-utils'
-import { messageSendTimes, lastSendMode, userExplicitSendTimes } from '@/lib/message-send-times'
+import { COMPLETION_WORDS } from '@/lib/format-utils'
+import { messageSendTimes, lastSendMode } from '@/lib/message-send-times'
 import { isComposingKeyboardEvent } from '@/lib/message-composer-shortcuts'
 import { buildPlanImplementationPrompt, looksLikeCodexProposedPlan } from '@/lib/proposedPlan'
-import beeIcon from '@/assets/bee.png'
 import { useI18n } from '@/i18n/useI18n'
+import {
+  isTodoWriteTool,
+  parseTodoItems,
+  shouldShowTodoTracker,
+  type TodoToolStatus,
+  type TodoTrackerSnapshot
+} from './tools/todo-utils'
 
 // Stable empty array to avoid creating new references in selectors
 const EMPTY_FILE_INDEX: FlatFile[] = []
@@ -104,6 +120,48 @@ export interface OpenCodeMessage {
   timestamp: string
   /** Interleaved parts for assistant messages with tool calls */
   parts?: StreamingPart[]
+}
+
+function hasMeaningfulMessagePart(message: OpenCodeMessage): boolean {
+  if (message.role === 'system') return false
+  if (message.role === 'user') return message.content.trim().length > 0
+
+  if (message.content.trim().length > 0) return true
+
+  return (
+    message.parts?.some((part) => {
+      if (part.type === 'tool_use' || part.type === 'subtask' || part.type === 'compaction') {
+        return true
+      }
+      if (part.type === 'text' && typeof part.text === 'string' && part.text.trim().length > 0) {
+        return true
+      }
+      return false
+    }) ?? false
+  )
+}
+
+function getRoundTerminalMessageIds(messages: OpenCodeMessage[]): Set<string> {
+  const ids = new Set<string>()
+  if (messages.length === 0) return ids
+
+  let chunkStart = 0
+
+  for (let i = 1; i <= messages.length; i++) {
+    const isBoundary = i === messages.length || messages[i]?.role === 'user'
+    if (!isBoundary) continue
+
+    for (let j = i - 1; j >= chunkStart; j--) {
+      if (hasMeaningfulMessagePart(messages[j])) {
+        ids.add(messages[j].id)
+        break
+      }
+    }
+
+    chunkStart = i
+  }
+
+  return ids
 }
 
 export interface SessionViewState {
@@ -277,6 +335,44 @@ function createLocalMessage(role: OpenCodeMessage['role'], content: string): Ope
     content,
     timestamp: new Date().toISOString()
   }
+}
+
+function getLatestTodoSnapshotFromParts(
+  parts: StreamingPart[] | undefined
+): TodoTrackerSnapshot | null {
+  if (!parts || parts.length === 0) return null
+
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const part = parts[i]
+    if (part.type !== 'tool_use' || !part.toolUse || !isTodoWriteTool(part.toolUse.name)) continue
+
+    const todos = parseTodoItems(part.toolUse.input)
+    if (todos.length === 0) continue
+
+    return {
+      todos,
+      toolStatus: part.toolUse.status as TodoToolStatus
+    }
+  }
+
+  return null
+}
+
+function getLatestVisibleTodoSnapshot(
+  messages: OpenCodeMessage[],
+  streamingParts: StreamingPart[]
+): TodoTrackerSnapshot | null {
+  const streamingSnapshot = getLatestTodoSnapshotFromParts(streamingParts)
+  if (streamingSnapshot) return streamingSnapshot
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i]
+    if (message.role !== 'assistant') continue
+    const snapshot = getLatestTodoSnapshotFromParts(message.parts)
+    if (snapshot) return snapshot
+  }
+
+  return null
 }
 
 async function loadCodexDurableState(
@@ -507,7 +603,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const [sessionErrorMessage, setSessionErrorMessage] = useState<string | null>(null)
   const [sessionErrorStderr, setSessionErrorStderr] = useState<string | null>(null)
   const [retryTickMs, setRetryTickMs] = useState<number>(Date.now())
-  const [elapsedTickMs, setElapsedTickMs] = useState(Date.now())
+  const [executionStartedAt, setExecutionStartedAt] = useState<number | null>(null)
+  const [executionTickMs, setExecutionTickMs] = useState<number>(Date.now())
 
   // Prompt history key: works for both worktree and connection sessions
   const historyKey = worktreeId ?? connectionId
@@ -565,15 +662,10 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const activeQuestion = useQuestionStore((s) => s.getActiveQuestion(sessionId))
   const activePermission = usePermissionStore((s) => s.getActivePermission(sessionId))
   const activeCommandApproval = useCommandApprovalStore((s) => s.getActiveApproval(sessionId))
+  const currentSessionStatus = useWorktreeStatusStore((s) => s.sessionStatuses[sessionId] ?? null)
 
   // Pending plan approval (ExitPlanMode blocking tool)
   const pendingPlan = useSessionStore((s) => s.pendingPlans.get(sessionId) ?? null)
-
-  // Completion badge — reactive subscription to this session's status entry
-  const completionEntry = useWorktreeStatusStore((state) => {
-    const entry = state.sessionStatuses[sessionId]
-    return entry?.status === 'completed' ? entry : null
-  })
 
   // Streaming parts - tracks interleaved text and tool use during streaming
   const [streamingParts, setStreamingParts] = useState<StreamingPart[]>([])
@@ -597,6 +689,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const bottomAreaRef = useRef<HTMLDivElement>(null)
 
   // Smart auto-scroll tracking
   const isAutoScrollEnabledRef = useRef(true)
@@ -605,6 +698,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const userHasScrolledUpRef = useRef(false)
   const isProgrammaticScrollRef = useRef(false)
   const programmaticScrollResetRef = useRef<number | null>(null)
+  const bottomAreaScrollRafRef = useRef<number | null>(null)
   const manualScrollIntentRef = useRef(false)
   const pointerDownInScrollerRef = useRef(false)
 
@@ -851,6 +945,48 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     resetAutoScrollState()
   }, [resetAutoScrollState, sessionId])
 
+  // Keep the latest messages visible when the bottom interaction area changes height
+  // (task tracker expand/collapse, interrupt cards, textarea growth). If the user is
+  // already anchored near the bottom, re-anchor to the newest message after the
+  // layout settles so content doesn't get pushed out of view.
+  useEffect(() => {
+    const bottomArea = bottomAreaRef.current
+    if (!bottomArea || typeof ResizeObserver === 'undefined') return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const scrollEl = scrollContainerRef.current
+      if (!scrollEl) return
+
+      const nextHeight = entries[0]?.contentRect.height ?? bottomArea.getBoundingClientRect().height
+      if (nextHeight < 1) return
+
+      const distanceFromBottom =
+        scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight
+      const shouldCompensate = isAutoScrollEnabledRef.current || distanceFromBottom < 96
+
+      if (!shouldCompensate) return
+
+      if (bottomAreaScrollRafRef.current !== null) {
+        cancelAnimationFrame(bottomAreaScrollRafRef.current)
+      }
+
+      bottomAreaScrollRafRef.current = requestAnimationFrame(() => {
+        bottomAreaScrollRafRef.current = null
+        resetAutoScrollState()
+        scrollToBottom('instant')
+      })
+    })
+
+    resizeObserver.observe(bottomArea)
+    return () => {
+      resizeObserver.disconnect()
+      if (bottomAreaScrollRafRef.current !== null) {
+        cancelAnimationFrame(bottomAreaScrollRafRef.current)
+        bottomAreaScrollRafRef.current = null
+      }
+    }
+  }, [resetAutoScrollState, scrollToBottom, sessionId, viewState.status])
+
   // Instant scroll to bottom when session view becomes connected with messages.
   // This must wait for viewState === 'connected' because the message list DOM
   // is only rendered in that state (connecting shows a loading spinner).
@@ -953,6 +1089,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       }
       if (programmaticScrollResetRef.current !== null) {
         cancelAnimationFrame(programmaticScrollResetRef.current)
+      }
+      if (bottomAreaScrollRafRef.current !== null) {
+        cancelAnimationFrame(bottomAreaScrollRafRef.current)
       }
     }
   }, [])
@@ -2300,7 +2439,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                 void finalizeResponse()
               }
 
-              // Set completion badge with duration since user sent the message
+              // Track duration metadata for completed-session status bookkeeping
               const sendTime = messageSendTimes.get(sessionId)
               const durationMs = sendTime ? Date.now() - sendTime : 0
               const word = COMPLETION_WORDS[Math.floor(Math.random() * COMPLETION_WORDS.length)]
@@ -2623,7 +2762,6 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
             // Start completion timer for auto-sent pending prompts (e.g. PR creation)
             messageSendTimes.set(sessionId, Date.now())
-            userExplicitSendTimes.set(sessionId, Date.now())
             // Set worktree status based on session mode
             const currentMode = useSessionStore.getState().getSessionMode(sessionId)
             lastSendMode.set(sessionId, currentMode)
@@ -3260,9 +3398,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
           resetAutoScrollState()
 
-          // Start completion badge timer
+          // Track request start time for completion metadata
           messageSendTimes.set(sessionId, Date.now())
-          userExplicitSendTimes.set(sessionId, Date.now())
           lastSendMode.set(sessionId, 'ask')
           useWorktreeStatusStore.getState().setSessionStatus(sessionId, 'working')
 
@@ -3352,10 +3489,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       // Clear any stale command approvals from previous turns
       useCommandApprovalStore.getState().clearSession(sessionId)
 
-      // Start the completion badge timer from when the user sends the message
+      // Track request start time from when the user sends the message
       messageSendTimes.set(sessionId, Date.now())
-      userExplicitSendTimes.set(sessionId, Date.now())
-
       // Record the mode at send time — used to derive "Plan ready" vs "Ready"
       const currentModeForStatus = useSessionStore.getState().getSessionMode(sessionId)
       lastSendMode.set(sessionId, currentModeForStatus)
@@ -3657,8 +3792,6 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         useWorktreeStatusStore.getState().setSessionStatus(sessionId, 'working')
         setIsStreaming(true)
         setIsSending(true)
-        userExplicitSendTimes.set(sessionId, Date.now())
-
         // Transition the ExitPlanMode tool card to "accepted" state
         updateStreamingPartsRef((parts) =>
           parts.map((p) =>
@@ -3724,7 +3857,6 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       }
 
       if (!worktreePath) return
-      userExplicitSendTimes.set(sessionId, Date.now())
       const pendingBeforeAction = pendingPlan
       useSessionStore.getState().clearPendingPlan(sessionId)
       useWorktreeStatusStore.getState().clearSessionStatus(sessionId)
@@ -4340,6 +4472,119 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   // Determine if there's streaming content to show
   const hasStreamingContent = streamingParts.length > 0 || streamingContent.length > 0
 
+  const roundTerminalMessageIds = useMemo(
+    () => getRoundTerminalMessageIds(visibleMessages),
+    [visibleMessages]
+  )
+
+  const currentRoundAnchorId = useMemo(() => {
+    if (hasStreamingContent) return 'streaming'
+
+    for (let i = visibleMessages.length - 1; i >= 0; i--) {
+      if (hasMeaningfulMessagePart(visibleMessages[i])) {
+        return visibleMessages[i].id
+      }
+    }
+
+    return null
+  }, [hasStreamingContent, visibleMessages])
+
+  const taskTrackerSnapshot = useMemo(() => {
+    const snapshot = getLatestVisibleTodoSnapshot(visibleMessages, streamingParts)
+    return shouldShowTodoTracker(snapshot) ? snapshot : null
+  }, [visibleMessages, streamingParts])
+
+  const activeInterruptKind = activeQuestion
+    ? 'question'
+    : activePermission
+      ? 'permission'
+      : activeCommandApproval
+        ? 'command_approval'
+        : null
+
+  const hasBlockingInterrupt = activeInterruptKind !== null
+
+  const activeExecutionKind = useMemo(() => {
+    if (hasBlockingInterrupt) return null
+
+    const liveStatus = currentSessionStatus?.status
+    if (liveStatus === 'planning' || liveStatus === 'working' || liveStatus === 'answering') {
+      return liveStatus
+    }
+
+    if (isSending || isStreaming) {
+      return mode === 'plan' ? 'planning' : 'working'
+    }
+
+    return null
+  }, [currentSessionStatus?.status, hasBlockingInterrupt, isSending, isStreaming, mode])
+
+  useEffect(() => {
+    if (activeExecutionKind) {
+      setExecutionStartedAt((current) => current ?? Date.now())
+      setExecutionTickMs(Date.now())
+      return
+    }
+
+    setExecutionStartedAt(null)
+  }, [activeExecutionKind])
+
+  useEffect(() => {
+    if (!executionStartedAt || !activeExecutionKind) return
+
+    const timer = window.setInterval(() => {
+      setExecutionTickMs(Date.now())
+    }, 1000)
+
+    return () => {
+      window.clearInterval(timer)
+    }
+  }, [executionStartedAt, activeExecutionKind])
+
+  const executionStatusMeta = useMemo(() => {
+    if (!activeExecutionKind || !executionStartedAt) return null
+
+    const elapsedMs = executionTickMs - executionStartedAt
+    if (elapsedMs < 5000) return null
+
+    const label =
+      activeExecutionKind === 'planning'
+        ? t('recent.status.planning')
+        : activeExecutionKind === 'answering'
+          ? t('recent.status.answering')
+          : t('recent.status.working')
+
+    return { label, elapsedMs }
+  }, [activeExecutionKind, executionStartedAt, executionTickMs, t])
+
+  const blockingComposerCopy = useMemo(() => {
+    if (activeInterruptKind === 'question') {
+      return {
+        title: t('sessionView.composer.blockedByQuestionTitle'),
+        subtitle: t('sessionView.composer.blockedHint'),
+        Icon: MessageCircleQuestion
+      }
+    }
+
+    if (activeInterruptKind === 'permission') {
+      return {
+        title: t('sessionView.composer.blockedByPermissionTitle'),
+        subtitle: t('sessionView.composer.blockedHint'),
+        Icon: Shield
+      }
+    }
+
+    if (activeInterruptKind === 'command_approval') {
+      return {
+        title: t('sessionView.composer.blockedByCommandApprovalTitle'),
+        subtitle: t('sessionView.composer.blockedHint'),
+        Icon: Shield
+      }
+    }
+
+    return null
+  }, [activeInterruptKind, t])
+
   // The StreamingCursor (blinking cursor) only renders after text or tool_use parts.
   // Parts like reasoning, step_start, step_finish, compaction don't show it.
   // When those are the only parts, we still need the 3-dot loading indicator.
@@ -4416,20 +4661,6 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     }
   }, [sessionRetry?.next])
 
-  const isActive = isStreaming || isSending
-  useEffect(() => {
-    if (!isActive) return
-    setElapsedTickMs(Date.now())
-    const timer = window.setInterval(() => setElapsedTickMs(Date.now()), 1000)
-    return () => window.clearInterval(timer)
-  }, [isActive])
-
-  const elapsedTimerText = useMemo(() => {
-    const sendTime = userExplicitSendTimes.get(sessionId)
-    if (!sendTime) return null
-    return formatElapsedTimer(elapsedTickMs - sendTime)
-  }, [sessionId, elapsedTickMs])
-
   // Render based on view state
   if (viewState.status === 'connecting') {
     return (
@@ -4491,6 +4722,12 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                 <MessageRenderer
                   key={message.id}
                   message={message}
+                  showTimestamp={roundTerminalMessageIds.has(message.id)}
+                  executionStatus={
+                    currentRoundAnchorId === message.id && !hasStreamingContent
+                      ? executionStatusMeta
+                      : null
+                  }
                   cwd={worktreePath}
                   onForkAssistantMessage={handleForkFromAssistantMessage}
                   forkDisabled={forkingMessageId !== null && forkingMessageId !== message.id}
@@ -4576,6 +4813,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                     timestamp: new Date().toISOString(),
                     parts: streamingParts
                   }}
+                  showTimestamp={false}
+                  executionStatus={currentRoundAnchorId === 'streaming' ? executionStatusMeta : null}
                   isStreaming={isStreaming}
                   cwd={worktreePath}
                   onForkAssistantMessage={handleForkFromAssistantMessage}
@@ -4603,22 +4842,6 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                 <QueuedMessageBubble key={msg.id} content={msg.content} />
               ))}
               {/* Plan content is now rendered inside the ExitPlanMode tool card */}
-              {/* Completion badge — shows after streaming finishes */}
-              {completionEntry && !isSending && (
-                <div
-                  className="flex items-center gap-1.5 px-6 py-2 text-xs"
-                  style={{ color: '#C15F3C' }}
-                  data-testid="completion-badge"
-                >
-                  <img src={beeIcon} alt={t('sessionView.completion.alt')} className="h-7 w-7" />
-                  <span className="font-medium">
-                    {t('sessionView.completion.forDuration', {
-                      word: completionEntry.word ?? t('sessionView.completion.defaultWord'),
-                      duration: formatCompletionDuration(completionEntry.durationMs ?? 0)
-                    })}
-                  </span>
-                </div>
-              )}
               <div ref={messagesEndRef} />
             </div>
           )}
@@ -4640,54 +4863,61 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         />
       </div>
 
-      {/* Permission prompt from AI */}
-      {activePermission && (
-        <div className="px-4 pb-2">
-          <div className="max-w-4xl mx-auto">
-            <PermissionPrompt
-              key={activePermission.id}
-              request={activePermission}
-              onReply={handlePermissionReply}
-            />
+      <div ref={bottomAreaRef}>
+        {(hasBlockingInterrupt || taskTrackerSnapshot) && (
+          <div className="px-5 pb-2">
+            <div className="mx-auto max-w-4xl">
+              {hasBlockingInterrupt ? (
+                <div className="flex flex-col gap-2 xl:flex-row xl:items-start">
+                  <div className="min-w-0 flex-1">
+                    {activeQuestion ? (
+                      <QuestionPrompt
+                        key={activeQuestion.id}
+                        request={activeQuestion}
+                        onReply={handleQuestionReply}
+                        onReject={handleQuestionReject}
+                      />
+                    ) : activePermission ? (
+                      <PermissionPrompt
+                        key={activePermission.id}
+                        request={activePermission}
+                        onReply={handlePermissionReply}
+                      />
+                    ) : activeCommandApproval ? (
+                      <CommandApprovalPrompt
+                        key={activeCommandApproval.id}
+                        request={activeCommandApproval}
+                        onReply={handleCommandApprovalReply}
+                      />
+                    ) : null}
+                  </div>
+                  {taskTrackerSnapshot && (
+                    <div className="xl:w-[248px] xl:shrink-0">
+                      <SessionTaskTracker
+                        todos={taskTrackerSnapshot.todos}
+                        toolStatus={taskTrackerSnapshot.toolStatus}
+                        compact={true}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : taskTrackerSnapshot ? (
+                <SessionTaskTracker
+                  todos={taskTrackerSnapshot.todos}
+                  toolStatus={taskTrackerSnapshot.toolStatus}
+                />
+              ) : null}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Command approval prompt from AI (command filter system) */}
-      {activeCommandApproval && (
-        <div className="px-4 pb-2">
-          <div className="max-w-4xl mx-auto">
-            <CommandApprovalPrompt
-              key={activeCommandApproval.id}
-              request={activeCommandApproval}
-              onReply={handleCommandApprovalReply}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Question prompt from AI */}
-      {activeQuestion && (
-        <div className="px-4 pb-2">
-          <div className="max-w-4xl mx-auto">
-            <QuestionPrompt
-              key={activeQuestion.id}
-              request={activeQuestion}
-              onReply={handleQuestionReply}
-              onReject={handleQuestionReject}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Input area */}
-      <div
-        className="p-4 bg-background"
-        data-testid="input-area"
-        role="form"
-        aria-label={t('sessionView.composer.inputAriaLabel')}
-      >
-        <div className="max-w-4xl mx-auto relative">
+        <div
+          className="px-5 pb-5 pt-3 bg-background/80 backdrop-blur-sm"
+          data-testid="input-area"
+          role="form"
+          aria-label={t('sessionView.composer.inputAriaLabel')}
+        >
+          <div className="max-w-4xl mx-auto relative">
           {/* Slash command popover — outside overflow-hidden so it can render above */}
           <SlashCommandPopover
             commands={allSlashCommands}
@@ -4709,164 +4939,174 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           <PrCommentAttachments />
           <div
             className={cn(
-              'rounded-xl border-2 transition-colors duration-200 overflow-hidden',
-              mode === 'build'
-                ? 'border-blue-500/50 bg-blue-500/5'
-                : 'border-violet-500/50 bg-violet-500/5'
+              'overflow-hidden rounded-2xl border border-border/80 bg-card/88 shadow-[0_4px_14px_rgba(15,23,42,0.035)] transition-colors duration-200',
+              mode === 'build' ? 'ring-1 ring-blue-500/10' : 'ring-1 ring-primary/10',
+              hasBlockingInterrupt && 'border-border/70 bg-card/78'
             )}
           >
-            {/* Top row: mode toggle */}
-            <div className="px-3 pt-2.5 pb-1">
-              <ModeToggle sessionId={sessionId} />
-            </div>
-
             {/* Attachment previews */}
             <AttachmentPreview attachments={attachments} onRemove={handleRemoveAttachment} />
-
-            {/* Middle: textarea */}
-            <textarea
-              ref={textareaRef}
-              value={inputValue}
-              onChange={(e) => {
-                const pos = e.currentTarget.selectionStart ?? 0
-                handleInputChange(e.target.value, pos)
-              }}
-              onKeyUp={(e) => {
-                const pos = e.currentTarget.selectionStart ?? 0
-                cursorPositionRef.current = pos
-                setCursorPosition(pos)
-              }}
-              onClick={(e) => {
-                const pos = e.currentTarget.selectionStart ?? 0
-                cursorPositionRef.current = pos
-                setCursorPosition(pos)
-              }}
-              onKeyDown={handleKeyDown}
-              onCompositionStart={() => {
-                isImeComposingRef.current = true
-              }}
-              onCompositionEnd={() => {
-                isImeComposingRef.current = false
-              }}
-              onPaste={handlePaste}
-              disabled={!!activePermission}
-              placeholder={
-                activePermission
-                  ? t('sessionView.composer.waitingPermissionResponse')
-                  : pendingPlan
-                    ? t('sessionView.composer.planFeedbackPlaceholder')
-                    : t('sessionView.composer.messagePlaceholder')
-              }
-              aria-label={t('sessionView.composer.inputAriaLabel')}
-              aria-haspopup="listbox"
-              aria-expanded={fileMentions.isOpen && !showSlashCommands}
-              className={cn(
-                'w-full resize-none bg-transparent px-3 py-2',
-                'text-sm placeholder:text-muted-foreground',
-                'focus:outline-none border-none',
-                'disabled:cursor-not-allowed disabled:opacity-50',
-                'min-h-[40px] max-h-[200px]'
-              )}
-              rows={1}
-              data-testid="message-input"
-            />
-
-            {/* Bottom row: model selector + context indicator + hint text + send/implement buttons */}
-            <div className="flex items-center justify-between px-3 pb-2.5">
-              <div className="flex items-center gap-2">
-                <ModelSelector sessionId={sessionId} />
-                {sessionAgentSdk === 'codex' && (
-                  <CodexFastToggle
-                    enabled={codexFastMode}
-                    accepted={codexFastModeAccepted}
-                    onToggle={() => updateSetting('codexFastMode', !codexFastMode)}
-                    onAccept={() => updateSetting('codexFastModeAccepted', true)}
-                  />
-                )}
-                <AttachmentButton onAttach={handleAttach} />
-                <ContextIndicator
-                  sessionId={sessionId}
-                  modelId={currentModelId}
-                  providerId={currentProviderId}
-                />
-                <span
-                  className={cn(
-                    'text-xs tabular-nums',
-                    elapsedTimerText && isActive
-                      ? activeQuestion
-                        ? 'text-amber-500 font-semibold'
-                        : mode === 'build'
-                          ? 'text-blue-500 font-semibold'
-                          : 'text-violet-500 font-semibold'
-                      : 'text-muted-foreground'
-                  )}
-                >
-                  {elapsedTimerText ??
-                    (pendingPlan
-                      ? t('sessionView.composer.planFeedbackHint')
-                      : t('sessionView.composer.changeVariantHint', {
-                          shortcut: navigator.platform.includes('Mac') ? 'Ctrl+T' : 'Ctrl+T'
-                        }))}
+            {hasBlockingInterrupt && blockingComposerCopy ? (
+              <div className="flex items-center gap-3 px-4 py-3.5">
+                <span className="inline-flex size-8 items-center justify-center rounded-xl bg-muted/70 text-muted-foreground">
+                  <blockingComposerCopy.Icon className="h-4 w-4" />
                 </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium text-foreground">
+                    {blockingComposerCopy.title}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {blockingComposerCopy.subtitle}
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                {isStreaming && (
-                  <IndeterminateProgressBar mode={mode} isAsking={!!activeQuestion} />
-                )}
-                {isStreaming && !inputValue.trim() ? (
-                  <Button
-                    onClick={handleAbort}
-                    size="sm"
-                    variant="destructive"
-                    className="h-7 w-7 p-0"
-                    aria-label={t('sessionView.composer.stopStreaming')}
-                    title={t('sessionView.composer.stopStreaming')}
-                    data-testid="stop-button"
-                  >
-                    <Square className="h-3 w-3" />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => {
-                      // When a plan is pending and there's text, send as feedback (reject)
-                      if (pendingPlan && inputValue.trim()) {
-                        void handlePlanReject(inputValue.trim())
-                        setInputValue('')
-                        inputValueRef.current = ''
-                        if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
-                        window.db.session.updateDraft(sessionId, null)
-                        return
-                      }
-                      void handleSend()
-                    }}
-                    disabled={!inputValue.trim() || !!activePermission}
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    aria-label={
-                      pendingPlan && inputValue.trim()
-                        ? t('sessionView.composer.sendFeedback')
-                        : isStreaming
-                          ? t('sessionView.composer.queueMessage')
-                          : t('sessionView.composer.sendMessage')
-                    }
-                    title={
-                      pendingPlan && inputValue.trim()
-                        ? t('sessionView.composer.sendFeedbackTitle')
-                        : isStreaming
-                          ? t('sessionView.composer.queueMessage')
-                          : t('sessionView.composer.sendMessage')
-                    }
-                    data-testid="send-button"
-                  >
-                    {isStreaming ? (
-                      <ListPlus className="h-3.5 w-3.5" />
-                    ) : (
-                      <Send className="h-3.5 w-3.5" />
+            ) : (
+              <>
+                {/* Middle: textarea */}
+                <textarea
+                  ref={textareaRef}
+                  value={inputValue}
+                  onChange={(e) => {
+                    const pos = e.currentTarget.selectionStart ?? 0
+                    handleInputChange(e.target.value, pos)
+                  }}
+                  onKeyUp={(e) => {
+                    const pos = e.currentTarget.selectionStart ?? 0
+                    cursorPositionRef.current = pos
+                    setCursorPosition(pos)
+                  }}
+                  onClick={(e) => {
+                    const pos = e.currentTarget.selectionStart ?? 0
+                    cursorPositionRef.current = pos
+                    setCursorPosition(pos)
+                  }}
+                  onKeyDown={handleKeyDown}
+                  onCompositionStart={() => {
+                    isImeComposingRef.current = true
+                  }}
+                  onCompositionEnd={() => {
+                    isImeComposingRef.current = false
+                  }}
+                  onPaste={handlePaste}
+                  disabled={false}
+                  placeholder={
+                    pendingPlan
+                      ? t('sessionView.composer.planFeedbackPlaceholder')
+                      : t('sessionView.composer.messagePlaceholder')
+                  }
+                  aria-label={t('sessionView.composer.inputAriaLabel')}
+                  aria-haspopup="listbox"
+                  aria-expanded={fileMentions.isOpen && !showSlashCommands}
+                  className={cn(
+                    'w-full resize-none bg-transparent px-4 py-4',
+                    'text-[15px] leading-7 placeholder:text-muted-foreground',
+                    'focus:outline-none border-none',
+                    'disabled:cursor-not-allowed disabled:opacity-50',
+                    'min-h-[92px] max-h-[220px]'
+                  )}
+                  rows={3}
+                  data-testid="message-input"
+                />
+
+                {/* Bottom row: model selector + context indicator + hint text + send/implement buttons */}
+                <div className="flex items-center justify-between px-4 pb-3 pt-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <ModelSelector sessionId={sessionId} showProviderPrefix={false} />
+                    {sessionAgentSdk === 'codex' && (
+                      <CodexFastToggle
+                        enabled={codexFastMode}
+                        accepted={codexFastModeAccepted}
+                        onToggle={() => updateSetting('codexFastMode', !codexFastMode)}
+                        onAccept={() => updateSetting('codexFastModeAccepted', true)}
+                      />
                     )}
-                  </Button>
-                )}
-              </div>
-            </div>
+                    <AttachmentButton onAttach={handleAttach} />
+                    <ContextIndicator
+                      sessionId={sessionId}
+                      modelId={currentModelId}
+                      providerId={currentProviderId}
+                    />
+                    {pendingPlan ? (
+                      <span className="text-[12px] text-muted-foreground">
+                        {t('sessionView.composer.planFeedbackHint')}
+                      </span>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                          'h-7 rounded-full border px-2.5 text-[12px] font-medium transition-[color,background-color,border-color,box-shadow]',
+                          mode === 'plan'
+                            ? 'border-violet-300/80 bg-violet-500/10 text-violet-700 shadow-[0_0_0_1px_rgba(196,181,253,0.26),0_0_14px_rgba(167,139,250,0.18)] hover:bg-violet-500/14 hover:text-violet-800 dark:border-violet-400/45 dark:bg-violet-500/12 dark:text-violet-200 dark:shadow-[0_0_0_1px_rgba(167,139,250,0.22),0_0_16px_rgba(139,92,246,0.18)]'
+                            : 'border-border/70 bg-background/65 text-muted-foreground shadow-none hover:border-border hover:bg-background/85 hover:text-foreground'
+                        )}
+                        onClick={() => void toggleSessionMode(sessionId)}
+                        title={`${t('keyboardShortcuts.items.sessionModeToggle')} (Tab)`}
+                        data-testid="composer-mode-toggle"
+                      >
+                        {t('sessionView.composer.planModeLabel')}
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {isStreaming && !inputValue.trim() ? (
+                      <Button
+                        onClick={handleAbort}
+                        size="sm"
+                        variant="destructive"
+                        className="h-7 w-7 p-0"
+                        aria-label={t('sessionView.composer.stopStreaming')}
+                        title={t('sessionView.composer.stopStreaming')}
+                        data-testid="stop-button"
+                      >
+                        <Square className="h-3 w-3" />
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          // When a plan is pending and there's text, send as feedback (reject)
+                          if (pendingPlan && inputValue.trim()) {
+                            void handlePlanReject(inputValue.trim())
+                            setInputValue('')
+                            inputValueRef.current = ''
+                            if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+                            window.db.session.updateDraft(sessionId, null)
+                            return
+                          }
+                          void handleSend()
+                        }}
+                        disabled={!inputValue.trim()}
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        aria-label={
+                          pendingPlan && inputValue.trim()
+                            ? t('sessionView.composer.sendFeedback')
+                            : isStreaming
+                              ? t('sessionView.composer.queueMessage')
+                              : t('sessionView.composer.sendMessage')
+                        }
+                        title={
+                          pendingPlan && inputValue.trim()
+                            ? t('sessionView.composer.sendFeedbackTitle')
+                            : isStreaming
+                              ? t('sessionView.composer.queueMessage')
+                              : t('sessionView.composer.sendMessage')
+                        }
+                        data-testid="send-button"
+                      >
+                        {isStreaming ? (
+                          <ListPlus className="h-3.5 w-3.5" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           </div>
         </div>
       </div>

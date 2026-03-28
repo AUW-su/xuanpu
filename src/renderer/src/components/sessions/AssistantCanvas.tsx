@@ -6,6 +6,7 @@ import { ReasoningBlock } from './ReasoningBlock'
 import { CompactionPill } from './CompactionPill'
 import { cn } from '@/lib/utils'
 import type { StreamingPart } from './SessionView'
+import { isTodoWriteTool } from './tools/todo-utils'
 
 interface AssistantCanvasProps {
   content: string
@@ -69,6 +70,10 @@ function renderParts(
 
     if (part.type === 'tool_use') {
       if (part.toolUse) {
+        if (isTodoWriteTool(part.toolUse.name)) {
+          index += 1
+          continue
+        }
         renderedParts.push(
           <ToolCard
             key={`tool-${part.toolUse.id}`}

@@ -61,101 +61,92 @@ export function FileSidebar({
   }, [hasAttachedPR, activeTab])
 
   return (
-    <div className={cn('flex flex-col h-full', className)}>
-      <div className="flex items-center border-b border-border px-2 pt-1.5 pb-0">
-        <button
-          className={cn(
-            'px-3 py-1.5 text-xs font-medium transition-colors relative',
-            activeTab === 'changes'
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          )}
-          onClick={() => setActiveTab('changes')}
-        >
-          {vimModeEnabled && supportsFirstCharHint ? (
-            <>
-              <span className="text-primary">C</span>hanges
-            </>
-          ) : (
-            t('fileTree.sidebar.changes')
-          )}
-          {activeTab === 'changes' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-          )}
-        </button>
-        <button
-          className={cn(
-            'px-3 py-1.5 text-xs font-medium transition-colors relative',
-            activeTab === 'files'
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          )}
-          onClick={() => setActiveTab('files')}
-        >
-          {vimModeEnabled && supportsFirstCharHint ? (
-            <>
-              <span className="text-primary">F</span>iles
-            </>
-          ) : (
-            t('fileTree.sidebar.files')
-          )}
-          {activeTab === 'files' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-          )}
-        </button>
-        <button
-          className={cn(
-            'px-3 py-1.5 text-xs font-medium transition-colors relative',
-            activeTab === 'diffs'
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          )}
-          onClick={() => setActiveTab('diffs')}
-        >
-          {vimModeEnabled && supportsFirstCharHint ? (
-            <>
-              <span className="text-primary">D</span>iffs
-            </>
-          ) : (
-            t('fileTree.sidebar.diffs')
-          )}
-          {activeTab === 'diffs' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-          )}
-        </button>
-        {hasAttachedPR && (
-          <button
-            className={cn(
-              'px-3 py-1.5 text-xs font-medium transition-colors relative',
-              activeTab === 'comments'
-                ? 'text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+    <div className={cn('flex h-full flex-col bg-transparent', className)}>
+      <div className="flex items-center gap-2 border-b border-border/60 bg-background/58 px-2.5 py-2">
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="inline-flex min-w-max items-center gap-1 rounded-lg bg-background/35 p-0.5">
+            <button
+              className={cn(
+                'shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors',
+                activeTab === 'changes'
+                  ? 'bg-background/90 text-foreground'
+                  : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+              )}
+              onClick={() => setActiveTab('changes')}
+            >
+              {vimModeEnabled && supportsFirstCharHint ? (
+                <>
+                  <span className="text-primary">C</span>hanges
+                </>
+              ) : (
+                t('fileTree.sidebar.changes')
+              )}
+            </button>
+            <button
+              className={cn(
+                'shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors',
+                activeTab === 'files'
+                  ? 'bg-background/90 text-foreground'
+                  : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+              )}
+              onClick={() => setActiveTab('files')}
+            >
+              {vimModeEnabled && supportsFirstCharHint ? (
+                <>
+                  <span className="text-primary">F</span>iles
+                </>
+              ) : (
+                t('fileTree.sidebar.files')
+              )}
+            </button>
+            <button
+              className={cn(
+                'shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors',
+                activeTab === 'diffs'
+                  ? 'bg-background/90 text-foreground'
+                  : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+              )}
+              onClick={() => setActiveTab('diffs')}
+            >
+              {vimModeEnabled && supportsFirstCharHint ? (
+                <>
+                  <span className="text-primary">D</span>iffs
+                </>
+              ) : (
+                t('fileTree.sidebar.diffs')
+              )}
+            </button>
+            {hasAttachedPR && (
+              <button
+                className={cn(
+                  'shrink-0 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors',
+                  activeTab === 'comments'
+                    ? 'bg-background/90 text-foreground'
+                    : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+                )}
+                onClick={() => setActiveTab('comments')}
+              >
+                {vimModeEnabled && supportsFirstCharHint ? (
+                  <>
+                    C<span className="text-primary">o</span>mments
+                  </>
+                ) : (
+                  t('fileTree.sidebar.comments')
+                )}
+              </button>
             )}
-            onClick={() => setActiveTab('comments')}
-          >
-            {vimModeEnabled && supportsFirstCharHint ? (
-              <>
-                C<span className="text-primary">o</span>mments
-              </>
-            ) : (
-              t('fileTree.sidebar.comments')
-            )}
-            {activeTab === 'comments' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-            )}
-          </button>
-        )}
-        <div className="flex-1" />
+          </div>
+        </div>
         <button
           onClick={onClose}
-          className="p-1 text-muted-foreground hover:text-foreground rounded"
+          className="ml-auto rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground"
           aria-label={t('fileTree.sidebar.closeSidebar')}
         >
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+      <div className="flex flex-1 min-h-0 flex-col overflow-hidden bg-transparent">
         {activeTab === 'comments' && selectedWorktreeId ? (
           <PrReviewViewer worktreeId={selectedWorktreeId} />
         ) : activeTab === 'changes' ? (

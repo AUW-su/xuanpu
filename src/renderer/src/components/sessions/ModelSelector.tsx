@@ -43,13 +43,15 @@ interface ModelSelectorProps {
   onChange?: (model: { providerID: string; modelID: string; variant?: string }) => void
   // Override the SDK used for model listing (e.g. force 'opencode' in settings when defaultAgentSdk is 'terminal')
   agentSdkOverride?: 'opencode' | 'claude-code' | 'codex'
+  showProviderPrefix?: boolean
 }
 
 export function ModelSelector({
   sessionId,
   value,
   onChange,
-  agentSdkOverride
+  agentSdkOverride,
+  showProviderPrefix = true
 }: ModelSelectorProps): React.JSX.Element {
   const { t } = useI18n()
   // Read per-session model from session store (with global fallback)
@@ -218,12 +220,12 @@ export function ModelSelector({
   }, [selectedModel, providers])
 
   const providerPrefix = useMemo(() => {
-    if (!showModelProvider) return null
+    if (!showProviderPrefix || !showModelProvider) return null
     if (agentSdk === 'claude-code') return 'ANTHROPIC'
     return (
       currentModel?.providerID?.toUpperCase() ?? selectedModel?.providerID?.toUpperCase() ?? null
     )
-  }, [showModelProvider, agentSdk, currentModel, selectedModel])
+  }, [showProviderPrefix, showModelProvider, agentSdk, currentModel, selectedModel])
 
   // Cycle thinking-level variant for Alt+T
   const cycleVariant = useCallback(() => {

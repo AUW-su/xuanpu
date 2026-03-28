@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { getModelLimitKey, useContextStore } from '@/stores/useContextStore'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n/useI18n'
 
 interface ContextIndicatorProps {
@@ -14,11 +13,11 @@ function formatNumber(n: number): string {
   return n.toLocaleString()
 }
 
-function getBarColor(percent: number): string {
-  if (percent >= 90) return 'bg-red-500'
-  if (percent >= 80) return 'bg-orange-500'
-  if (percent >= 60) return 'bg-yellow-500'
-  return 'bg-green-500'
+function getRingColor(percent: number): string {
+  if (percent >= 90) return '#d9485f'
+  if (percent >= 80) return '#d17a22'
+  if (percent >= 60) return '#b28a17'
+  return '#237a68'
 }
 
 export function ContextIndicator({
@@ -55,7 +54,10 @@ export function ContextIndicator({
     return { used: u, limit: lim, percent: pct, tokens: t }
   }, [tokenInfo, sessionModel, modelId, providerId, modelLimits])
 
-  const percentForBar = percent ?? 0
+  const percentLabel = Math.min(100, Math.max(0, percent ?? 0))
+  const ringColor = getRingColor(percentLabel)
+  const circumference = 2 * Math.PI * 12
+  const strokeOffset = circumference - (percentLabel / 100) * circumference
 
   // Don't render if no limit or no usage yet
   if (!limit && used === 0) return null
@@ -63,16 +65,47 @@ export function ContextIndicator({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="w-[120px] flex-shrink-0 cursor-default" data-testid="context-indicator">
-          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className={cn(
-                'h-full rounded-full transition-all duration-300',
-                getBarColor(percentForBar)
-              )}
-              style={{ width: `${Math.min(100, Math.max(0, percentForBar))}%` }}
-              data-testid="context-bar"
-            />
+        <div
+          className="flex h-8 w-8 shrink-0 cursor-default items-center justify-center rounded-full border border-border/60 bg-background/85 shadow-sm"
+          data-testid="context-indicator"
+          aria-label={
+            typeof limit === 'number'
+              ? t('contextIndicator.summary.withLimit', {
+                  used: formatNumber(used),
+                  limit: formatNumber(limit),
+                  percent: percentLabel
+                })
+              : t('contextIndicator.summary.noLimit', { used: formatNumber(used) })
+          }
+        >
+          <div className="relative h-7 w-7">
+            <svg className="h-7 w-7 -rotate-90" viewBox="0 0 28 28" aria-hidden="true">
+              <circle
+                cx="14"
+                cy="14"
+                r="12"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                fill="none"
+                className="text-muted/80"
+              />
+              <circle
+                cx="14"
+                cy="14"
+                r="12"
+                stroke={ringColor}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                fill="none"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeOffset}
+                className="transition-all duration-300"
+                data-testid="context-ring"
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/45" />
+            </span>
           </div>
         </div>
       </TooltipTrigger>

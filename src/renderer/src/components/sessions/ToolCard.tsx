@@ -47,6 +47,7 @@ import { ToolCallContextMenu } from './ToolCallContextMenu'
 import { extractCommandText } from '@/lib/tool-input-utils'
 import { useSessionStore } from '@/stores/useSessionStore'
 import { useI18n } from '@/i18n/useI18n'
+import { isTodoWriteTool } from './tools/todo-utils'
 
 export type ToolStatus = 'pending' | 'running' | 'success' | 'error'
 
@@ -59,12 +60,6 @@ export interface ToolUseInfo {
   error?: string
   startTime: number
   endTime?: number
-}
-
-/** Check if a tool name refers to the TodoWrite tool */
-function isTodoWriteTool(name: string): boolean {
-  const lower = name.toLowerCase()
-  return lower.includes('todowrite') || lower.includes('todo_write')
 }
 
 /** Check if a tool name refers to the LSP tool */

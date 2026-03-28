@@ -123,9 +123,10 @@ export const VirtualFileTreeNode = memo(function VirtualFileTreeNode({
   const gitStatus = useMemo(() => getNodeGitStatus(node, gitStatusMap), [node, gitStatusMap])
 
   const nodeContent = (
-    <div
+    <button
+      type="button"
       className={cn(
-        'flex items-center py-0.5 px-1 rounded-sm cursor-pointer',
+        'flex h-full w-full items-center rounded-sm px-1 py-0.5 text-left cursor-pointer',
         'hover:bg-accent/50 transition-colors',
         'focus:outline-none focus:bg-accent/50'
       )}
@@ -190,8 +191,15 @@ export const VirtualFileTreeNode = memo(function VirtualFileTreeNode({
       {!hideGitIndicators && gitStatus && (
         <GitStatusIndicator status={gitStatus.status} staged={gitStatus.staged} className="ml-1" />
       )}
-    </div>
+    </button>
   )
+
+  // In the simplified Files sidebar mode, directory expansion should take priority
+  // over right-click affordances. Avoid wrapping folder rows in Radix's trigger there,
+  // which can interfere with normal click handling in the virtualized tree.
+  if (hideGitContextActions && node.isDirectory) {
+    return nodeContent
+  }
 
   return (
     <FileContextMenu

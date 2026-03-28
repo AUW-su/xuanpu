@@ -115,6 +115,11 @@ describe('Session 3: Plan Mode Badge', () => {
       const bubble = screen.getByTestId('message-user').firstElementChild!
       expect(bubble.className).toContain('bg-primary/10')
     })
+
+    test('does not render timestamp inside UserBubble', () => {
+      render(<UserBubble content="Test" timestamp="2025-01-01T00:00:00.000Z" isPlanMode={false} />)
+      expect(screen.queryByTestId('message-user-timestamp')).not.toBeInTheDocument()
+    })
   })
 
   describe('MessageRenderer', () => {

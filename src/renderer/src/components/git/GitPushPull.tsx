@@ -28,11 +28,13 @@ interface BranchInfo {
 interface GitPushPullProps {
   worktreePath: string | null
   className?: string
+  compact?: boolean
 }
 
 export function GitPushPull({
   worktreePath,
-  className
+  className,
+  compact = false
 }: GitPushPullProps): React.JSX.Element | null {
   const { t } = useI18n()
   const mergeBranch = useGitStore((s) =>
@@ -300,7 +302,11 @@ export function GitPushPull({
 
   return (
     <div
-      className={cn('flex flex-col gap-2 px-2 py-2 border-t', className)}
+      className={cn(
+        'flex flex-col gap-2 border-t border-border/60 px-2 py-2',
+        compact && 'gap-2.5 border-border/50 px-0 py-0',
+        className
+      )}
       data-testid="git-push-pull"
     >
       {/* Push/Pull buttons */}
@@ -309,7 +315,7 @@ export function GitPushPull({
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 h-7 text-xs"
+          className={cn('flex-1 h-7 text-xs', compact && 'h-8 rounded-lg')}
           onClick={handlePush}
           disabled={isOperating}
           data-testid="push-button"
@@ -327,7 +333,7 @@ export function GitPushPull({
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 h-7 text-xs"
+          className={cn('flex-1 h-7 text-xs', compact && 'h-8 rounded-lg')}
           onClick={handlePull}
           disabled={isOperating || !hasTracking}
           data-testid="pull-button"
@@ -343,7 +349,10 @@ export function GitPushPull({
       </div>
 
       {/* Merge section */}
-      <div className="flex gap-2 items-center border-t pt-2" data-testid="merge-section">
+      <div
+        className={cn('flex items-center gap-2 border-t border-border/60 pt-2')}
+        data-testid="merge-section"
+      >
         <span className="text-[10px] text-muted-foreground whitespace-nowrap">
           {t('gitPushPull.merge.label')}
         </span>
@@ -466,7 +475,7 @@ export function GitPushPull({
           <Button
             variant="outline"
             size="sm"
-            className="h-6 text-xs whitespace-nowrap"
+            className={cn('h-6 text-xs whitespace-nowrap', compact && 'h-8 rounded-lg')}
             onClick={handleMerge}
             disabled={isMerging || isOperating || !mergeBranch.trim()}
             data-testid="merge-button"

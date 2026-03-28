@@ -695,9 +695,8 @@ describe('Session 10: Tool Message Rendering', () => {
       expect(screen.queryByTestId('tool-card')).not.toBeInTheDocument()
     })
 
-    test('User and assistant message timestamps are not displayed', () => {
+    test('Message timestamps are only displayed when explicitly enabled', () => {
       const timestamp = '2026-02-09T12:34:56.000Z'
-      const renderedTime = new Date(timestamp).toLocaleTimeString()
 
       const userMessage: OpenCodeMessage = {
         id: 'user-1',
@@ -713,10 +712,10 @@ describe('Session 10: Tool Message Rendering', () => {
       }
 
       const { rerender } = render(<MessageRenderer message={userMessage} />)
-      expect(screen.getByTestId('message-user').textContent).not.toContain(renderedTime)
+      expect(screen.queryByTestId('message-timestamp')).not.toBeInTheDocument()
 
-      rerender(<MessageRenderer message={assistantMessage} />)
-      expect(screen.getByTestId('message-assistant').textContent).not.toContain(renderedTime)
+      rerender(<MessageRenderer message={assistantMessage} showTimestamp={true} />)
+      expect(screen.getByTestId('message-timestamp')).toBeInTheDocument()
     })
   })
 

@@ -11,17 +11,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n/useI18n'
 import type { ToolViewProps } from './types'
-
-interface TodoItem {
-  id: string
-  content: string
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
-  priority: 'high' | 'medium' | 'low'
-}
-
-interface TodoInput {
-  todos: TodoItem[]
-}
+import { parseTodoItems, type TodoItem } from './todo-utils'
 
 function StatusIcon({ status }: { status: TodoItem['status'] }) {
   switch (status) {
@@ -52,11 +42,7 @@ function PriorityBadge({ priority }: { priority: TodoItem['priority'] }) {
 
 export function TodoWriteToolView({ input, error }: ToolViewProps) {
   const { t } = useI18n()
-  const todoInput = input as unknown as TodoInput
-  const todos = useMemo(
-    () => (Array.isArray(todoInput?.todos) ? todoInput.todos : []),
-    [todoInput?.todos]
-  )
+  const todos = useMemo(() => parseTodoItems(input), [input])
 
   if (todos.length === 0) {
     return (

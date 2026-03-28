@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Build for Future - High Fidelity Concept</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f2eee6;
+        --bg-2: #f8f5ef;
+        --panel: rgba(255, 252, 247, 0.7);
+        --panel-strong: rgba(255, 251, 245, 0.92);
+        --line: rgba(56, 49, 43, 0.08);
+        --line-strong: rgba(56, 49, 43, 0.18);
+        --ink: #1d1a17;
+        --muted: #6f665d;
+        --soft: #8f877d;
+        --accent: #ff6b2c;
+        --accent-2: #144b45;
+        --accent-3: #0d7f6d;
+        --warn: #9b5b00;
+        --danger: #a13621;
+        --shadow: 0 30px 80px rgba(48, 39, 29, 0.12);
+        --radius-xl: 28px;
+        --radius-lg: 22px;
+        --radius-md: 18px;
+        --radius-sm: 14px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(255, 107, 44, 0.18), transparent 32%),
+          radial-gradient(circle at 85% 16%, rgba(20, 75, 69, 0.16), transparent 28%),
+          linear-gradient(180deg, #fbf8f2 0%, #f3eee5 58%, #ece6da 100%);
+        font-family: 'Noto Sans SC', sans-serif;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(33, 27, 21, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(33, 27, 21, 0.03) 1px, transparent 1px);
+        background-size: 28px 28px;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent 95%);
+        pointer-events: none;
+      }
+
+      body::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          radial-gradient(rgba(0, 0, 0, 0.05) 0.6px, transparent 0.7px),
+          radial-gradient(rgba(255, 255, 255, 0.14) 0.6px, transparent 0.7px);
+        background-size: 11px 11px, 17px 17px;
+        mix-blend-mode: multiply;
+        opacity: 0.24;
+        pointer-events: none;
+      }
+
+      .page {
+        position: relative;
+        min-height: 100vh;
+        padding: 22px;
+      }
+
+      .shell {
+        position: relative;
+        display: grid;
+        grid-template-columns: 88px minmax(0, 1fr);
+        gap: 18px;
+        min-height: calc(100vh - 44px);
+      }
+
+      .rail {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 18px 14px;
+        background: rgba(255, 249, 241, 0.74);
+        border: 1px solid rgba(36, 29, 23, 0.08);
+        border-radius: 30px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(14px);
+      }
+
+      .rail__stack,
+      .rail__foot {
+        display: grid;
+        gap: 14px;
+      }
+
+      .glyph,
+      .avatar {
+        width: 100%;
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        border-radius: 22px;
+        border: 1px solid rgba(36, 29, 23, 0.08);
+        background: rgba(255, 252, 247, 0.88);
+        color: var(--ink);
+        font-family: 'Sora', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .glyph--brand {
+        background: linear-gradient(145deg, #111111 0%, #2d241f 100%);
+        color: #f7f1e7;
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 34px rgba(17, 17, 17, 0.18);
+      }
+
+      .glyph--active {
+        background: linear-gradient(145deg, rgba(255, 107, 44, 0.16), rgba(255, 107, 44, 0.02));
+        color: #c64d18;
+        border-color: rgba(255, 107, 44, 0.18);
+      }
+
+      .avatar {
+        background: linear-gradient(145deg, rgba(20, 75, 69, 0.18), rgba(20, 75, 69, 0.04));
+        color: var(--accent-2);
+      }
+
+      .main {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .topbar,
+      .hero,
+      .board,
+      .insight {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-xl);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 16px 20px;
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 54px;
+        padding: 0 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.52);
+        border: 1px solid rgba(43, 36, 30, 0.08);
+      }
+
+      .search__hint {
+        color: var(--soft);
+        font-size: 14px;
+      }
+
+      .chipbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .chip {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(43, 36, 30, 0.09);
+        background: rgba(255, 251, 244, 0.84);
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .chip--strong {
+        background: #1f1a17;
+        color: #fff4ea;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 28px;
+      }
+
+      .hero::before {
+        content: '';
+        position: absolute;
+        inset: auto 28px 24px auto;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 107, 44, 0.18), transparent 66%);
+        filter: blur(2px);
+      }
+
+      .hero__grid {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 107, 44, 0.08);
+        color: #b44418;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 11ch;
+        font-family: 'Sora', sans-serif;
+        font-size: clamp(36px, 5vw, 74px);
+        line-height: 0.94;
+        letter-spacing: -0.05em;
+      }
+
+      .hero__lead {
+        max-width: 760px;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.8;
+      }
+
+      .hero__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 50px;
+        padding: 0 18px;
+        border-radius: 16px;
+        border: 1px solid rgba(43, 36, 30, 0.08);
+        background: rgba(255, 251, 246, 0.88);
+        color: var(--ink);
+        font-family: 'Sora', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .button--solid {
+        background: linear-gradient(135deg, #111111 0%, #332821 100%);
+        color: #fff1e6;
+      }
+
+      .hero__card {
+        display: grid;
+        gap: 16px;
+        padding: 22px;
+        border-radius: 28px;
+        background: linear-gradient(160deg, rgba(20, 75, 69, 0.94), rgba(9, 25, 23, 0.92));
+        color: #f5f4ef;
+        box-shadow: 0 24px 60px rgba(13, 42, 37, 0.24);
+      }
+
+      .hero__card small,
+      .hero__card p {
+        color: rgba(245, 244, 239, 0.74);
+      }
+
+      .hero__meter {
+        display: grid;
+        gap: 12px;
+      }
+
+      .hero__meter-row {
+        display: grid;
+        grid-template-columns: 86px minmax(0, 1fr) 44px;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+      }
+
+      .bar {
+        position: relative;
+        height: 11px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+      }
+
+      .bar > span {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--value);
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ff8650, #ffd3be);
+      }
+
+      .hero__mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat-tile {
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .stat-tile strong {
+        display: block;
+        margin-top: 8px;
+        font-family: 'Sora', sans-serif;
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.8fr);
+        gap: 18px;
+        min-height: 0;
+      }
+
+      .board {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        gap: 18px;
+        padding: 22px;
+        min-height: 0;
+      }
+
+      .board__head,
+      .insight__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .title {
+        display: grid;
+        gap: 6px;
+      }
+
+      .title h2,
+      .title h3 {
+        margin: 0;
+        font-family: 'Sora', sans-serif;
+        font-size: 24px;
+        line-height: 1.05;
+      }
+
+      .title p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .segmented {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 252, 247, 0.84);
+      }
+
+      .segmented button {
+        min-height: 36px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--muted);
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .segmented button.active {
+        background: #1f1a17;
+        color: #fff5ea;
+      }
+
+      .feature-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .feature-card {
+        position: relative;
+        display: grid;
+        gap: 12px;
+        padding: 18px;
+        border: 1px solid rgba(42, 34, 28, 0.09);
+        border-radius: 24px;
+        background: var(--panel-strong);
+        cursor: pointer;
+        transition:
+          transform 220ms ease,
+          border-color 220ms ease,
+          box-shadow 220ms ease;
+      }
+
+      .feature-card:hover,
+      .feature-card.active {
+        transform: translateY(-4px);
+        border-color: rgba(255, 107, 44, 0.22);
+        box-shadow: 0 18px 28px rgba(255, 107, 44, 0.08);
+      }
+
+      .feature-card__top,
+      .mini-labels,
+      .detail__meta,
+      .detail__pills,
+      .run-list,
+      .agent-stack,
+      .evidence-list,
+      .timeline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .status-dot,
+      .pill,
+      .soft-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 30px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+
+      .status-dot {
+        border: 1px solid rgba(42, 34, 28, 0.08);
+        background: rgba(255, 255, 255, 0.68);
+        color: var(--muted);
+      }
+
+      .status-dot::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .status-dot[data-tone='progress'] {
+        color: #e96520;
+      }
+
+      .status-dot[data-tone='review'] {
+        color: #0e7b73;
+      }
+
+      .status-dot[data-tone='blocked'] {
+        color: #9b5b00;
+      }
+
+      .status-dot[data-tone='ship'] {
+        color: #2d8659;
+      }
+
+      .feature-card h3 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      .feature-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .mini-labels span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: rgba(20, 75, 69, 0.08);
+        color: var(--accent-2);
+        font-size: 12px;
+      }
+
+      .detail {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.78fr);
+        gap: 18px;
+        min-height: 0;
+      }
+
+      .detail__panel,
+      .insight,
+      .stack-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: rgba(255, 252, 247, 0.86);
+      }
+
+      .detail__panel {
+        padding: 22px;
+        display: grid;
+        gap: 18px;
+      }
+
+      .detail__title {
+        display: grid;
+        gap: 10px;
+      }
+
+      .detail__title h2 {
+        margin: 0;
+        font-family: 'Sora', sans-serif;
+        font-size: clamp(24px, 3vw, 38px);
+        line-height: 1.08;
+      }
+
+      .detail__title p,
+      .stack-card p,
+      .stack-card small,
+      .insight p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .pill {
+        border: 1px solid rgba(43, 36, 30, 0.08);
+        background: rgba(255, 250, 243, 0.9);
+      }
+
+      .pill--dark {
+        background: #1f1a17;
+        color: #fff2e8;
+      }
+
+      .soft-pill {
+        background: rgba(255, 107, 44, 0.08);
+        color: #b44418;
+      }
+
+      .detail__story {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 0.9fr);
+        gap: 18px;
+      }
+
+      .story-card {
+        padding: 18px;
+        border: 1px solid rgba(42, 34, 28, 0.08);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .story-card h4 {
+        margin: 0 0 10px;
+        font-family: 'Sora', sans-serif;
+        font-size: 15px;
+      }
+
+      .story-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .story-item {
+        display: grid;
+        gap: 4px;
+        padding-left: 16px;
+        position: relative;
+      }
+
+      .story-item::before {
+        content: '';
+        position: absolute;
+        top: 9px;
+        left: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .story-item strong {
+        font-size: 14px;
+      }
+
+      .stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .stack-card {
+        padding: 18px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .run-list {
+        gap: 10px;
+      }
+
+      .run-chip {
+        display: grid;
+        gap: 6px;
+        width: 100%;
+        padding: 14px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(20, 75, 69, 0.08), rgba(20, 75, 69, 0.03));
+        border: 1px solid rgba(20, 75, 69, 0.12);
+      }
+
+      .run-chip strong {
+        font-size: 14px;
+      }
+
+      .run-chip small {
+        color: var(--soft);
+      }
+
+      .agent-stack {
+        flex-direction: column;
+      }
+
+      .agent-row,
+      .evidence-row,
+      .checkpoint {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px dashed rgba(43, 36, 30, 0.08);
+      }
+
+      .agent-row:last-child,
+      .evidence-row:last-child,
+      .checkpoint:last-child {
+        border-bottom: 0;
+      }
+
+      .agent-badge {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: rgba(255, 107, 44, 0.12);
+        color: var(--accent);
+        font-family: 'Sora', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .insight {
+        display: grid;
+        gap: 18px;
+        padding: 22px;
+        min-height: 0;
+      }
+
+      .radar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(42, 34, 28, 0.08);
+        background: rgba(255, 255, 255, 0.56);
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 12px;
+        font-family: 'Sora', sans-serif;
+        font-size: 30px;
+        line-height: 1;
+      }
+
+      .ring {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        aspect-ratio: 1;
+        margin-top: 10px;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at center, rgba(250, 245, 236, 0.9) 0 38%, transparent 39%),
+          conic-gradient(
+            from 180deg,
+            #0e7b73 0 28%,
+            #ff6b2c 28% 61%,
+            #f5c89f 61% 78%,
+            rgba(29, 26, 23, 0.08) 78% 100%
+          );
+      }
+
+      .ring::before {
+        content: '';
+        position: absolute;
+        inset: 18%;
+        border-radius: 50%;
+        background: rgba(249, 245, 239, 0.96);
+        border: 1px solid rgba(42, 34, 28, 0.08);
+      }
+
+      .ring__label {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+      }
+
+      .ring__label strong {
+        display: block;
+        font-family: 'Sora', sans-serif;
+        font-size: 34px;
+      }
+
+      .checklist {
+        display: grid;
+        gap: 12px;
+      }
+
+      .checkpoint strong {
+        font-size: 14px;
+      }
+
+      .checkpoint .state {
+        min-height: 28px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+
+      .state--ok {
+        background: rgba(45, 134, 89, 0.12);
+        color: #2d8659;
+      }
+
+      .state--warn {
+        background: rgba(155, 91, 0, 0.1);
+        color: #9b5b00;
+      }
+
+      .state--hold {
+        background: rgba(161, 54, 33, 0.1);
+        color: #a13621;
+      }
+
+      .pulse {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .pulse::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 rgba(255, 107, 44, 0.4);
+        animation: pulse 1.8s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.45);
+        }
+        70% {
+          box-shadow: 0 0 0 14px rgba(255, 107, 44, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 107, 44, 0);
+        }
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        animation: rise 720ms cubic-bezier(0.18, 0.9, 0.26, 1) forwards;
+        animation-delay: var(--delay, 0ms);
+      }
+
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1260px) {
+        .feature-strip,
+        .detail {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .detail__panel {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 1040px) {
+        .hero__grid,
+        .content,
+        .detail,
+        .detail__story {
+          grid-template-columns: 1fr;
+        }
+
+        .feature-strip {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          padding: 12px;
+        }
+
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .rail {
+          grid-row: 2;
+          flex-direction: row;
+          align-items: center;
+          padding: 12px;
+        }
+
+        .rail__stack,
+        .rail__foot {
+          display: flex;
+        }
+
+        .glyph,
+        .avatar {
+          width: 52px;
+        }
+
+        .topbar {
+          grid-template-columns: 1fr;
+        }
+
+        .feature-strip,
+        .radar {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="shell">
+        <aside class="rail reveal" style="--delay: 20ms">
+          <div class="rail__stack">
+            <div class="glyph glyph--brand">B/F</div>
+            <div class="glyph glyph--active">FT</div>
+            <div class="glyph">RN</div>
+            <div class="glyph">EV</div>
+            <div class="glyph">PR</div>
+          </div>
+          <div class="rail__foot">
+            <div class="glyph">CN</div>
+            <div class="avatar">SQ</div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <section class="topbar reveal" style="--delay: 100ms">
+            <div class="search">
+              <strong style="font-family: 'Sora', sans-serif">Today</strong>
+              <span class="search__hint"
+                >不是“我在哪个 project 里”，而是“我今天要把什么推进到可交付”。</span
+              >
+            </div>
+            <div class="chipbar">
+              <span class="chip chip--strong">Build for Future</span>
+              <span class="chip">Feature-first</span>
+              <span class="chip">Delivery-centered</span>
+              <span class="chip">Human-steered</span>
+            </div>
+          </section>
+
+          <section class="hero reveal" style="--delay: 180ms">
+            <div class="hero__grid">
+              <div>
+                <div class="kicker">Next-Gen Chinese Agent Workspace</div>
+                <h1>让开发者围绕交付结果，而不是围绕会话工作。</h1>
+                <p class="hero__lead">
+                  我眼中的下一代产品，不再从 <code>Project</code> 进入，也不再以
+                  <code>Session</code> 为中心。首页先展示正在推进的 Feature、当前阻塞点、Agent
+                  分工和交付证据，让“功能推进状态”成为主舞台。
+                </p>
+                <div class="hero__actions">
+                  <button class="button button--solid">Start a Feature</button>
+                  <button class="button">Resume Delivery</button>
+                  <button class="button">Review Evidence</button>
+                </div>
+              </div>
+
+              <div class="hero__card">
+                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: start">
+                  <div>
+                    <small>Delivery Pulse</small>
+                    <h3 style="margin: 8px 0 0; font-family: 'Sora', sans-serif; font-size: 28px">
+                      今天不是写代码。<br />今天是把一个改动真正送出去。
+                    </h3>
+                  </div>
+                  <span class="pulse">3 agents active</span>
+                </div>
+
+                <div class="hero__meter">
+                  <div class="hero__meter-row">
+                    <span>Context</span>
+                    <div class="bar"><span style="--value: 84%"></span></div>
+                    <strong>84</strong>
+                  </div>
+                  <div class="hero__meter-row">
+                    <span>Evidence</span>
+                    <div class="bar"><span style="--value: 68%"></span></div>
+                    <strong>68</strong>
+                  </div>
+                  <div class="hero__meter-row">
+                    <span>Review</span>
+                    <div class="bar"><span style="--value: 53%"></span></div>
+                    <strong>53</strong>
+                  </div>
+                </div>
+
+                <div class="hero__mini-grid">
+                  <div class="stat-tile">
+                    <small>Running Features</small>
+                    <strong>07</strong>
+                  </div>
+                  <div class="stat-tile">
+                    <small>Ready for Review</small>
+                    <strong>02</strong>
+                  </div>
+                  <div class="stat-tile">
+                    <small>Blocked</small>
+                    <strong>01</strong>
+                  </div>
+                  <div class="stat-tile">
+                    <small>Shipped This Week</small>
+                    <strong>11</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="content">
+            <section class="board reveal" style="--delay: 260ms">
+              <div class="board__head">
+                <div class="title">
+                  <h2>Feature Control Board</h2>
+                  <p>首页不再是 project list，而是功能推进总台。</p>
+                </div>
+                <div class="segmented">
+                  <button class="active">Today</button>
+                  <button>Review</button>
+                  <button>Blocked</button>
+                  <button>Shipped</button>
+                </div>
+              </div>
+
+              <div class="feature-strip" id="featureStrip">
+                <article class="feature-card active" data-feature="ime-fix">
+                  <div class="feature-card__top">
+                    <span class="status-dot" data-tone="progress">In Progress</span>
+                    <span class="status-dot" data-tone="review">2 proofs</span>
+                  </div>
+                  <h3>修复中文输入法 Enter 误发送，并补齐发送策略设定</h3>
+                  <p>不再让用户自己记住哪个 session 在做什么，直接从 Feature 看状态和证据。</p>
+                  <div class="mini-labels">
+                    <span>hive-cn</span>
+                    <span>IME</span>
+                    <span>Settings</span>
+                  </div>
+                </article>
+
+                <article class="feature-card" data-feature="new-home">
+                  <div class="feature-card__top">
+                    <span class="status-dot" data-tone="review">Ready for Review</span>
+                    <span class="status-dot" data-tone="ship">PR waiting</span>
+                  </div>
+                  <h3>重设计首页，让“功能推进状态”取代当前 project-first 入口</h3>
+                  <p>把今天要推进的事情放到前面，而不是让用户先进某个仓库再找线程。</p>
+                  <div class="mini-labels">
+                    <span>Home</span>
+                    <span>Feature Board</span>
+                    <span>UX</span>
+                  </div>
+                </article>
+
+                <article class="feature-card" data-feature="proof-chain">
+                  <div class="feature-card__top">
+                    <span class="status-dot" data-tone="blocked">Blocked</span>
+                    <span class="status-dot">missing tests</span>
+                  </div>
+                  <h3>搭建 Delivery Evidence 链路，把 test / diff / review 变成显式对象</h3>
+                  <p>交付不是对话结束时才发生，而是整个推进过程里一直被看见。</p>
+                  <div class="mini-labels">
+                    <span>Evidence</span>
+                    <span>Checks</span>
+                    <span>Risk</span>
+                  </div>
+                </article>
+
+                <article class="feature-card" data-feature="multi-agent">
+                  <div class="feature-card__top">
+                    <span class="status-dot" data-tone="ship">Shipped</span>
+                    <span class="status-dot">4 runs</span>
+                  </div>
+                  <h3>多 Agent 运行视图，把“谁在做什么”从日志里抽出来</h3>
+                  <p>不是开多个 session，而是让一个 Feature 拥有多条可比较的执行线程。</p>
+                  <div class="mini-labels">
+                    <span>Agent</span>
+                    <span>Runs</span>
+                    <span>Compare</span>
+                  </div>
+                </article>
+              </div>
+
+              <div class="detail">
+                <section class="detail__panel" id="detailPanel">
+                  <div class="detail__title">
+                    <div class="detail__meta">
+                      <span class="pill pill--dark" id="detailState">In Progress</span>
+                      <span class="pill" id="detailWorkspace">workspace: hive-cn</span>
+                      <span class="pill" id="detailBranch">branch: feature/ime-enter-flow</span>
+                    </div>
+                    <h2 id="detailTitle">修复中文输入法 Enter 误发送，并补齐发送策略设定</h2>
+                    <p id="detailSummary">
+                      当前不是“继续上次那条 session”，而是继续推进这个 Feature。系统应该自动把 worktree、agent
+                      run、验证证据和交付状态收拢到同一个对象里。
+                    </p>
+                  </div>
+
+                  <div class="detail__pills" id="detailPills">
+                    <span class="soft-pill">IME safety</span>
+                    <span class="soft-pill">shortcut policy</span>
+                    <span class="soft-pill">settings sync</span>
+                    <span class="soft-pill">zh-CN defaults</span>
+                  </div>
+
+                  <div class="detail__story">
+                    <div class="story-card">
+                      <h4>推进叙事</h4>
+                      <div class="story-list" id="storyList">
+                        <div class="story-item">
+                          <strong>定义目标</strong>
+                          <span>锁定中文输入法下的 Enter 误触发，明确发送规则和换行规则。</span>
+                        </div>
+                        <div class="story-item">
+                          <strong>分配执行线程</strong>
+                          <span>一个 agent 负责输入事件分析，一个 agent 负责设置与默认值。</span>
+                        </div>
+                        <div class="story-item">
+                          <strong>收集交付证据</strong>
+                          <span>需要 diff、测试、手动 smoke 记录以及行为说明，不再只保留聊天结论。</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="story-card">
+                      <h4>下一步动作</h4>
+                      <div class="story-list" id="nextActionList">
+                        <div class="story-item">
+                          <strong>补齐 smoke proof</strong>
+                          <span>需要一条“中文输入中按 Enter 不发送”的手动验证证据。</span>
+                        </div>
+                        <div class="story-item">
+                          <strong>更新设置文案</strong>
+                          <span>把发送键策略描述成用户可理解的行为，而不是技术实现。</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="stack">
+                  <section class="stack-card">
+                    <div class="title">
+                      <h3>Agent Runs</h3>
+                      <p>Session 不再是主角，而是 Feature 的执行线程。</p>
+                    </div>
+                    <div class="run-list" id="runList">
+                      <div class="run-chip">
+                        <strong>Run A · Input Event Audit</strong>
+                        <small>Claude Code · 找出 IME composing / keyCode 229 处理缺口</small>
+                      </div>
+                      <div class="run-chip">
+                        <strong>Run B · Settings Defaults</strong>
+                        <small>Codex · 统一 shift+enter / enter 行为在中文环境的默认说明</small>
+                      </div>
+                      <div class="run-chip">
+                        <strong>Run C · Regression Check</strong>
+                        <small>Local smoke · 验证英文输入不回归、IME 输入不误发</small>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="stack-card">
+                    <div class="title">
+                      <h3>Evidence Locker</h3>
+                      <p>交付证据显式化，而不是藏在对话历史里。</p>
+                    </div>
+                    <div class="evidence-list" id="evidenceList">
+                      <div class="evidence-row">
+                        <span class="agent-badge">DF</span>
+                        <div>
+                          <strong>Diff attached</strong>
+                          <p>message composer shortcut behavior updated</p>
+                        </div>
+                        <span class="state state--ok">ready</span>
+                      </div>
+                      <div class="evidence-row">
+                        <span class="agent-badge">TS</span>
+                        <div>
+                          <strong>Test coverage</strong>
+                          <p>needs IME-specific regression test</p>
+                        </div>
+                        <span class="state state--warn">partial</span>
+                      </div>
+                      <div class="evidence-row">
+                        <span class="agent-badge">RV</span>
+                        <div>
+                          <strong>Review notes</strong>
+                          <p>behavior rationale drafted, pending product wording</p>
+                        </div>
+                        <span class="state state--ok">ready</span>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </section>
+
+            <aside class="insight reveal" style="--delay: 340ms">
+              <div class="insight__head">
+                <div class="title">
+                  <h3>Delivery Radar</h3>
+                  <p>右侧看到的不是“聊天摘要”，而是“交付判断”。</p>
+                </div>
+                <span class="chip">Today / Mar 27</span>
+              </div>
+
+              <div class="ring">
+                <div class="ring__label">
+                  <small>Merge Readiness</small>
+                  <strong>74%</strong>
+                </div>
+              </div>
+
+              <div class="radar">
+                <div class="metric">
+                  <small>Active Features</small>
+                  <strong>07</strong>
+                </div>
+                <div class="metric">
+                  <small>Ready Today</small>
+                  <strong>02</strong>
+                </div>
+                <div class="metric">
+                  <small>Agent Load</small>
+                  <strong>63%</strong>
+                </div>
+                <div class="metric">
+                  <small>Risk Flags</small>
+                  <strong>01</strong>
+                </div>
+              </div>
+
+              <section class="stack-card" style="padding: 0; border: 0; background: transparent">
+                <div class="title">
+                  <h3>Merge Gate</h3>
+                  <p>每个 Feature 要明确知道离交付还差什么。</p>
+                </div>
+                <div class="checklist" id="gateList">
+                  <div class="checkpoint">
+                    <span class="agent-badge">01</span>
+                    <div>
+                      <strong>Context is stable</strong>
+                      <p>需求、范围、相关文件、风险点已经收拢</p>
+                    </div>
+                    <span class="state state--ok">done</span>
+                  </div>
+                  <div class="checkpoint">
+                    <span class="agent-badge">02</span>
+                    <div>
+                      <strong>Evidence is enough</strong>
+                      <p>需要再补一条 IME smoke 证明，避免只是“理论上没问题”</p>
+                    </div>
+                    <span class="state state--warn">need</span>
+                  </div>
+                  <div class="checkpoint">
+                    <span class="agent-badge">03</span>
+                    <div>
+                      <strong>Review is framed</strong>
+                      <p>准备好为什么这样设计发送规则的说明</p>
+                    </div>
+                    <span class="state state--ok">done</span>
+                  </div>
+                  <div class="checkpoint">
+                    <span class="agent-badge">04</span>
+                    <div>
+                      <strong>Merge risk acceptable</strong>
+                      <p>仍需关注英文输入路径和快捷键习惯回归</p>
+                    </div>
+                    <span class="state state--hold">watch</span>
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const features = {
+        'ime-fix': {
+          state: 'In Progress',
+          workspace: 'workspace: hive-cn',
+          branch: 'branch: feature/ime-enter-flow',
+          title: '修复中文输入法 Enter 误发送，并补齐发送策略设定',
+          summary:
+            '当前不是“继续上次那条 session”，而是继续推进这个 Feature。系统应该自动把 worktree、agent run、验证证据和交付状态收拢到同一个对象里。',
+          pills: ['IME safety', 'shortcut policy', 'settings sync', 'zh-CN defaults'],
+          story: [
+            ['定义目标', '锁定中文输入法下的 Enter 误触发，明确发送规则和换行规则。'],
+            ['分配执行线程', '一个 agent 负责输入事件分析，一个 agent 负责设置与默认值。'],
+            ['收集交付证据', '需要 diff、测试、手动 smoke 记录以及行为说明，不再只保留聊天结论。']
+          ],
+          next: [
+            ['补齐 smoke proof', '需要一条“中文输入中按 Enter 不发送”的手动验证证据。'],
+            ['更新设置文案', '把发送键策略描述成用户可理解的行为，而不是技术实现。']
+          ],
+          runs: [
+            ['Run A · Input Event Audit', 'Claude Code · 找出 IME composing / keyCode 229 处理缺口'],
+            ['Run B · Settings Defaults', 'Codex · 统一 shift+enter / enter 行为在中文环境的默认说明'],
+            ['Run C · Regression Check', 'Local smoke · 验证英文输入不回归、IME 输入不误发']
+          ],
+          evidence: [
+            ['DF', 'Diff attached', 'message composer shortcut behavior updated', 'ready'],
+            ['TS', 'Test coverage', 'needs IME-specific regression test', 'partial'],
+            ['RV', 'Review notes', 'behavior rationale drafted, pending product wording', 'ready']
+          ],
+          gates: [
+            ['01', 'Context is stable', '需求、范围、相关文件、风险点已经收拢', 'done'],
+            ['02', 'Evidence is enough', '需要再补一条 IME smoke 证明，避免只是“理论上没问题”', 'need'],
+            ['03', 'Review is framed', '准备好为什么这样设计发送规则的说明', 'done'],
+            ['04', 'Merge risk acceptable', '仍需关注英文输入路径和快捷键习惯回归', 'watch']
+          ]
+        },
+        'new-home': {
+          state: 'Ready for Review',
+          workspace: 'workspace: next-product',
+          branch: 'branch: concept/feature-home',
+          title: '重设计首页，让“功能推进状态”取代当前 project-first 入口',
+          summary:
+            '用户进入产品后第一眼看到的，不该是 project list，而应该是今天正在推进的结果、阻塞点和 ready 状态。这是对象模型层级的改变，不是排版美化。',
+          pills: ['home control board', 'feature queue', 'resume lane', 'delivery pulse'],
+          story: [
+            ['改写首页中心对象', '首页从 project 列表改为 feature 控制台，优先展示推进状态。'],
+            ['建立恢复机制', '用户应该能一眼找到“继续推进哪个 Feature”，而不是去回忆上次开的会话。'],
+            ['显化下一步动作', '系统明确告诉用户今天最值得推进的动作是什么。']
+          ],
+          next: [
+            ['校准信息密度', '确保高频使用下不拥挤，首次进入时也不会失焦。'],
+            ['验证视觉方向', '确认首页既现代，又保有工程工作台的克制感。']
+          ],
+          runs: [
+            ['Run A · IA structure', 'Codex · 重排首页层级，弱化 project-first'],
+            ['Run B · Visual prototype', 'Design agent · 做高保真布局探索'],
+            ['Run C · Daily-driver check', 'Manual test · 判断是否真比现状更好用']
+          ],
+          evidence: [
+            ['UI', 'Hi-fi prototype', 'feature control board visual ready', 'ready'],
+            ['IA', 'Object model draft', 'project -> feature -> run hierarchy drafted', 'ready'],
+            ['UX', 'Interaction notes', 'resume flow needs one more pass', 'partial']
+          ],
+          gates: [
+            ['01', 'Value proposition clear', '首页为什么不该再 project-first 已讲清楚', 'done'],
+            ['02', 'Feature hierarchy tested', '需要再验证真实使用下切换效率', 'need'],
+            ['03', 'Visual consistency', 'Hero, board, detail, radar 已形成统一语言', 'done'],
+            ['04', 'Implementation path bounded', '还需要拆成 renderer 实现批次', 'watch']
+          ]
+        },
+        'proof-chain': {
+          state: 'Blocked',
+          workspace: 'workspace: next-product',
+          branch: 'branch: architecture/evidence-chain',
+          title: '搭建 Delivery Evidence 链路，把 test / diff / review 变成显式对象',
+          summary:
+            '当前产品里“交付证据”被散落在 session、git、PR、评论和人的记忆里。下一代产品要把它收拢成 Feature 的组成部分，否则交付判断仍然是模糊的。',
+          pills: ['evidence model', 'checks', 'risk framing', 'merge gate'],
+          story: [
+            ['定义证据模型', '明确什么算证据，什么只是执行痕迹。'],
+            ['建立 merge gate', '让每个 Feature 都能被问出：离 review / merge / ship 还差什么。'],
+            ['减少主观判断', '把“感觉差不多了”改成“证据已经足够了”。']
+          ],
+          next: [
+            ['补齐 schema', '需要定义 Evidence 对象的最小字段集。'],
+            ['连接运行结果', '需要把 agent run 输出和证据对象建立稳定关联。']
+          ],
+          runs: [
+            ['Run A · Data model', '探索 Evidence / Gate / Risk 的最小抽象'],
+            ['Run B · UI framing', '设计右侧 Delivery Radar 和 Merge Gate 视图'],
+            ['Run C · Validation path', '连接 test / diff / review 信号，尚未闭环']
+          ],
+          evidence: [
+            ['MD', 'Model sketch', 'object model drafted, not implemented', 'partial'],
+            ['UX', 'Radar concept', 'visual framing exists', 'ready'],
+            ['TS', 'Verification flow', 'no end-to-end proof chain yet', 'hold']
+          ],
+          gates: [
+            ['01', 'Object model exists', '已有草图，但还未进入实现层', 'need'],
+            ['02', 'Proof collection works', 'test / lint / review 仍未打通', 'watch'],
+            ['03', 'Gate language clear', '已经知道应该围绕交付状态表达', 'done'],
+            ['04', 'Implementation low risk', '仍需避免过早过度建模', 'watch']
+          ]
+        },
+        'multi-agent': {
+          state: 'Shipped',
+          workspace: 'workspace: concept-lab',
+          branch: 'branch: shipped/agent-runs',
+          title: '多 Agent 运行视图，把“谁在做什么”从日志里抽出来',
+          summary:
+            '这部分已经证明成立：Feature 下面应该能拥有多条并行执行线程，用户看到的不是乱糟糟的日志，而是谁在做什么、产出了什么、值不值得继续采用。',
+          pills: ['agent compare', 'parallel runs', 'thread ownership', 'traceability'],
+          story: [
+            ['从会话到运行线程', '把 session 理解为执行轨迹，而不是工作对象本身。'],
+            ['建立并行比较', '允许多个 agent 在同一个 Feature 下跑不同策略。'],
+            ['沉淀可追踪性', '任何结果都能回溯到具体 run。']
+          ],
+          next: [
+            ['接入更多证据视图', '下一步把 run 结果和 merge gate 绑定。'],
+            ['优化视觉切换', '让 run compare 更像产品主舞台而不是附属工具。']
+          ],
+          runs: [
+            ['Run A · Planner', '生成 Feature 任务拆分'],
+            ['Run B · Implementer', '提交代码和 diff'],
+            ['Run C · Reviewer', '产生 review 和风险摘要']
+          ],
+          evidence: [
+            ['RN', 'Run timeline', 'multi-run structure validated', 'ready'],
+            ['RV', 'Review summary', 'parallel run comparison works', 'ready'],
+            ['UX', 'Operator flow', 'needs stronger default choreography', 'partial']
+          ],
+          gates: [
+            ['01', 'Run structure validated', '并行线程模型已被证明有效', 'done'],
+            ['02', 'Operator clarity', '仍需减少首次理解成本', 'need'],
+            ['03', 'Delivery coupling', '还需和 Feature 状态做更强绑定', 'watch'],
+            ['04', 'Daily value', '对多改动并行推进用户价值显著', 'done']
+          ]
+        }
+      }
+
+      function renderList(targetId, items, mapper) {
+        const target = document.getElementById(targetId)
+        target.innerHTML = items.map(mapper).join('')
+      }
+
+      function stateClass(value) {
+        if (value === 'ready' || value === 'done') return 'state--ok'
+        if (value === 'partial' || value === 'need') return 'state--warn'
+        return 'state--hold'
+      }
+
+      function setFeature(id) {
+        const data = features[id]
+        if (!data) return
+
+        document.querySelectorAll('.feature-card').forEach((card) => {
+          card.classList.toggle('active', card.dataset.feature === id)
+        })
+
+        document.getElementById('detailState').textContent = data.state
+        document.getElementById('detailWorkspace').textContent = data.workspace
+        document.getElementById('detailBranch').textContent = data.branch
+        document.getElementById('detailTitle').textContent = data.title
+        document.getElementById('detailSummary').textContent = data.summary
+
+        renderList(
+          'detailPills',
+          data.pills,
+          (item) => `<span class="soft-pill">${item}</span>`
+        )
+
+        renderList(
+          'storyList',
+          data.story,
+          ([title, desc]) => `
+            <div class="story-item">
+              <strong>${title}</strong>
+              <span>${desc}</span>
+            </div>
+          `
+        )
+
+        renderList(
+          'nextActionList',
+          data.next,
+          ([title, desc]) => `
+            <div class="story-item">
+              <strong>${title}</strong>
+              <span>${desc}</span>
+            </div>
+          `
+        )
+
+        renderList(
+          'runList',
+          data.runs,
+          ([title, desc]) => `
+            <div class="run-chip">
+              <strong>${title}</strong>
+              <small>${desc}</small>
+            </div>
+          `
+        )
+
+        renderList(
+          'evidenceList',
+          data.evidence,
+          ([badge, title, desc, state]) => `
+            <div class="evidence-row">
+              <span class="agent-badge">${badge}</span>
+              <div>
+                <strong>${title}</strong>
+                <p>${desc}</p>
+              </div>
+              <span class="state ${stateClass(state)}">${state}</span>
+            </div>
+          `
+        )
+
+        renderList(
+          'gateList',
+          data.gates,
+          ([num, title, desc, state]) => `
+            <div class="checkpoint">
+              <span class="agent-badge">${num}</span>
+              <div>
+                <strong>${title}</strong>
+                <p>${desc}</p>
+              </div>
+              <span class="state ${stateClass(state)}">${state}</span>
+            </div>
+          `
+        )
+      }
+
+      document.querySelectorAll('.feature-card').forEach((card) => {
+        card.addEventListener('click', () => setFeature(card.dataset.feature))
+      })
+    </script>
+  </body>
+</html>

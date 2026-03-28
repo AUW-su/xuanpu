@@ -23,7 +23,7 @@ export function SortProjectsButton(): React.JSX.Element {
     <Button
       variant="ghost"
       size="icon"
-      className="h-6 w-6"
+      className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70"
       title={t('sidebar.sortProjectsTitle')}
       onClick={handleSort}
       disabled={isSorting}

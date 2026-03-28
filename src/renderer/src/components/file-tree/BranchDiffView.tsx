@@ -178,12 +178,14 @@ export function BranchDiffView({ worktreePath }: BranchDiffViewProps): React.JSX
   return (
     <div className="flex flex-col h-full" data-testid="branch-diff-view">
       {/* Branch selector */}
-      <div className="px-2 py-1.5 border-b border-border relative" ref={dropdownRef}>
+      <div
+        className="relative border-b border-border/60 bg-background/62 px-3 py-2"
+        ref={dropdownRef}
+      >
         <button
           type="button"
           className={cn(
-            'flex items-center gap-1.5 w-full px-2 py-1 text-xs rounded',
-            'border border-border bg-background hover:bg-accent/50 transition-colors'
+            'flex w-full items-center gap-1.5 rounded-lg border border-border/70 bg-background px-2.5 py-1.5 text-xs transition-colors hover:bg-accent/30'
           )}
           onClick={() => setDropdownOpen((prev) => !prev)}
           disabled={isLoadingBranches}
@@ -201,9 +203,9 @@ export function BranchDiffView({ worktreePath }: BranchDiffViewProps): React.JSX
         </button>
 
         {dropdownOpen && (
-          <div className="absolute left-0 right-0 mt-1 mx-2 z-50 bg-popover border border-border rounded-md shadow-md max-h-64 flex flex-col">
+          <div className="absolute left-0 right-0 z-50 mx-3 mt-2 flex max-h-64 flex-col rounded-xl border border-border bg-popover shadow-lg">
             {/* Search input */}
-            <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-border">
+            <div className="flex items-center gap-1.5 border-b border-border/60 px-2 py-1.5">
               <Search className="h-3 w-3 text-muted-foreground shrink-0" />
               <input
                 ref={searchInputRef}
@@ -321,7 +323,7 @@ export function BranchDiffView({ worktreePath }: BranchDiffViewProps): React.JSX
       )}
 
       {/* Status bar */}
-      <div className="flex items-center justify-between px-2 py-1 border-t border-border bg-muted/30">
+      <div className="flex items-center justify-between border-t border-border/60 bg-background/62 px-3 py-2">
         <span className="text-[10px] text-muted-foreground">
           {selectedBranch
             ? t('fileTree.branchDiff.changedCount', {
@@ -335,7 +337,7 @@ export function BranchDiffView({ worktreePath }: BranchDiffViewProps): React.JSX
         </span>
         <button
           className={cn(
-            'p-0.5 text-muted-foreground hover:text-foreground rounded',
+            'rounded-md border border-transparent p-1 text-muted-foreground transition-colors hover:border-border/70 hover:bg-background hover:text-foreground',
             isLoadingFiles && 'animate-spin'
           )}
           onClick={handleRefresh}

@@ -286,8 +286,10 @@ export function ProjectItem({
         <ContextMenuTrigger asChild>
           <div
             className={cn(
-              'group flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer transition-colors',
-              isSelected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50',
+              'group flex items-center gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-colors',
+              isSelected
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-sidebar-border/60 shadow-sm'
+                : 'hover:bg-sidebar-accent/70',
               isDragging && 'opacity-50',
               isDragOver && 'border-t-2 border-primary'
             )}
@@ -313,7 +315,7 @@ export function ProjectItem({
             <Button
               variant="ghost"
               size="icon"
-              className="h-5 w-5 p-0 hover:bg-transparent"
+              className="h-5 w-5 rounded-md p-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
               onClick={handleToggleExpand}
             >
               <ChevronRight
@@ -345,10 +347,10 @@ export function ProjectItem({
                   <HighlightedText
                     text={project.name}
                     indices={nameMatchIndices}
-                    className="text-sm truncate block"
+                    className="text-sm font-medium truncate block"
                   />
                 ) : (
-                  <span className="text-sm truncate block" title={project.path}>
+                  <span className="text-sm font-medium truncate block" title={project.path}>
                     {project.name}
                   </span>
                 )}
@@ -356,7 +358,7 @@ export function ProjectItem({
                   <HighlightedText
                     text={project.path}
                     indices={pathMatchIndices}
-                    className="text-[10px] text-muted-foreground truncate block"
+                    className="text-[11px] text-muted-foreground/90 truncate block mt-0.5"
                   />
                 )}
               </div>
@@ -379,7 +381,10 @@ export function ProjectItem({
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn('h-5 w-5 p-0 cursor-pointer', 'hover:bg-accent')}
+                className={cn(
+                  'h-6 w-6 rounded-md p-0 cursor-pointer text-muted-foreground',
+                  'hover:bg-sidebar-accent hover:text-foreground'
+                )}
                 onClick={handleCreateWorktree}
                 onContextMenu={(e) => {
                   e.preventDefault()

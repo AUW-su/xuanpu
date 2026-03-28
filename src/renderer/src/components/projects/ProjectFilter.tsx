@@ -235,7 +235,7 @@ export function ProjectFilter({ value, onChange }: ProjectFilterProps): React.JS
 
   return (
     <div className="relative flex items-center">
-      <Search className="absolute left-3.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+      <Search className="absolute left-4 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
       <input
         ref={inputRef}
         type="text"
@@ -245,7 +245,7 @@ export function ProjectFilter({ value, onChange }: ProjectFilterProps): React.JS
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={t('sidebar.filterProjects')}
-        className="h-8 w-full text-sm px-2 pl-8 pr-12 rounded-md border border-input bg-transparent placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        className="h-10 w-full text-sm px-3 pl-10 pr-12 rounded-xl border border-input/80 bg-background/70 placeholder:text-muted-foreground shadow-none focus:outline-none focus:ring-[3px] focus:ring-ring/15 focus:border-ring/50"
         data-testid="project-filter-input"
       />
       {value ? (
@@ -254,13 +254,13 @@ export function ProjectFilter({ value, onChange }: ProjectFilterProps): React.JS
             handleChange('')
             inputRef.current?.focus()
           }}
-          className="absolute right-3.5 h-3.5 w-3.5 flex items-center justify-center text-muted-foreground hover:text-foreground"
+          className="absolute right-4 h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground"
           data-testid="project-filter-clear"
         >
           <X className="h-3 w-3" />
         </button>
       ) : (
-        <kbd className="absolute right-2 pointer-events-none text-[10px] text-muted-foreground/60 bg-muted/50 border border-border/50 rounded px-1 py-0.5 font-sans">
+        <kbd className="absolute right-2.5 pointer-events-none text-[10px] text-muted-foreground/60 bg-background/70 border border-border/60 rounded-md px-1.5 py-0.5 font-sans">
           ⌘G
         </kbd>
       )}

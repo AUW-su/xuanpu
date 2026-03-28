@@ -109,7 +109,7 @@ export function LeftSidebar(): React.JSX.Element {
   return (
     <div className="flex flex-shrink-0" data-testid="left-sidebar-container">
       <aside
-        className="bg-sidebar text-sidebar-foreground border-r flex flex-col overflow-hidden"
+        className="bg-sidebar/90 text-sidebar-foreground border-r border-sidebar-border/80 flex flex-col overflow-hidden backdrop-blur-xl"
         style={{ width: leftSidebarWidth }}
         data-testid="left-sidebar"
         data-width={leftSidebarWidth}
@@ -117,7 +117,7 @@ export function LeftSidebar(): React.JSX.Element {
         aria-label={t('leftSidebar.ariaLabel')}
       >
         {connectionModeActive ? (
-          <div className="p-3 border-b flex items-center justify-between bg-muted/50">
+          <div className="px-4 py-3 border-b border-sidebar-border/80 flex items-center justify-between bg-sidebar/70">
             <div className="flex items-center gap-2 text-sm font-medium min-w-0">
               <Link className="h-4 w-4 text-primary shrink-0" />
               <span className="truncate">{t('sidebar.connectionMode.selectWorktrees')}</span>
@@ -153,7 +153,7 @@ export function LeftSidebar(): React.JSX.Element {
             </div>
           </div>
         ) : (
-          <div className="p-3 border-b flex items-center justify-between">
+          <div className="px-4 py-3 border-b border-sidebar-border/80 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-medium">
               <FolderGit2 className="h-4 w-4" />
               <span>{t('sidebar.projects')}</span>
@@ -166,16 +166,16 @@ export function LeftSidebar(): React.JSX.Element {
           </div>
         )}
         {!connectionModeActive && projectCount > 1 && (
-          <div className="px-3 py-2 border-b">
+          <div className="px-4 py-3 border-b border-sidebar-border/70">
             <ProjectFilter value={filterQuery} onChange={setFilterQuery} />
           </div>
         )}
         {activeLanguages.length > 0 && (
-          <div className="px-3 py-1.5 border-b">
+          <div className="px-4 py-2 border-b border-sidebar-border/70">
             <FilterChips languages={activeLanguages} onRemove={removeLanguage} />
           </div>
         )}
-        <div className="flex-1 overflow-auto p-2" data-testid="sidebar-scroll-container">
+        <div className="flex-1 overflow-auto px-3 py-3" data-testid="sidebar-scroll-container">
           <PinnedList />
           <RecentList />
           <ConnectionList />
@@ -185,7 +185,16 @@ export function LeftSidebar(): React.JSX.Element {
             activeLanguages={activeLanguages}
           />
         </div>
-        {!connectionModeActive && (showUsageIndicator ? <UsageIndicator /> : <SpacesTabBar />)}
+        {!connectionModeActive &&
+          (showUsageIndicator ? (
+            <div className="border-t border-sidebar-border/70">
+              <UsageIndicator />
+            </div>
+          ) : (
+            <div className="border-t border-sidebar-border/70 px-2 py-2">
+              <SpacesTabBar />
+            </div>
+          ))}
       </aside>
       <ResizeHandle onResize={handleResize} direction="left" />
     </div>

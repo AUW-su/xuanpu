@@ -433,12 +433,12 @@ export function QuickActions(): React.JSX.Element | null {
   )
 
   return (
-    <div className="flex items-center gap-3" data-testid="quick-actions">
+    <div className="flex items-center gap-2.5" data-testid="quick-actions">
       {isSwiftProject && xcworkspacePath && !isConnectionMode && (
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
+          className="h-8 rounded-full px-3 gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 cursor-pointer"
           disabled={disabled}
           onClick={() => window.projectOps.openPath(xcworkspacePath)}
           title={t('quickActions.openInXcode')}
@@ -452,7 +452,7 @@ export function QuickActions(): React.JSX.Element | null {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
+          className="h-8 rounded-full px-3 gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 cursor-pointer"
           disabled={disabled}
           onClick={() => {
             const openPath = activePath || selectedProject?.path
@@ -468,7 +468,7 @@ export function QuickActions(): React.JSX.Element | null {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
+        className="h-8 rounded-full px-3 gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('editor')}
         title={t('quickActions.openInApp', { app: editorLabel })}
@@ -484,7 +484,7 @@ export function QuickActions(): React.JSX.Element | null {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
+        className="h-8 rounded-full px-3 gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('terminal')}
         title={t('quickActions.openInApp', { app: terminalLabel })}
@@ -496,7 +496,7 @@ export function QuickActions(): React.JSX.Element | null {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
+        className="h-8 rounded-full px-3 gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('copy-path')}
         title={t('quickActions.copyPath')}
@@ -512,7 +512,7 @@ export function QuickActions(): React.JSX.Element | null {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
+        className="h-8 rounded-full px-3 gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 cursor-pointer"
         disabled={disabled}
         onClick={() => handleAction('finder')}
         title={t('quickActions.revealInManager', { manager: fileManagerName() })}
@@ -525,7 +525,7 @@ export function QuickActions(): React.JSX.Element | null {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 px-2 gap-1.5 text-xs cursor-pointer"
+          className="h-8 rounded-full px-3 gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 cursor-pointer"
           onClick={() => handleAction('copy-branch')}
           title={t('quickActions.copyBranchName')}
           data-testid="quick-action-copy-branch"

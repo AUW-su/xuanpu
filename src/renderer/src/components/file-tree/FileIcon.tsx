@@ -31,5 +31,16 @@ export function FileIcon({
   }
 
   const Icon = info.icon
-  return <Icon className={cn('h-4 w-4 flex-shrink-0', info.colorClass, className)} />
+  return (
+    <span
+      className={cn(
+        'inline-flex size-[18px] flex-shrink-0 items-center justify-center rounded-[6px]',
+        info.containerClass,
+        className
+      )}
+      aria-hidden="true"
+    >
+      <Icon className={cn('h-[13px] w-[13px]', info.colorClass)} />
+    </span>
+  )
 }

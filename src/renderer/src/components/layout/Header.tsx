@@ -487,38 +487,46 @@ export function Header(): React.JSX.Element {
 
   return (
     <header
-      className="h-12 border-b bg-background flex items-center justify-between px-4 flex-shrink-0 select-none"
+      className="h-[54px] border-b border-border/70 bg-background/90 backdrop-blur-xl flex items-center justify-between px-5 flex-shrink-0 select-none"
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       data-testid="header"
     >
       {/* Spacer for macOS traffic lights */}
-      {isMac() && <div className="w-16 flex-shrink-0" />}
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        <img src={hiveLogo} alt="Hive" className="h-5 w-5 shrink-0 rounded" draggable={false} />
-        {isConnectionMode && selectedConnection ? (
-          <span className="text-sm font-medium truncate" data-testid="header-connection-info">
-            {selectedConnection.name}
-            <span className="text-primary font-normal">
-              {' '}
-              ({selectedConnection.members.map((m) => m.project_name).join(' + ')})
-            </span>
-          </span>
-        ) : selectedProject ? (
-          <span className="text-sm font-medium truncate" data-testid="header-project-info">
-            {selectedProject.name}
-            {selectedWorktree?.branch_name && selectedWorktree.name !== '(no-worktree)' && (
-              <span className="text-primary font-normal"> ({selectedWorktree.branch_name})</span>
-            )}
-          </span>
-        ) : (
-          <span className="text-sm font-medium">Hive</span>
-        )}
+      {isMac() && <div className="w-[72px] flex-shrink-0" />}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 rounded-xl border border-border/60 bg-muted/35 px-3 py-1.5">
+          <img
+            src={hiveLogo}
+            alt="Hive"
+            className="h-5 w-5 shrink-0 rounded-md"
+            draggable={false}
+          />
+          {isConnectionMode && selectedConnection ? (
+            <div className="min-w-0" data-testid="header-connection-info">
+              <div className="text-sm font-semibold truncate">{selectedConnection.name}</div>
+              <div className="text-xs text-muted-foreground truncate">
+                {selectedConnection.members.map((m) => m.project_name).join(' + ')}
+              </div>
+            </div>
+          ) : selectedProject ? (
+            <div className="min-w-0" data-testid="header-project-info">
+              <div className="text-sm font-semibold truncate">{selectedProject.name}</div>
+              <div className="text-xs text-muted-foreground truncate">
+                {selectedWorktree?.branch_name && selectedWorktree.name !== '(no-worktree)'
+                  ? selectedWorktree.branch_name
+                  : t('header.controls.noBranchSelected')}
+              </div>
+            </div>
+          ) : (
+            <span className="text-sm font-semibold">Hive</span>
+          )}
+        </div>
         {vimModeEnabled && (
           <span
             className={cn(
-              'text-[10px] font-mono px-1.5 py-0.5 rounded border select-none',
+              'text-[10px] font-mono px-2 py-1 rounded-md border select-none',
               vimMode === 'normal'
-                ? 'text-muted-foreground bg-muted/50 border-border/50'
+                ? 'text-muted-foreground bg-muted/60 border-border/50'
                 : 'text-primary bg-primary/10 border-primary/30'
             )}
             data-testid="vim-mode-pill"
@@ -554,7 +562,7 @@ export function Header(): React.JSX.Element {
       )}
       <div className="flex-1" />
       <div
-        className="flex items-center gap-2"
+        className="flex items-center gap-1.5"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         {!isConnectionMode &&
@@ -633,7 +641,7 @@ export function Header(): React.JSX.Element {
             <Button
               size="sm"
               variant="outline"
-              className="h-7 text-xs"
+              className="h-8 rounded-full px-3 text-[12px] font-medium"
               onClick={handleReview}
               disabled={isOperating}
               title={t('header.controls.reviewTitle')}
@@ -658,7 +666,7 @@ export function Header(): React.JSX.Element {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-xs text-muted-foreground px-2 h-7"
+                  className="h-8 rounded-full px-3 text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/60"
                   data-testid="review-target-branch-trigger"
                 >
                   vs {reviewTargetBranch || branchInfo?.tracking || 'origin/main'}
@@ -694,7 +702,7 @@ export function Header(): React.JSX.Element {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-xs"
+                className="h-8 rounded-full px-3 text-[12px] font-medium"
                 title={`PR #${attachedPR!.number}`}
                 data-testid="pr-badge"
               >
@@ -784,7 +792,7 @@ export function Header(): React.JSX.Element {
           <Button
             size="sm"
             variant="outline"
-            className="h-7 text-xs"
+            className="h-8 rounded-full px-3 text-[12px] font-medium"
             disabled
             data-testid="pr-creating-button"
           >
@@ -799,7 +807,7 @@ export function Header(): React.JSX.Element {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-xs"
+                className="h-8 rounded-full px-3 text-[12px] font-medium"
                 onClick={handleCreatePR}
                 onContextMenu={(e) => {
                   e.preventDefault()
@@ -858,7 +866,7 @@ export function Header(): React.JSX.Element {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-xs text-muted-foreground px-2 h-7"
+                  className="h-8 rounded-full px-3 text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/60"
                   data-testid="pr-target-branch-trigger"
                 >
                   → {prTargetBranch || branchInfo?.tracking || 'origin/main'}
@@ -890,6 +898,7 @@ export function Header(): React.JSX.Element {
         <Button
           variant="ghost"
           size="icon"
+          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60"
           onClick={openSessionHistory}
           title={t('header.controls.sessionHistoryTitle')}
           data-testid="session-history-toggle"
@@ -899,6 +908,7 @@ export function Header(): React.JSX.Element {
         <Button
           variant="ghost"
           size="icon"
+          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60"
           onClick={() => openSettings()}
           title={t('header.controls.settingsTitle')}
           data-testid="settings-toggle"
@@ -909,6 +919,7 @@ export function Header(): React.JSX.Element {
           onClick={toggleRightSidebar}
           variant="ghost"
           size="icon"
+          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60"
           title={
             rightSidebarCollapsed
               ? t('header.controls.showSidebar')

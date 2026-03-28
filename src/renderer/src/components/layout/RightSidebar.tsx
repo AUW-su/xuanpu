@@ -103,7 +103,7 @@ export function RightSidebar(): React.JSX.Element {
       <ResizeHandle onResize={handleResize} direction="right" />
       <aside
         ref={sidebarRef}
-        className="bg-sidebar text-sidebar-foreground border-l flex flex-col overflow-hidden"
+        className="flex flex-col overflow-hidden border-l border-sidebar-border/80 bg-sidebar text-sidebar-foreground"
         style={{ width: rightSidebarWidth }}
         data-testid="right-sidebar"
         data-width={rightSidebarWidth}
@@ -112,7 +112,7 @@ export function RightSidebar(): React.JSX.Element {
       >
         {/* Top half: Tabbed sidebar (Changes / Files) */}
         <div
-          className="flex flex-col min-h-0 overflow-hidden"
+          className="flex min-h-0 flex-col overflow-hidden"
           style={{ flex: `${splitFraction} 1 0%` }}
           data-testid="right-sidebar-top"
         >
@@ -136,11 +136,15 @@ export function RightSidebar(): React.JSX.Element {
         </div>
 
         {/* Draggable divider between top and bottom panels */}
-        <ResizeHandle onResize={handleVerticalResize} direction="up" />
+        <ResizeHandle
+          onResize={handleVerticalResize}
+          direction="up"
+          className="h-px border-0 bg-sidebar-border/80 hover:bg-primary/25 active:bg-primary/35"
+        />
 
         {/* Bottom half: Tab panel */}
         <div
-          className="flex flex-col min-h-0 overflow-hidden"
+          className="flex min-h-0 flex-col overflow-hidden bg-background/20"
           style={{ flex: `${1 - splitFraction} 1 0%` }}
           data-testid="right-sidebar-bottom"
         >

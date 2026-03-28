@@ -318,7 +318,7 @@ export const specialFileMap: Record<string, SpecialFileEntry> = {
 
 export type FileIconInfo =
   | { type: 'svg'; src: string }
-  | { type: 'lucide'; icon: LucideIcon; colorClass: string }
+  | { type: 'lucide'; icon: LucideIcon; colorClass: string; containerClass?: string }
 
 /** Resolves a special file entry to a FileIconInfo, or null if entry is empty */
 function resolveSpecial(entry: SpecialFileEntry): FileIconInfo | null {
@@ -327,7 +327,8 @@ function resolveSpecial(entry: SpecialFileEntry): FileIconInfo | null {
     return {
       type: 'lucide',
       icon: entry.lucide,
-      colorClass: entry.color ?? 'text-muted-foreground'
+      colorClass: entry.color ?? 'text-muted-foreground',
+      containerClass: 'bg-background/70 ring-1 ring-border/40'
     }
   }
   return null
@@ -348,7 +349,8 @@ export function getFileIconInfo(
     return {
       type: 'lucide',
       icon: isExpanded ? FolderOpen : Folder,
-      colorClass: 'text-amber-500'
+      colorClass: 'text-amber-600 dark:text-amber-300',
+      containerClass: 'bg-amber-500/12 ring-1 ring-amber-500/22'
     }
   }
 
@@ -365,7 +367,12 @@ export function getFileIconInfo(
 
   // Check .env* pattern (covers .env.anything)
   if (lowerName.startsWith('.env')) {
-    return { type: 'lucide', icon: Lock, colorClass: 'text-yellow-600' }
+    return {
+      type: 'lucide',
+      icon: Lock,
+      colorClass: 'text-yellow-600',
+      containerClass: 'bg-background/70 ring-1 ring-border/40'
+    }
   }
 
   // Check SVG icon by extension
@@ -376,10 +383,20 @@ export function getFileIconInfo(
     // Check lucide fallback by extension
     const fallback = lucideFallbackMap[ext]
     if (fallback) {
-      return { type: 'lucide', icon: fallback.icon, colorClass: fallback.color }
+      return {
+        type: 'lucide',
+        icon: fallback.icon,
+        colorClass: fallback.color,
+        containerClass: 'bg-background/70 ring-1 ring-border/40'
+      }
     }
   }
 
   // Default fallback
-  return { type: 'lucide', icon: File, colorClass: 'text-muted-foreground' }
+  return {
+    type: 'lucide',
+    icon: File,
+    colorClass: 'text-muted-foreground',
+    containerClass: 'bg-background/70 ring-1 ring-border/40'
+  }
 }

@@ -575,8 +575,10 @@ export function WorktreeItem({
       <ContextMenuTrigger asChild>
         <div
           className={cn(
-            'group flex items-center gap-1.5 pl-8 pr-1 py-1 rounded-md cursor-pointer transition-colors',
-            isSelected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50',
+            'group flex items-center gap-2 pl-6 pr-2.5 py-2 rounded-xl cursor-pointer transition-colors',
+            isSelected
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-sidebar-border/60 shadow-sm'
+              : 'hover:bg-sidebar-accent/70',
             isArchiving && 'opacity-50 pointer-events-none',
             isDragging && 'opacity-50',
             isDragOver && 'border-t-2 border-primary'
@@ -687,9 +689,12 @@ export function WorktreeItem({
             ) : (
               renderWorktreeName()
             )}
-            <div className="flex items-center pr-1">
+            <div className="flex items-center pr-1 mt-0.5">
               <ModelIcon worktreeId={worktree.id} className="h-2.5 w-2.5 mr-1 shrink-0" />
-              <span className={cn('text-[11px]', statusClass)} data-testid="worktree-status-text">
+              <span
+                className={cn('text-[11px] leading-none', statusClass)}
+                data-testid="worktree-status-text"
+              >
                 {displayStatus}
               </span>
               <span className="flex-1" />
@@ -727,8 +732,8 @@ export function WorktreeItem({
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  'h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity',
-                  'hover:bg-accent'
+                  'h-6 w-6 rounded-md p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground',
+                  'hover:bg-sidebar-accent hover:text-foreground'
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
