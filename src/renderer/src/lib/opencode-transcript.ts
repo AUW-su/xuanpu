@@ -277,7 +277,7 @@ function mapMessage(rawMessage: unknown, index: number): MappedMessage {
 export function mapOpencodeMessagesToSessionViewMessages(messages: unknown[]): OpenCodeMessage[] {
   if (!Array.isArray(messages)) return []
 
-  return messages
+  const sorted = messages
     .map((message, index) => mapMessage(message, index))
     .sort((a, b) => {
       if (a.sortTime !== undefined && b.sortTime !== undefined && a.sortTime !== b.sortTime) {
@@ -290,4 +290,16 @@ export function mapOpencodeMessagesToSessionViewMessages(messages: unknown[]): O
       return a.originalIndex - b.originalIndex
     })
     .map((item) => item.message)
+
+  // Deduplicate user messages with the same content. The Claude Code backend
+  // creates a synthetic user message AND the SDK may echo the same prompt,
+  // resulting in duplicate user entries in the transcript.
+  const seen = new Set<string>()
+  return sorted.filter((msg) => {
+    if (msg.role !== 'user') return true
+    const key = msg.content.trim()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
 }
