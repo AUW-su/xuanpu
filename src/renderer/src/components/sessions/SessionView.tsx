@@ -353,6 +353,25 @@ function toFilePartsForDisplay(attachments: Attachment[]): MessagePart[] {
     .map((a) => ({ type: 'file' as const, mime: a.mime, url: a.dataUrl, filename: a.name }))
 }
 
+/**
+ * Re-attach cached user message attachments to messages loaded from backend.
+ * The backend transcript doesn't carry image data, so we match user messages
+ * by normalised content and restore the attachments from our local cache.
+ */
+function restoreUserAttachments(
+  messages: OpenCodeMessage[],
+  cache: Map<string, MessagePart[]>
+): OpenCodeMessage[] {
+  if (cache.size === 0) return messages
+  return messages.map((msg) => {
+    if (msg.role === 'user' && !msg.attachments) {
+      const stored = cache.get(msg.content.trim())
+      if (stored) return { ...msg, attachments: stored }
+    }
+    return msg
+  })
+}
+
 function getLatestTodoSnapshotFromParts(
   parts: StreamingPart[] | undefined
 ): TodoTrackerSnapshot | null {
@@ -798,6 +817,11 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     worktreePath: null,
     opencodeSessionId: null
   })
+
+  // Cache user message attachments so they survive transcript refreshes.
+  // Backend-loaded messages don't carry attachment data, so we preserve
+  // them from local messages and re-attach after loadMessages().
+  const userAttachmentsRef = useRef(new Map<string, MessagePart[]>())
 
   const getModelForRequests = useCallback((): SelectedModel | undefined => {
     const state = useSessionStore.getState()
@@ -1441,7 +1465,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       }
 
       if (isCodexSession && loadedMessages.length > 0) {
-        setMessages(loadedMessages)
+        setMessages(restoreUserAttachments(loadedMessages, userAttachmentsRef.current))
       } else if (loadedFromOpenCode) {
         // Guard: don't replace existing messages with an empty transcript.
         // This prevents a race where getMessages returns before the SDK has
@@ -1456,7 +1480,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             : useCache
               ? cachedMessages
               : loadedMessages
-          return nextMessages
+          return restoreUserAttachments(nextMessages, userAttachmentsRef.current)
         })
       } else {
         setMessages((currentMessages) => {
@@ -1464,7 +1488,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           const localOnly = currentMessages.filter((m) => !loadedIds.has(m.id))
           const nextMessages =
             localOnly.length > 0 ? [...loadedMessages, ...localOnly] : loadedMessages
-          return nextMessages
+          return restoreUserAttachments(nextMessages, userAttachmentsRef.current)
         })
       }
 
@@ -3082,7 +3106,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         const durableState = await loadCodexDurableState(sessionId)
         loadedMessages = mergeCodexActivityMessages(loadedMessages, durableState.activities)
       }
-      setMessages(loadedMessages)
+      setMessages(restoreUserAttachments(loadedMessages, userAttachmentsRef.current))
       setViewState({ status: 'connected' })
     } catch (error) {
       console.error('Retry failed:', error)
@@ -3180,13 +3204,13 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             ),
             durableState.activities
           )
-          setMessages(liveMessages)
+          setMessages(restoreUserAttachments(liveMessages, userAttachmentsRef.current))
           return liveMessages.length > 0
         }
       }
 
       if (durableState.messages.length > 0) {
-        setMessages(durableState.messages)
+        setMessages(restoreUserAttachments(durableState.messages, userAttachmentsRef.current))
         return true
       }
     }
@@ -3202,7 +3226,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     const loadedMessages = mapOpencodeMessagesToSessionViewMessages(
       Array.isArray(transcriptResult.messages) ? transcriptResult.messages : []
     )
-    setMessages(loadedMessages)
+    setMessages(restoreUserAttachments(loadedMessages, userAttachmentsRef.current))
     return true
   }, [opencodeSessionId, sessionId, sessionRecord?.agent_sdk, worktreePath])
 
@@ -3443,6 +3467,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
           // Add user message to UI immediately (before response)
           const askFileAttachments = toFilePartsForDisplay(attachments)
+          if (askFileAttachments.length > 0) {
+            userAttachmentsRef.current.set(prefixedQuestion.trim(), askFileAttachments)
+          }
           setMessages((prev) => [
             ...prev,
             createLocalMessage('user', prefixedQuestion, askFileAttachments)
@@ -3531,6 +3558,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         setRevertMessageID(null)
         revertDiffRef.current = null
         const sendFileAttachments = toFilePartsForDisplay(attachments)
+        if (sendFileAttachments.length > 0) {
+          userAttachmentsRef.current.set(trimmedValue.trim(), sendFileAttachments)
+        }
         setMessages((prev) => {
           let base = prev
           if (currentRevertId) {
