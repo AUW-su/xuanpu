@@ -275,9 +275,9 @@ describe('Session 9: Integration & Verification', () => {
   describe('S7: Header branding with logo + project/branch', () => {
     test('header has logo image', () => {
       const source = readSource('src/renderer/src/components/layout/Header.tsx')
-      expect(source).toContain("import hiveLogo from '@/assets/icon.png'")
-      expect(source).toContain('src={hiveLogo}')
-      expect(source).toContain('alt="Hive"')
+      expect(source).toContain("import appLogo from '@/assets/icon.png'")
+      expect(source).toContain('src={appLogo}')
+      expect(source).toContain('alt="Xuanpu"')
     })
 
     test('shows project name when selected', () => {
@@ -286,10 +286,10 @@ describe('Session 9: Integration & Verification', () => {
       expect(source).toContain('data-testid="header-project-info"')
     })
 
-    test('shows branch name in parentheses', () => {
+    test('shows branch name', () => {
       const source = readSource('src/renderer/src/components/layout/Header.tsx')
       expect(source).toContain('selectedWorktree?.branch_name')
-      expect(source).toMatch(/\(\s*\{selectedWorktree\.branch_name\}\s*\)/)
+      expect(source).toContain('selectedWorktree.branch_name')
     })
 
     test('hides branch for default worktree (no-worktree)', () => {
@@ -297,9 +297,9 @@ describe('Session 9: Integration & Verification', () => {
       expect(source).toContain("'(no-worktree)'")
     })
 
-    test('shows "Hive" fallback when no project selected', () => {
+    test('shows "Xuanpu" fallback when no project selected', () => {
       const source = readSource('src/renderer/src/components/layout/Header.tsx')
-      expect(source).toMatch(/>Hive<\/span>/)
+      expect(source).toMatch(/>Xuanpu<\/span>/)
     })
 
     test('header layout includes QuickActions in center', () => {

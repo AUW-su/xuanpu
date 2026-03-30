@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hive — AI Agent Orchestrator</title>
+  <title>Xuanpu Workbench — AI-native workbench for builders</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-  <meta name="description" content="Run multiple AI coding agents in parallel across projects. One window. Isolated branches. Zero tab chaos. Free and open source.">
-  <meta property="og:title" content="Hive — AI Agent Orchestrator">
-  <meta property="og:description" content="Run Claude Code, OpenCode, and Codex sessions in parallel across projects. One window. Isolated branches. Zero tab chaos.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/morapelker/hive/main/docs/screenshots/hive-ss-1.png">
+  <meta name="description" content="An AI-native workbench for builders. Not a chat box bolted onto an editor. A workspace where projects, context, tasks, agents, changes, and outputs live together.">
+  <meta property="og:title" content="Xuanpu Workbench — AI-native workbench for builders">
+  <meta property="og:description" content="Not a chat box bolted onto an editor. A workspace where projects, context, tasks, agents, changes, and outputs live together.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/slicenferqin/xuanpu/main/docs/social-preview.png">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <style>
@@ -258,15 +258,15 @@
 <body>
   <div class="container">
     <div class="hero">
-      <h1>Hive</h1>
+      <h1>Xuanpu Workbench</h1>
       <p class="subtitle">
-        Stop juggling terminal tabs.<br>
-        Orchestrate your AI coding agents from one window.
+        An AI-native workbench for builders.<br>
+        Projects, context, agents, changes — one workspace.
       </p>
     </div>
 
     <div class="demo" onclick="openModal()">
-      <img src="screenshots/hive-full-demo.gif" alt="Hive demo — orchestrate AI agents across projects">
+      <img src="screenshots/hive-full-demo.gif" alt="Xuanpu Workbench demo — AI-native workspace for projects and agents">
       <div class="play-overlay">
         <div class="play-icon"></div>
       </div>
@@ -274,16 +274,16 @@
 
     <div class="features">
       <div class="feature">
-        <h3>All your agents in one sidebar</h3>
-        <p>Run Claude Code, OpenCode, and Codex sessions across multiple projects. See every agent's status at a glance. Click to switch. No more hunting through terminal tabs.</p>
+        <h3>One workspace for everything</h3>
+        <p>Projects, agent sessions, file trees, diffs, and git state — all in a single window. No more scattering context across terminal tabs, editors, and browser windows.</p>
       </div>
       <div class="feature">
         <h3>Isolated branches by default</h3>
-        <p>Each agent runs on its own git worktree branch. Two agents can work on the same repo simultaneously without stepping on each other. No conflicts, no stashing.</p>
+        <p>Every task runs on its own git worktree branch. Multiple agents can work on the same repo simultaneously without conflicts, no stashing, no coordination overhead.</p>
       </div>
       <div class="feature">
-        <h3>Connections: cross-repo AI context</h3>
-        <p>Link multiple repositories together so a single agent session sees your entire stack. Frontend, backend, shared libraries — one agent plans and implements across all of them in one pass.</p>
+        <h3>Cross-repo context with Connections</h3>
+        <p>Link repositories together so a single agent session sees your entire stack. Frontend, backend, shared libraries — one agent reasons and implements across all of them in one pass.</p>
       </div>
     </div>
 
@@ -291,19 +291,19 @@
       <h2>Install</h2>
       <div class="install-cmd" onclick="copyInstall(this)">
         <span class="copy-hint">click to copy</span>
-        brew tap morapelker/hive && brew install --cask hive
+        brew tap slicenferqin/xuanpu && brew install --cask xuanpu
       </div>
       <p style="margin-top: 16px; color: #555; font-size: 0.8rem;">
-        Or download the .dmg from <a href="https://github.com/morapelker/hive/releases/latest" style="color: #888;">GitHub Releases</a>
+        Or download the .dmg from <a href="https://github.com/slicenferqin/xuanpu/releases/latest" style="color: #888;">GitHub Releases</a>
       </p>
     </div>
 
     <p class="meta">Free. Open source. MIT licensed. macOS.</p>
 
     <div class="links">
-      <a href="https://github.com/morapelker/hive">GitHub</a>
-      <a href="https://github.com/morapelker/hive/issues">Issues</a>
-      <a href="https://github.com/morapelker/hive/discussions">Discussions</a>
+      <a href="https://github.com/slicenferqin/xuanpu">GitHub</a>
+      <a href="https://github.com/slicenferqin/xuanpu/issues">Issues</a>
+      <a href="https://github.com/slicenferqin/xuanpu/discussions">Discussions</a>
     </div>
   </div>
 
@@ -340,7 +340,7 @@
     });
 
     function copyInstall(el) {
-      navigator.clipboard.writeText('brew tap morapelker/hive && brew install --cask hive');
+      navigator.clipboard.writeText('brew tap slicenferqin/xuanpu && brew install --cask xuanpu');
       el.classList.add('copied');
       el.querySelector('.copy-hint').textContent = 'copied!';
       setTimeout(function() {

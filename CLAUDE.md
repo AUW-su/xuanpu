@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Hive** is an Electron desktop app for managing git projects and worktrees with integrated OpenCode AI coding sessions. Built with Electron 33 + React 19 + TypeScript + Tailwind CSS 4 + SQLite.
+**Xuanpu (玄圃)** is an AI-native desktop workbench for managing git projects and worktrees with integrated AI coding sessions (Claude Code, OpenCode, Codex). Built with Electron 33 + React 19 + TypeScript + Tailwind CSS 4 + SQLite.
 
 ## Commands
 
@@ -43,9 +43,9 @@ All renderer↔main communication goes through the preload layer via typed IPC. 
 
 ### Main Process (`src/main/`)
 
-- **`db/`** — SQLite via better-sqlite3. Schema in `schema.ts` with versioned migrations (CURRENT_SCHEMA_VERSION = 7). Database at `~/.hive/hive.db`. WAL mode, foreign keys enabled.
+- **`db/`** — SQLite via better-sqlite3. Schema in `schema.ts` with versioned migrations (CURRENT_SCHEMA_VERSION = 7). Database at `~/.xuanpu/xuanpu.db`. WAL mode, foreign keys enabled.
 - **`ipc/`** — IPC handler modules registered in `index.ts`. Pattern: `ipcMain.handle(channel, handler)` returning Promise results.
-- **`services/`** — Core services: `git-service.ts` (simple-git wrapper), `opencode-service.ts` (OpenCode SDK lifecycle), `script-runner.ts` (setup/run/archive script execution), `logger.ts` (Winston-style, logs to ~/Library/Logs/hive/).
+- **`services/`** — Core services: `git-service.ts` (simple-git wrapper), `opencode-service.ts` (OpenCode SDK lifecycle), `script-runner.ts` (setup/run/archive script execution), `logger.ts` (Winston-style, logs to ~/Library/Logs/xuanpu/).
 
 ### Preload (`src/preload/`)
 

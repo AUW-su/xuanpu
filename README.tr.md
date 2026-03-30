@@ -1,20 +1,19 @@
 <div align="center">
-  <img src="resources/icon.png" alt="Hive" width="128" />
-  <h1>Hive</h1>
+  <img src="resources/banner.png" alt="Xuanpu Workbench" width="100%" />
   <p><strong>Projeler arası paralel kodlama için açık kaynaklı bir AI ajan orkestratörü.</strong></p>
   <p>Claude Code, OpenCode ve Codex oturumlarını paralel çalıştırın. Tek pencere. İzole dallar. Sıfır sekme kaosu.</p>
   <p>
     <a href="README.md">English</a> | <a href="README.ar.md">العربية</a> | <a href="README.bn.md">বাংলা</a> | <a href="README.bs.md">Bosanski</a> | <a href="README.da.md">Dansk</a> | <a href="README.de.md">Deutsch</a> | <a href="README.el.md">Ελληνικά</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.he.md">עברית</a> | <a href="README.it.md">Italiano</a> | <a href="README.ja.md">日本語</a> | <a href="README.ko.md">한국어</a> | <a href="README.no.md">Norsk</a> | <a href="README.pl.md">Polski</a> | <a href="README.pt-BR.md">Português (BR)</a> | <a href="README.ru.md">Русский</a> | <a href="README.th.md">ไทย</a> | <a href="README.tr.md"><strong>Türkçe</strong></a> | <a href="README.uk.md">Українська</a> | <a href="README.vi.md">Tiếng Việt</a> | <a href="README.zh-CN.md">简体中文</a> | <a href="README.zh-TW.md">繁體中文</a>
   </p>
-    <a href="https://github.com/morapelker/hive/releases/latest"><img src="https://img.shields.io/github/v/release/morapelker/hive?style=flat-square&logo=github&label=version" alt="Son Sürüm" /></a>
-    <a href="https://github.com/morapelker/hive/releases"><img src="https://img.shields.io/github/downloads/morapelker/hive/total?style=flat-square&logo=github" alt="İndirmeler" /></a>
-    <a href="https://github.com/morapelker/hive/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/morapelker/hive/release.yml?style=flat-square&logo=github-actions&label=build" alt="Build Durumu" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/releases/latest"><img src="https://img.shields.io/github/v/release/slicenferqin/xuanpu?style=flat-square&logo=github&label=version" alt="Son Sürüm" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/releases"><img src="https://img.shields.io/github/downloads/slicenferqin/xuanpu/total?style=flat-square&logo=github" alt="İndirmeler" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/slicenferqin/xuanpu/release.yml?style=flat-square&logo=github-actions&label=build" alt="Build Durumu" /></a>
     <a href="#"><img src="https://img.shields.io/badge/macOS-only-000000?style=flat-square&logo=apple&logoColor=white" alt="macOS" /></a>
     <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" /></a>
     <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/electron-33-47848F?style=flat-square&logo=electron&logoColor=white" alt="Electron" /></a>
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/typescript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="Lisans" /></a>
-    <a href="https://github.com/morapelker/hive/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PR'lar Hoş Geldiniz" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PR'lar Hoş Geldiniz" /></a>
   </p>
 </div>
 
@@ -22,9 +21,9 @@
 
 ## İçindekiler
 
-- [Hive Nedir?](#hive-nedir)
+- [Xuanpu Nedir?](#xuanpu-nedir)
 - [Özellikler](#özellikler)
-- [Neden Hive?](#neden-hive)
+- [Neden Xuanpu?](#neden-xuanpu)
 - [Kurulum](#kurulum)
 - [Hızlı Başlangıç](#hızlı-başlangıç)
 - [Bağlantılar — Oyun Değiştirici](#-bağlantılar---oyun-değiştirici)
@@ -35,11 +34,11 @@
 - [Katkıda Bulunma](#katkıda-bulunma)
 - [Lisans](#lisans)
 
-## Hive Nedir?
+## Xuanpu Nedir?
 
 Farklı projeler ve dallar üzerinde birden fazla AI kodlama ajanı çalıştırıyorsanız, bu acıyı bilirsiniz — altı terminal sekmesi açık, hangi ajanın ne üzerinde çalıştığını hatırlayamıyorsunuz ve ikisinin aynı dosyaları düzenlediğinden endişeleniyorsunuz.
 
-Hive bir AI ajan orkestratörüdür. Çalışan tüm ajanlarınızı tek bir kenar çubuğunda görün, aralarında geçiş yapmak için tıklayın ve her biri izole bir git worktree dalında çalışır, böylece çakışamazlar. Birden fazla depoyu birbirine bağlayarak tek bir ajan oturumunun tüm stack'iniz hakkında bağlama sahip olmasını sağlayın.
+Xuanpu bir AI ajan orkestratörüdür. Çalışan tüm ajanlarınızı tek bir kenar çubuğunda görün, aralarında geçiş yapmak için tıklayın ve her biri izole bir git worktree dalında çalışır, böylece çakışamazlar. Birden fazla depoyu birbirine bağlayarak tek bir ajan oturumunun tüm stack'iniz hakkında bağlama sahip olmasını sağlayın.
 
 ## Özellikler
 
@@ -47,7 +46,7 @@ Hive bir AI ajan orkestratörüdür. Çalışan tüm ajanlarınızı tek bir ken
 Stash yapmadan veya dal değiştirmeden aynı anda birden fazla dalda çalışın. Tek tıkla worktree oluşturun, arşivleyin ve düzenleyin. Her worktree kolay tanımlama için şehir tabanlı benzersiz bir ad alır.
 
 ### 🤖 **Yerleşik AI Kodlama Oturumları**
-**OpenCode** ve **Claude Code** desteğiyle AI kodlama ajanlarını doğrudan Hive içinde çalıştırın. Yanıtları gerçek zamanlı aktarın, araç çağrılarının yürütülmesini izleyin ve gerektiğinde izinleri onaylayın. Tam geri al/yinele desteği sizi kontrol altında tutar.
+**OpenCode** ve **Claude Code** desteğiyle AI kodlama ajanlarını doğrudan Xuanpu içinde çalıştırın. Yanıtları gerçek zamanlı aktarın, araç çağrılarının yürütülmesini izleyin ve gerektiğinde izinleri onaylayın. Tam geri al/yinele desteği sizi kontrol altında tutar.
 
 ### 📁 **Akıllı Dosya Gezgini**
 Canlı git durum göstergeleriyle nelerin değiştiğini bir bakışta görün. Diff'leri satır içi görüntüleyin, dosya geçmişini göz atın ve uygulamadan çıkmadan kod tabanınızda gezinin. Entegre Monaco editörü tam bir VS Code deneyimi sunar.
@@ -70,11 +69,11 @@ Worktree başına dil sunucuları ile tam LSP entegrasyonu. TypeScript, Python, 
 ### 🔌 **Worktree Bağlantıları**
 İki worktree'yi bağlayarak bağlam paylaşın, uygulamaları karşılaştırın veya gerçek zamanlı işbirliği yapın. Dallar arası değişiklikleri inceleme, worktree'ler arası AI oturumları paylaşma veya ilgili özellikler üzerinde çalışırken tutarlılık sağlama için mükemmeldir. Bağlı worktree'ler değiştiğinde canlı güncellemeleri görün.
 
-## Neden Hive?
+## Neden Xuanpu?
 
-Hive'ın git iş akışınızı nasıl dönüştürdüğünü görün:
+Xuanpu'ın git iş akışınızı nasıl dönüştürdüğünü görün:
 
-| Görev | Geleneksel İş Akışı | Hive ile |
+| Görev | Geleneksel İş Akışı | Xuanpu ile |
 |------|---------------------|-----------|
 | **Dal değiştirme** | `git stash` → `git checkout` → `git stash pop` | Worktree'ye tıkla → Tamam |
 | **Birden fazla özellik üzerinde çalışma** | Sürekli stash ve bağlam değiştirme | Birden fazla worktree'yi yan yana aç |
@@ -92,22 +91,22 @@ Hive'ın git iş akışınızı nasıl dönüştürdüğünü görün:
 ### Homebrew ile (Önerilen)
 
 ```bash
-brew tap morapelker/hive
-brew install --cask hive
+brew tap slicenferqin/xuanpu
+brew install --cask xuanpu
 ```
 
 ### Doğrudan İndirme
 
-En son `.dmg` dosyasını [GitHub Releases](https://github.com/morapelker/hive/releases/latest) sayfasından indirin.
+En son `.dmg` dosyasını [GitHub Releases](https://github.com/slicenferqin/xuanpu/releases/latest) sayfasından indirin.
 
-Bu kadar! Uygulamalar klasöründen Hive'ı açın ve bir git deposuna yönlendirin.
+Bu kadar! Uygulamalar klasöründen Xuanpu'ı açın ve bir git deposuna yönlendirin.
 
 ## Hızlı Başlangıç
 
 2 dakikadan kısa sürede çalışmaya başlayın:
 
 ### 1️⃣ **İlk Projenizi Ekleyin**
-Hive'ı açın → **"Add Project"** tıklayın → Makinenizdeki herhangi bir git deposunu seçin
+Xuanpu'ı açın → **"Add Project"** tıklayın → Makinenizdeki herhangi bir git deposunu seçin
 
 ### 2️⃣ **Worktree Oluşturun**
 Projenizi seçin → **"New Worktree"** tıklayın → Bir dal seçin (veya yeni oluşturun)
@@ -121,7 +120,7 @@ Bir worktree açın → **"New Session"** tıklayın → OpenCode veya Claude il
 
 ## 🔌 Worktree Bağlantıları — Oyun Değiştirici
 
-Hive'ın **Worktree Bağlantıları** özelliği, iki worktree'yi birbirine bağlayarak farklı dallar veya özellikler arasında bir köprü oluşturmanıza olanak tanır. Dallar arası farkındalık gerektiren geliştirme iş akışları için inanılmaz güçlüdür.
+Xuanpu'ın **Worktree Bağlantıları** özelliği, iki worktree'yi birbirine bağlayarak farklı dallar veya özellikler arasında bir köprü oluşturmanıza olanak tanır. Dallar arası farkındalık gerektiren geliştirme iş akışları için inanılmaz güçlüdür.
 
 ### Worktree Bağlantıları Nedir?
 
@@ -149,7 +148,7 @@ Herhangi iki worktree'yi bağlayarak:
 - ✅ **AI Bağlam Paylaşımı** - AI oturumları bağlı worktree koduna başvurabilir
 - ✅ **Durum Göstergeleri** - Bağlı worktree'lerdeki build durumu, testler ve değişiklikleri görün
 - ✅ **Bağlantı Geçmişi** - Hangi worktree'lerin ne zaman bağlandığını takip edin
-- ✅ **Akıllı Öneriler** - Hive, iş akışınıza göre bağlanılacak ilgili worktree'leri önerir
+- ✅ **Akıllı Öneriler** - Xuanpu, iş akışınıza göre bağlanılacak ilgili worktree'leri önerir
 
 ### Kullanım Senaryoları
 
@@ -166,7 +165,7 @@ Herhangi iki worktree'yi bağlayarak:
 ## Uygulamada Görün
 
 <div align="center">
-  <img src="docs/screenshots/hive-full-demo.gif" alt="Hive demosu — projeler arası AI ajanlarını yönetin" width="900" />
+  <img src="docs/screenshots/hive-full-demo.gif" alt="Xuanpu demosu — projeler arası AI ajanlarını yönetin" width="900" />
 </div>
 
 <details>
@@ -174,16 +173,16 @@ Herhangi iki worktree'yi bağlayarak:
 
 <div align="center">
   <br/>
-  <img src="docs/screenshots/hive-ss-1.png" alt="Hive — git worktree'lerle AI kodlama oturumu" width="900" />
+  <img src="docs/screenshots/hive-ss-1.png" alt="Xuanpu — git worktree'lerle AI kodlama oturumu" width="900" />
   <sub>Entegre git worktree yönetimiyle AI destekli kodlama oturumları</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-worktree-create.png" alt="Yeni worktree oluşturma" width="900" />
+  <img src="docs/screenshots/xuanpu-worktree-create.png" alt="Yeni worktree oluşturma" width="900" />
   <sub>Worktree'leri görsel olarak oluşturun ve yönetin</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-file-tree.png" alt="Git durumuyla dosya ağacı" width="900" />
+  <img src="docs/screenshots/xuanpu-file-tree.png" alt="Git durumuyla dosya ağacı" width="900" />
   <sub>Canlı git durum göstergeleriyle dosya gezgini</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-themes.png" alt="Tema vitrini" width="900" />
+  <img src="docs/screenshots/xuanpu-themes.png" alt="Tema vitrini" width="900" />
   <sub>Her tercihe uygun güzel temalar</sub>
 </div>
 
@@ -194,8 +193,8 @@ Herhangi iki worktree'yi bağlayarak:
 <div align="center">
 
 [![Dokümantasyon](https://img.shields.io/badge/📖_Dokümantasyon-Oku-blue?style=for-the-badge)](docs/)
-[![Sorunlar](https://img.shields.io/badge/🐛_Sorunlar-Bildir-red?style=for-the-badge)](https://github.com/morapelker/hive/issues)
-[![Tartışmalar](https://img.shields.io/badge/💬_Tartışmalar-Katıl-purple?style=for-the-badge)](https://github.com/morapelker/hive/discussions)
+[![Sorunlar](https://img.shields.io/badge/🐛_Sorunlar-Bildir-red?style=for-the-badge)](https://github.com/slicenferqin/xuanpu/issues)
+[![Tartışmalar](https://img.shields.io/badge/💬_Tartışmalar-Katıl-purple?style=for-the-badge)](https://github.com/slicenferqin/xuanpu/discussions)
 [![Katkı](https://img.shields.io/badge/🤝_Katkı-Kurallar-green?style=for-the-badge)](CONTRIBUTING.md)
 [![Güvenlik](https://img.shields.io/badge/🔒_Güvenlik-Politika-orange?style=for-the-badge)](SECURITY.md)
 
@@ -204,9 +203,9 @@ Herhangi iki worktree'yi bağlayarak:
 ### Yardım Alın
 
 - 📖 Ayrıntılı kılavuzlar için [dokümantasyonu](docs/) okuyun
-- 🐛 Yeniden üretim adımlarıyla [hata bildirin](https://github.com/morapelker/hive/issues/new?template=bug_report.md)
-- 💡 Görmek istediğiniz [özellik isteyin](https://github.com/morapelker/hive/issues/new?template=feature_request.md)
-- 💬 Toplulukla bağlantı kurmak için [tartışmalara katılın](https://github.com/morapelker/hive/discussions)
+- 🐛 Yeniden üretim adımlarıyla [hata bildirin](https://github.com/slicenferqin/xuanpu/issues/new?template=bug_report.md)
+- 💡 Görmek istediğiniz [özellik isteyin](https://github.com/slicenferqin/xuanpu/issues/new?template=feature_request.md)
+- 💬 Toplulukla bağlantı kurmak için [tartışmalara katılın](https://github.com/slicenferqin/xuanpu/discussions)
 - 🔒 [Güvenlik açıklarını sorumlu bir şekilde bildirin](SECURITY.md)
 
 ### Kaynaklar
@@ -220,7 +219,7 @@ Herhangi iki worktree'yi bağlayarak:
 ### 🚀 Yakında
 
 - **Çapraz platform desteği** — Windows ve Linux derlemeleri
-- **Eklenti sistemi** — Hive'ı özel entegrasyonlarla genişletin
+- **Eklenti sistemi** — Xuanpu'ı özel entegrasyonlarla genişletin
 - **Geliştirilmiş Bağlantılar** — Çok yönlü bağlantılar, bağlantı grupları, akıllı öneriler
 - **Bulut senkronizasyonu** — Ayarları, oturumları ve bağlantı şablonlarını cihazlar arası senkronize edin
 - **Takım özellikleri** — Worktree'leri paylaşın ve gerçek zamanlı işbirliği yapın
@@ -240,7 +239,7 @@ Herhangi iki worktree'yi bağlayarak:
 - **Kod inceleme modu** — İncelemeler için optimize edilmiş özel bağlantı türü
 - **Zaman takibi** — Worktree başına ve bağlantı başına aktivite analitiği
 
-Yol haritasını etkilemek ister misiniz? [Tartışmaya katılın](https://github.com/morapelker/hive/discussions/categories/ideas) veya [katkıda bulunun](CONTRIBUTING.md)!
+Yol haritasını etkilemek ister misiniz? [Tartışmaya katılın](https://github.com/slicenferqin/xuanpu/discussions/categories/ideas) veya [katkıda bulunun](CONTRIBUTING.md)!
 
 ---
 
@@ -256,15 +255,15 @@ Yol haritasını etkilemek ister misiniz? [Tartışmaya katılın](https://githu
 ### Kurulum
 
 ```bash
-git clone https://github.com/anomalyco/hive.git
-cd hive
+git clone https://github.com/anomalyco/xuanpu.git
+cd xuanpu
 pnpm install
 pnpm dev
 ```
 
 ### Ghostty Terminal (İsteğe Bağlı)
 
-Hive, [Ghostty](https://ghostty.org/)'nin `libghostty`'si ile çalışan isteğe bağlı bir yerel terminal içerir. Yalnızca gömülü terminal özelliği üzerinde çalışmak istiyorsanız gereklidir.
+Xuanpu, [Ghostty](https://ghostty.org/)'nin `libghostty`'si ile çalışan isteğe bağlı bir yerel terminal içerir. Yalnızca gömülü terminal özelliği üzerinde çalışmak istiyorsanız gereklidir.
 
 **Kurulum:**
 
@@ -287,7 +286,7 @@ Hive, [Ghostty](https://ghostty.org/)'nin `libghostty`'si ile çalışan isteğe
    cd src/native && npx node-gyp rebuild
    ```
 
-`libghostty` mevcut değilse, Hive yine de derlenir ve çalışır — Ghostty terminal özelliği sadece devre dışı kalır.
+`libghostty` mevcut değilse, Xuanpu yine de derlenir ve çalışır — Ghostty terminal özelliği sadece devre dışı kalır.
 
 ### Komutlar
 
@@ -305,7 +304,7 @@ Hive, [Ghostty](https://ghostty.org/)'nin `libghostty`'si ile çalışan isteğe
 
 ### Mimari
 
-Hive, katı sandbox'lama ile Electron'un üç süreçli modelini kullanır:
+Xuanpu, katı sandbox'lama ile Electron'un üç süreçli modelini kullanır:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -383,7 +382,7 @@ Ayrıntılı dokümanlar [`docs/`](docs/) klasöründe:
 
 ## Katkıda Bulunma
 
-Katkıları çok seviyoruz! Hive geliştiriciler tarafından geliştiriciler için yapılmıştır ve her türlü iyileştirmeyi memnuniyetle karşılarız.
+Katkıları çok seviyoruz! Xuanpu geliştiriciler tarafından geliştiriciler için yapılmıştır ve her türlü iyileştirmeyi memnuniyetle karşılarız.
 
 ### Katkı Yolları
 
@@ -412,6 +411,6 @@ Ayrıntılı kurallar için [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bakın
 
 ## Lisans
 
-[MIT](LICENSE) © 2024 morapelker
+[MIT](LICENSE) © 2026 slicenfer
 
-Hive, MIT Lisansı altında lisanslanan açık kaynaklı yazılımdır. Tam ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
+Xuanpu, MIT Lisansı altında lisanslanan açık kaynaklı yazılımdır. Tam ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.

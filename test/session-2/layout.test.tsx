@@ -137,7 +137,7 @@ describe('Session 2: Application Layout', () => {
     render(<AppLayout />)
 
     expect(screen.getByTestId('header')).toBeInTheDocument()
-    expect(screen.getByText('Hive')).toBeInTheDocument()
+    expect(screen.getByText('Xuanpu')).toBeInTheDocument()
   })
 
   test('Resize handles are present', () => {

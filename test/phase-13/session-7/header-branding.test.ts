@@ -4,10 +4,10 @@ import { describe, test, expect, beforeAll } from 'vitest'
  * Session 7: Header Branding — Tests
  *
  * These tests verify:
- * 1. Logo image replaces the "Hive" text heading
+ * 1. Logo image replaces the "Xuanpu" text heading
  * 2. Project name displays when a project is selected
  * 3. Branch name displays in parentheses after the project name
- * 4. "Hive" fallback text when no project is selected
+ * 4. "Xuanpu" fallback text when no project is selected
  * 5. Default worktree (no-worktree) hides branch name
  * 6. Logo asset exists
  */
@@ -33,13 +33,13 @@ describe('Session 7: Header Branding', () => {
       expect(source).toContain("import { useWorktreeStore } from '@/stores/useWorktreeStore'")
     })
 
-    test('imports hiveLogo from assets', () => {
-      expect(source).toContain("import hiveLogo from '@/assets/icon.png'")
+    test('imports appLogo from assets', () => {
+      expect(source).toContain("import appLogo from '@/assets/icon.png'")
     })
 
     test('renders logo image with correct attributes', () => {
-      expect(source).toContain('src={hiveLogo}')
-      expect(source).toContain('alt="Hive"')
+      expect(source).toContain('src={appLogo}')
+      expect(source).toContain('alt="Xuanpu"')
       expect(source).toContain('draggable={false}')
       expect(source).toContain('rounded')
     })
@@ -48,15 +48,15 @@ describe('Session 7: Header Branding', () => {
       expect(source).toContain('selectedProject.name')
     })
 
-    test('shows branch name in parentheses with primary color', () => {
+    test('shows branch name with muted foreground color', () => {
       expect(source).toContain('selectedWorktree?.branch_name')
-      expect(source).toMatch(/\(\s*\{selectedWorktree\.branch_name\}\s*\)/)
-      expect(source).toContain('text-primary')
+      expect(source).toContain('selectedWorktree.branch_name')
+      expect(source).toContain('text-muted-foreground')
     })
 
-    test('shows "Hive" fallback when no project selected', () => {
-      // There should be a fallback that renders "Hive" text
-      const fallbackMatch = source.match(/:\s*\(\s*<span[^>]*>Hive<\/span>/)
+    test('shows "Xuanpu" fallback when no project selected', () => {
+      // There should be a fallback that renders "Xuanpu" text
+      const fallbackMatch = source.match(/:\s*\(\s*<span[^>]*>Xuanpu<\/span>/)
       expect(fallbackMatch).not.toBeNull()
     })
 
@@ -64,7 +64,7 @@ describe('Session 7: Header Branding', () => {
       expect(source).toContain("'(no-worktree)'")
     })
 
-    test('no longer has h1 Hive heading', () => {
+    test('no longer has h1 Hive/Xuanpu heading', () => {
       expect(source).not.toContain('<h1')
     })
 

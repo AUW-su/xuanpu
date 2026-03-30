@@ -4,7 +4,7 @@
 
 ## Project
 
-Hive -- Electron desktop app for managing git projects/worktrees with integrated AI coding sessions.
+Xuanpu (玄圃) -- AI-native desktop workbench for managing git projects/worktrees with integrated AI coding sessions (Claude Code, OpenCode, Codex).
 Stack: Electron 33, React 19, TypeScript 5.7, Tailwind CSS 4, Zustand 5, SQLite (better-sqlite3).
 
 ## Commands
@@ -111,7 +111,7 @@ create<State>()(
     (set, get) => ({
       /* state + actions */
     }),
-    { name: 'hive-xxx', storage: createJSONStorage(() => localStorage) }
+    { name: 'xuanpu-xxx', storage: createJSONStorage(() => localStorage) }
   )
 )
 ```
@@ -163,4 +163,4 @@ To add a migration: append to the `MIGRATIONS` array, bump `CURRENT_SCHEMA_VERSI
 ## Logging
 
 Main process uses `createLogger({ component: 'Name' })` from `src/main/services/logger.ts`.
-Logs to `~/.hive/logs/hive-YYYY-MM-DD.log`. Max 5MB/file, 5 files retained.
+Logs to `~/.xuanpu/logs/xuanpu-YYYY-MM-DD.log`. Max 5MB/file, 5 files retained.

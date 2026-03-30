@@ -1,8 +1,8 @@
-# Contributing to Hive
+# Contributing to Xuanpu
 
-First off, thank you for considering contributing to Hive! 🎉
+First off, thank you for considering contributing to Xuanpu! 🎉
 
-Hive is built by developers, for developers, and contributions from the community are what make open source amazing. Whether you're fixing a bug, adding a feature, improving documentation, or sharing feedback, your input is valued and appreciated.
+Xuanpu is built by developers, for developers, and contributions from the community are what make open source amazing. Whether you're fixing a bug, adding a feature, improving documentation, or sharing feedback, your input is valued and appreciated.
 
 ## Table of Contents
 
@@ -27,12 +27,12 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md). We are committ
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/hive.git
-   cd hive
+   git clone https://github.com/YOUR_USERNAME/xuanpu.git
+   cd xuanpu
    ```
 3. **Add the upstream remote**:
    ```bash
-   git remote add upstream https://github.com/morapelker/hive.git
+   git remote add upstream https://github.com/slicenferqin/xuanpu.git
    ```
 
 ## Development Setup
@@ -56,7 +56,7 @@ pnpm dev
 
 ### Optional: Ghostty Terminal Setup
 
-Hive includes an optional native terminal integration powered by Ghostty's `libghostty`. This is only needed if you want to work on the embedded terminal feature.
+Xuanpu includes an optional native terminal integration powered by Ghostty's `libghostty`. This is only needed if you want to work on the embedded terminal feature.
 
 <details>
 <summary>Click for Ghostty setup instructions</summary>
@@ -79,7 +79,7 @@ Hive includes an optional native terminal integration powered by Ghostty's `libg
    cd src/native && npx node-gyp rebuild
    ```
 
-If `libghostty` is not available, Hive will still build and run normally — the Ghostty terminal feature will simply be disabled.
+If `libghostty` is not available, Xuanpu will still build and run normally — the Ghostty terminal feature will simply be disabled.
 
 </details>
 
@@ -87,9 +87,9 @@ If `libghostty` is not available, Hive will still build and run normally — the
 
 ### Finding Something to Work On
 
-- Check our [issue tracker](https://github.com/morapelker/hive/issues) for bugs and feature requests
+- Check our [issue tracker](https://github.com/slicenferqin/xuanpu/issues) for bugs and feature requests
 - Look for issues labeled `good first issue` or `help wanted`
-- Join our [discussions](https://github.com/morapelker/hive/discussions) to talk about ideas
+- Join our [discussions](https://github.com/slicenferqin/xuanpu/discussions) to talk about ideas
 - Feel free to create an issue for bugs or features before starting work
 
 ### Types of Contributions
@@ -102,14 +102,14 @@ We welcome all types of contributions:
 - **🎨 UI/UX**: Enhance the user interface or experience
 - **⚡ Performance**: Optimize slow code paths
 - **🧪 Tests**: Increase test coverage
-- **♿ Accessibility**: Make Hive usable for everyone
-- **🌐 Localization**: Translate Hive to other languages
+- **♿ Accessibility**: Make Xuanpu usable for everyone
+- **🌐 Localization**: Translate Xuanpu to other languages
 
 ## Development Workflow
 
 ### Architecture Overview
 
-Hive uses Electron's three-process architecture:
+Xuanpu uses Electron's three-process architecture:
 
 - **Main Process** (`src/main/`): Node.js backend, handles IPC, database, git operations
 - **Preload** (`src/preload/`): Secure bridge between main and renderer
@@ -334,7 +334,7 @@ For security vulnerabilities, please read our [Security Policy](SECURITY.md) and
 
 We love hearing your ideas! To request a feature:
 
-1. Check if it's already requested in [issues](https://github.com/morapelker/hive/issues) or [discussions](https://github.com/morapelker/hive/discussions)
+1. Check if it's already requested in [issues](https://github.com/slicenferqin/xuanpu/issues) or [discussions](https://github.com/slicenferqin/xuanpu/discussions)
 2. Use our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md)
 3. Explain the problem it solves
 4. Describe your proposed solution
@@ -346,20 +346,20 @@ We love hearing your ideas! To request a feature:
 ### Getting Help
 
 - 📖 [Documentation](docs/) — Comprehensive guides
-- 💬 [Discussions](https://github.com/morapelker/hive/discussions) — Ask questions, share ideas
-- 🐛 [Issues](https://github.com/morapelker/hive/issues) — Report bugs, request features
+- 💬 [Discussions](https://github.com/slicenferqin/xuanpu/discussions) — Ask questions, share ideas
+- 🐛 [Issues](https://github.com/slicenferqin/xuanpu/issues) — Report bugs, request features
 
 ### Staying Updated
 
 - Watch the repository for updates
 - Star the project if you find it useful
-- Follow [@morapelker](https://github.com/morapelker) for announcements
+- Follow [@slicenferqin](https://github.com/slicenferqin) for announcements
 
 ## Recognition
 
 Contributors are recognized in multiple ways:
 
-- Listed in our [Contributors](https://github.com/morapelker/hive/graphs/contributors) page
+- Listed in our [Contributors](https://github.com/slicenferqin/xuanpu/graphs/contributors) page
 - Mentioned in release notes for significant contributions
 - Special badges for regular contributors
 
@@ -367,10 +367,10 @@ Contributors are recognized in multiple ways:
 
 If you have questions about contributing, feel free to:
 
-- Open a [discussion](https://github.com/morapelker/hive/discussions/new?category=q-a)
+- Open a [discussion](https://github.com/slicenferqin/xuanpu/discussions/new?category=q-a)
 - Ask in an existing issue
 - Reach out to maintainers
 
 ---
 
-Thank you for contributing to Hive! Your efforts help make git worktree management better for everyone. 🚀
+Thank you for contributing to Xuanpu! Your efforts help make git worktree management better for everyone. 🚀

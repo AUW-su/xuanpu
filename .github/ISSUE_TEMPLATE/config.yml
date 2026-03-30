@@ -8,7 +8,7 @@ contact_links:
     about: Discuss feature ideas with the community before creating a request
   - name: Show and Tell
     url: https://github.com/slicenferqin/xuanpu/discussions/new?category=show-and-tell
-    about: Share your Hive workflows, tips, and tricks
+    about: Share your Xuanpu workflows, tips, and tricks
   - name: Security Issue
     url: https://github.com/slicenferqin/xuanpu/security/policy
     about: Please report security vulnerabilities according to our security policy

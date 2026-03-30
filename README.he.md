@@ -1,6 +1,5 @@
 <div align="center" dir="rtl">
-  <img src="resources/icon.png" alt="Hive" width="128" />
-  <h1>Hive</h1>
+  <img src="resources/banner.png" alt="Xuanpu Workbench" width="100%" />
   <p><strong>מתזמר סוכני AI בקוד פתוח לקידוד מקבילי בין פרויקטים.</strong></p>
   <p>הריצו סשנים של Claude Code, OpenCode ו-Codex במקביל. חלון אחד. ענפים מבודדים. אפס כאוס טאבים.</p>
 </div>
@@ -8,15 +7,15 @@
   <p>
     <a href="README.md">English</a> | <a href="README.ar.md">العربية</a> | <a href="README.bn.md">বাংলা</a> | <a href="README.bs.md">Bosanski</a> | <a href="README.da.md">Dansk</a> | <a href="README.de.md">Deutsch</a> | <a href="README.el.md">Ελληνικά</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.he.md"><strong>עברית</strong></a> | <a href="README.it.md">Italiano</a> | <a href="README.ja.md">日本語</a> | <a href="README.ko.md">한국어</a> | <a href="README.no.md">Norsk</a> | <a href="README.pl.md">Polski</a> | <a href="README.pt-BR.md">Português (BR)</a> | <a href="README.ru.md">Русский</a> | <a href="README.th.md">ไทย</a> | <a href="README.tr.md">Türkçe</a> | <a href="README.uk.md">Українська</a> | <a href="README.vi.md">Tiếng Việt</a> | <a href="README.zh-CN.md">简体中文</a> | <a href="README.zh-TW.md">繁體中文</a>
   </p>
-    <a href="https://github.com/morapelker/hive/releases/latest"><img src="https://img.shields.io/github/v/release/morapelker/hive?style=flat-square&logo=github&label=version" alt="Latest Release" /></a>
-    <a href="https://github.com/morapelker/hive/releases"><img src="https://img.shields.io/github/downloads/morapelker/hive/total?style=flat-square&logo=github" alt="Downloads" /></a>
-    <a href="https://github.com/morapelker/hive/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/morapelker/hive/release.yml?style=flat-square&logo=github-actions&label=build" alt="Build Status" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/releases/latest"><img src="https://img.shields.io/github/v/release/slicenferqin/xuanpu?style=flat-square&logo=github&label=version" alt="Latest Release" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/releases"><img src="https://img.shields.io/github/downloads/slicenferqin/xuanpu/total?style=flat-square&logo=github" alt="Downloads" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/slicenferqin/xuanpu/release.yml?style=flat-square&logo=github-actions&label=build" alt="Build Status" /></a>
     <a href="#"><img src="https://img.shields.io/badge/macOS-only-000000?style=flat-square&logo=apple&logoColor=white" alt="macOS" /></a>
     <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" /></a>
     <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/electron-33-47848F?style=flat-square&logo=electron&logoColor=white" alt="Electron" /></a>
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/typescript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" /></a>
-    <a href="https://github.com/morapelker/hive/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome" /></a>
   </p>
 </div>
 
@@ -26,9 +25,9 @@
 
 ## תוכן עניינים
 
-- [מה זה Hive?](#מה-זה-hive)
+- [מה זה Xuanpu?](#מה-זה-xuanpu)
 - [תכונות](#תכונות)
-- [למה Hive?](#למה-hive)
+- [למה Xuanpu?](#למה-xuanpu)
 - [התקנה](#התקנה)
 - [התחלה מהירה](#התחלה-מהירה)
 - [חיבורים - משנה את כללי המשחק](#-חיבורים---משנה-את-כללי-המשחק)
@@ -39,11 +38,11 @@
 - [תרומה](#תרומה)
 - [רישיון](#רישיון)
 
-## מה זה Hive?
+## מה זה Xuanpu?
 
 אם אתם מריצים מספר סוכני קידוד AI בין פרויקטים וענפים שונים, אתם מכירים את הכאב -- שישה טאבים של טרמינל פתוחים, אתם לא זוכרים איזה סוכן עובד על מה, ואתם מודאגים ששניים מהם עורכים את אותם קבצים.
 
-Hive הוא מתזמר סוכני AI. ראו את כל הסוכנים הפעילים שלכם בסרגל צד אחד, לחצו כדי לעבור ביניהם, וכל אחד רץ על ענף worktree מבודד ב-git כך שהם לא יכולים להתנגש. חברו מספר מאגרים יחד כך שלסשן סוכן יחיד יש הקשר על כל הסטאק הטכנולוגי שלכם.
+Xuanpu הוא מתזמר סוכני AI. ראו את כל הסוכנים הפעילים שלכם בסרגל צד אחד, לחצו כדי לעבור ביניהם, וכל אחד רץ על ענף worktree מבודד ב-git כך שהם לא יכולים להתנגש. חברו מספר מאגרים יחד כך שלסשן סוכן יחיד יש הקשר על כל הסטאק הטכנולוגי שלכם.
 
 ## תכונות
 
@@ -51,7 +50,7 @@ Hive הוא מתזמר סוכני AI. ראו את כל הסוכנים הפעיל
 עבדו על מספר ענפים בו-זמנית בלי stashing או switching. צרו, ארכבו וארגנו עצי עבודה בלחיצה אחת. כל worktree מקבל שם ייחודי מבוסס ערים לזיהוי קל.
 
 ### 🤖 **סשני קידוד AI מובנים**
-הריצו סוכני קידוד AI ישירות בתוך Hive עם תמיכה ב-**OpenCode** וב-**Claude Code**. צפו בתגובות בזמן אמת, עקבו אחרי קריאות כלים בביצוע, ואשרו הרשאות לפי הצורך. תמיכה מלאה ב-undo/redo שומרת אתכם בשליטה.
+הריצו סוכני קידוד AI ישירות בתוך Xuanpu עם תמיכה ב-**OpenCode** וב-**Claude Code**. צפו בתגובות בזמן אמת, עקבו אחרי קריאות כלים בביצוע, ואשרו הרשאות לפי הצורך. תמיכה מלאה ב-undo/redo שומרת אתכם בשליטה.
 
 ### 📁 **סייר קבצים חכם**
 ראו מה השתנה במבט עם מחווני סטטוס git חיים. צפו ב-diffs ישירות, דפדפו בהיסטוריית קבצים, ונווטו בקוד בלי לעזוב את האפליקציה. עורך Monaco המשולב מספק חווית VS Code מלאה.
@@ -74,11 +73,11 @@ Hive הוא מתזמר סוכני AI. ראו את כל הסוכנים הפעיל
 ### 🔌 **חיבורי Worktree**
 חברו שני עצי עבודה יחד כדי לשתף הקשר, להשוות מימושים, או לשתף פעולה בזמן אמת. מושלם לסקירת שינויים בין ענפים, שיתוף סשני AI בין עצי עבודה, או שמירה על עקביות כשעובדים על תכונות קשורות. ראו עדכונים חיים כשעצי עבודה מחוברים משתנים.
 
-## למה Hive?
+## למה Xuanpu?
 
-ראו איך Hive משנה את זרימת העבודה שלכם עם git:
+ראו איך Xuanpu משנה את זרימת העבודה שלכם עם git:
 
-| משימה | זרימת עבודה מסורתית | עם Hive |
+| משימה | זרימת עבודה מסורתית | עם Xuanpu |
 |------|---------------------|-----------|
 | **החלפת ענפים** | `git stash` → `git checkout` → `git stash pop` | לחיצה על worktree → סיום |
 | **עבודה על מספר תכונות** | stashing מתמיד ומעבר הקשר | פתיחת מספר עצי עבודה זה לצד זה |
@@ -96,22 +95,22 @@ Hive הוא מתזמר סוכני AI. ראו את כל הסוכנים הפעיל
 ### דרך Homebrew (מומלץ)
 
 ```bash
-brew tap morapelker/hive
-brew install --cask hive
+brew tap slicenferqin/xuanpu
+brew install --cask xuanpu
 ```
 
 ### הורדה ישירה
 
-הורידו את קובץ ה-`.dmg` העדכני ביותר מ-[GitHub Releases](https://github.com/morapelker/hive/releases/latest).
+הורידו את קובץ ה-`.dmg` העדכני ביותר מ-[GitHub Releases](https://github.com/slicenferqin/xuanpu/releases/latest).
 
-זהו! פתחו את Hive מתיקיית היישומים וכוונו אותו למאגר git.
+זהו! פתחו את Xuanpu מתיקיית היישומים וכוונו אותו למאגר git.
 
 ## התחלה מהירה
 
 התחילו לעבוד תוך פחות מ-2 דקות:
 
 ### 1️⃣ **הוסיפו את הפרויקט הראשון שלכם**
-פתחו את Hive → לחצו **"הוסף פרויקט"** → בחרו כל מאגר git במחשב שלכם
+פתחו את Xuanpu → לחצו **"הוסף פרויקט"** → בחרו כל מאגר git במחשב שלכם
 
 ### 2️⃣ **צרו Worktree**
 בחרו את הפרויקט שלכם → לחצו **"Worktree חדש"** → בחרו ענף (או צרו חדש)
@@ -125,7 +124,7 @@ brew install --cask hive
 
 ## 🔌 חיבורי Worktree - משנה את כללי המשחק
 
-תכונת **חיבורי ה-Worktree** של Hive מאפשרת לכם לקשר שני עצי עבודה יחד, ויוצרת גשר בין ענפים או תכונות שונות. זה חזק להפליא עבור זרימות עבודה בפיתוח שדורשות מודעות בין-ענפית.
+תכונת **חיבורי ה-Worktree** של Xuanpu מאפשרת לכם לקשר שני עצי עבודה יחד, ויוצרת גשר בין ענפים או תכונות שונות. זה חזק להפליא עבור זרימות עבודה בפיתוח שדורשות מודעות בין-ענפית.
 
 ### מה הם חיבורי Worktree?
 
@@ -153,7 +152,7 @@ brew install --cask hive
 - ✅ **שיתוף הקשר AI** - סשני AI יכולים להתייחס לקוד של עץ עבודה מחובר
 - ✅ **מחווני סטטוס** - ראו סטטוס build, טסטים ושינויים בעצי עבודה מחוברים
 - ✅ **היסטוריית חיבורים** - עקבו אחרי אילו עצי עבודה חוברו ומתי
-- ✅ **הצעות חכמות** - Hive מציע עצי עבודה רלוונטיים לחיבור בהתבסס על זרימת העבודה שלכם
+- ✅ **הצעות חכמות** - Xuanpu מציע עצי עבודה רלוונטיים לחיבור בהתבסס על זרימת העבודה שלכם
 
 ### דוגמאות לשימוש
 
@@ -172,7 +171,7 @@ brew install --cask hive
 </div>
 
 <div align="center">
-  <img src="docs/screenshots/hive-full-demo.gif" alt="הדגמת Hive — תזמור סוכני AI בין פרויקטים" width="900" />
+  <img src="docs/screenshots/hive-full-demo.gif" alt="הדגמת Xuanpu — תזמור סוכני AI בין פרויקטים" width="900" />
 </div>
 
 <details>
@@ -180,16 +179,16 @@ brew install --cask hive
 
 <div align="center">
   <br/>
-  <img src="docs/screenshots/hive-ss-1.png" alt="Hive — סשן קידוד AI עם עצי עבודה של git" width="900" />
+  <img src="docs/screenshots/hive-ss-1.png" alt="Xuanpu — סשן קידוד AI עם עצי עבודה של git" width="900" />
   <sub>סשני קידוד AI עם ניהול משולב של עצי עבודה git</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-worktree-create.png" alt="יצירת worktree חדש" width="900" />
+  <img src="docs/screenshots/xuanpu-worktree-create.png" alt="יצירת worktree חדש" width="900" />
   <sub>צרו ונהלו עצי עבודה ויזואלית</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-file-tree.png" alt="עץ קבצים עם סטטוס git" width="900" />
+  <img src="docs/screenshots/xuanpu-file-tree.png" alt="עץ קבצים עם סטטוס git" width="900" />
   <sub>סייר קבצים עם מחווני סטטוס git חיים</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-themes.png" alt="תצוגת ערכות נושא" width="900" />
+  <img src="docs/screenshots/xuanpu-themes.png" alt="תצוגת ערכות נושא" width="900" />
   <sub>ערכות נושא יפות לכל העדפה</sub>
 </div>
 
@@ -204,8 +203,8 @@ brew install --cask hive
 <div align="center">
 
 [![Documentation](https://img.shields.io/badge/📖_תיעוד-קראו-blue?style=for-the-badge)](docs/)
-[![Issues](https://img.shields.io/badge/🐛_באגים-דווחו-red?style=for-the-badge)](https://github.com/morapelker/hive/issues)
-[![Discussions](https://img.shields.io/badge/💬_דיונים-הצטרפו-purple?style=for-the-badge)](https://github.com/morapelker/hive/discussions)
+[![Issues](https://img.shields.io/badge/🐛_באגים-דווחו-red?style=for-the-badge)](https://github.com/slicenferqin/xuanpu/issues)
+[![Discussions](https://img.shields.io/badge/💬_דיונים-הצטרפו-purple?style=for-the-badge)](https://github.com/slicenferqin/xuanpu/discussions)
 [![Contributing](https://img.shields.io/badge/🤝_תרומה-הנחיות-green?style=for-the-badge)](CONTRIBUTING.md)
 [![Security](https://img.shields.io/badge/🔒_אבטחה-מדיניות-orange?style=for-the-badge)](SECURITY.md)
 
@@ -216,9 +215,9 @@ brew install --cask hive
 ### קבלו עזרה
 
 - 📖 קראו את [התיעוד](docs/) למדריכים מפורטים
-- 🐛 [דווחו על באגים](https://github.com/morapelker/hive/issues/new?template=bug_report.md) עם צעדים לשחזור
-- 💡 [בקשו תכונות](https://github.com/morapelker/hive/issues/new?template=feature_request.md) שתרצו לראות
-- 💬 [הצטרפו לדיונים](https://github.com/morapelker/hive/discussions) כדי להתחבר לקהילה
+- 🐛 [דווחו על באגים](https://github.com/slicenferqin/xuanpu/issues/new?template=bug_report.md) עם צעדים לשחזור
+- 💡 [בקשו תכונות](https://github.com/slicenferqin/xuanpu/issues/new?template=feature_request.md) שתרצו לראות
+- 💬 [הצטרפו לדיונים](https://github.com/slicenferqin/xuanpu/discussions) כדי להתחבר לקהילה
 - 🔒 [דווחו על חולשות אבטחה](SECURITY.md) באחריות
 
 ### משאבים
@@ -232,7 +231,7 @@ brew install --cask hive
 ### 🚀 בקרוב
 
 - **תמיכה חוצת פלטפורמות** — בנייה ל-Windows ו-Linux
-- **מערכת תוספים** — הרחיבו את Hive עם אינטגרציות מותאמות
+- **מערכת תוספים** — הרחיבו את Xuanpu עם אינטגרציות מותאמות
 - **חיבורים משופרים** — חיבורים רב-כיווניים, קבוצות חיבורים, הצעות חכמות
 - **סנכרון ענן** — סנכרון הגדרות, סשנים ותבניות חיבור בין מכשירים
 - **תכונות צוות** — שתפו עצי עבודה ושתפו פעולה בזמן אמת
@@ -252,7 +251,7 @@ brew install --cask hive
 - **מצב סקירת קוד** — סוג חיבור מיוחד מותאם לסקירות
 - **מעקב זמן** — אנליטיקת פעילות לכל worktree וחיבור
 
-רוצים להשפיע על מפת הדרכים? [הצטרפו לדיון](https://github.com/morapelker/hive/discussions/categories/ideas) או [תרמו](CONTRIBUTING.md)!
+רוצים להשפיע על מפת הדרכים? [הצטרפו לדיון](https://github.com/slicenferqin/xuanpu/discussions/categories/ideas) או [תרמו](CONTRIBUTING.md)!
 
 ---
 
@@ -268,15 +267,15 @@ brew install --cask hive
 ### הגדרה
 
 ```bash
-git clone https://github.com/anomalyco/hive.git
-cd hive
+git clone https://github.com/anomalyco/xuanpu.git
+cd xuanpu
 pnpm install
 pnpm dev
 ```
 
 ### טרמינל Ghostty (אופציונלי)
 
-Hive כולל טרמינל native אופציונלי מופעל על ידי `libghostty` של [Ghostty](https://ghostty.org/). זה נדרש רק אם רוצים לעבוד על תכונת הטרמינל המשובץ.
+Xuanpu כולל טרמינל native אופציונלי מופעל על ידי `libghostty` של [Ghostty](https://ghostty.org/). זה נדרש רק אם רוצים לעבוד על תכונת הטרמינל המשובץ.
 
 **הגדרה:**
 
@@ -299,7 +298,7 @@ Hive כולל טרמינל native אופציונלי מופעל על ידי `lib
    cd src/native && npx node-gyp rebuild
    ```
 
-אם `libghostty` לא זמין, Hive עדיין נבנה ורץ -- תכונת הטרמינל של Ghostty פשוט תהיה מושבתת.
+אם `libghostty` לא זמין, Xuanpu עדיין נבנה ורץ -- תכונת הטרמינל של Ghostty פשוט תהיה מושבתת.
 
 ### פקודות
 
@@ -317,7 +316,7 @@ Hive כולל טרמינל native אופציונלי מופעל על ידי `lib
 
 ### ארכיטקטורה
 
-Hive משתמש במודל שלוש התהליכים של Electron עם sandboxing קפדני:
+Xuanpu משתמש במודל שלוש התהליכים של Electron עם sandboxing קפדני:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -395,7 +394,7 @@ src/
 
 ## תרומה
 
-אנחנו אוהבים תרומות! Hive נבנה על ידי מפתחים, למפתחים, ואנחנו מקבלים בברכה שיפורים מכל הסוגים.
+אנחנו אוהבים תרומות! Xuanpu נבנה על ידי מפתחים, למפתחים, ואנחנו מקבלים בברכה שיפורים מכל הסוגים.
 
 ### דרכים לתרום
 
@@ -424,8 +423,8 @@ src/
 
 ## רישיון
 
-[MIT](LICENSE) © 2024 morapelker
+[MIT](LICENSE) © 2026 slicenfer
 
-Hive הוא תוכנת קוד פתוח ברישיון MIT. ראו את קובץ [LICENSE](LICENSE) לפרטים מלאים.
+Xuanpu הוא תוכנת קוד פתוח ברישיון MIT. ראו את קובץ [LICENSE](LICENSE) לפרטים מלאים.
 
 </div>

@@ -1,20 +1,19 @@
 <div align="center">
-  <img src="resources/icon.png" alt="Hive" width="128" />
-  <h1>Hive</h1>
+  <img src="resources/banner.png" alt="Xuanpu Workbench" width="100%" />
   <p><strong>Um orquestrador de agentes IA open-source para programação em paralelo entre projetos.</strong></p>
   <p>Execute sessões de Claude Code, OpenCode e Codex em paralelo. Uma janela. Branches isolados. Zero caos de abas.</p>
   <p>
     <a href="README.md">English</a> | <a href="README.ar.md">العربية</a> | <a href="README.bn.md">বাংলা</a> | <a href="README.bs.md">Bosanski</a> | <a href="README.da.md">Dansk</a> | <a href="README.de.md">Deutsch</a> | <a href="README.el.md">Ελληνικά</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.he.md">עברית</a> | <a href="README.it.md">Italiano</a> | <a href="README.ja.md">日本語</a> | <a href="README.ko.md">한국어</a> | <a href="README.no.md">Norsk</a> | <a href="README.pl.md">Polski</a> | <a href="README.pt-BR.md"><strong>Português (BR)</strong></a> | <a href="README.ru.md">Русский</a> | <a href="README.th.md">ไทย</a> | <a href="README.tr.md">Türkçe</a> | <a href="README.uk.md">Українська</a> | <a href="README.vi.md">Tiếng Việt</a> | <a href="README.zh-CN.md">简体中文</a> | <a href="README.zh-TW.md">繁體中文</a>
   </p>
-    <a href="https://github.com/morapelker/hive/releases/latest"><img src="https://img.shields.io/github/v/release/morapelker/hive?style=flat-square&logo=github&label=version" alt="Última versão" /></a>
-    <a href="https://github.com/morapelker/hive/releases"><img src="https://img.shields.io/github/downloads/morapelker/hive/total?style=flat-square&logo=github" alt="Downloads" /></a>
-    <a href="https://github.com/morapelker/hive/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/morapelker/hive/release.yml?style=flat-square&logo=github-actions&label=build" alt="Status do build" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/releases/latest"><img src="https://img.shields.io/github/v/release/slicenferqin/xuanpu?style=flat-square&logo=github&label=version" alt="Última versão" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/releases"><img src="https://img.shields.io/github/downloads/slicenferqin/xuanpu/total?style=flat-square&logo=github" alt="Downloads" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/slicenferqin/xuanpu/release.yml?style=flat-square&logo=github-actions&label=build" alt="Status do build" /></a>
     <a href="#"><img src="https://img.shields.io/badge/macOS-only-000000?style=flat-square&logo=apple&logoColor=white" alt="macOS" /></a>
     <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" /></a>
     <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/electron-33-47848F?style=flat-square&logo=electron&logoColor=white" alt="Electron" /></a>
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/typescript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="Licença" /></a>
-    <a href="https://github.com/morapelker/hive/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs bem-vindos" /></a>
+    <a href="https://github.com/slicenferqin/xuanpu/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs bem-vindos" /></a>
   </p>
 </div>
 
@@ -22,9 +21,9 @@
 
 ## Índice
 
-- [O que é o Hive?](#o-que-é-o-hive)
+- [O que é o Xuanpu?](#o-que-é-o-xuanpu)
 - [Funcionalidades](#funcionalidades)
-- [Por que Hive?](#por-que-hive)
+- [Por que Xuanpu?](#por-que-xuanpu)
 - [Instalação](#instalação)
 - [Início rápido](#início-rápido)
 - [Conexões — O diferencial](#-conexões---o-diferencial)
@@ -35,11 +34,11 @@
 - [Contribuir](#contribuir)
 - [Licença](#licença)
 
-## O que é o Hive?
+## O que é o Xuanpu?
 
 Se você executa múltiplos agentes de codificação IA em diferentes projetos e branches, conhece a dor — seis abas de terminal abertas, você não lembra qual agente está trabalhando em quê, e se preocupa que dois deles estejam editando os mesmos arquivos.
 
-Hive é um orquestrador de agentes IA. Veja todos os seus agentes em execução em uma barra lateral, clique para alternar entre eles, e cada um roda em um branch git worktree isolado para que não possam conflitar. Conecte múltiplos repositórios para que uma única sessão de agente tenha contexto de toda a sua stack.
+Xuanpu é um orquestrador de agentes IA. Veja todos os seus agentes em execução em uma barra lateral, clique para alternar entre eles, e cada um roda em um branch git worktree isolado para que não possam conflitar. Conecte múltiplos repositórios para que uma única sessão de agente tenha contexto de toda a sua stack.
 
 ## Funcionalidades
 
@@ -47,7 +46,7 @@ Hive é um orquestrador de agentes IA. Veja todos os seus agentes em execução 
 Trabalhe em múltiplos branches simultaneamente sem stash ou troca. Crie, arquive e organize worktrees com um clique. Cada worktree recebe um nome único baseado em cidades para fácil identificação.
 
 ### 🤖 **Sessões de codificação IA integradas**
-Execute agentes de codificação IA diretamente dentro do Hive com suporte para **OpenCode** e **Claude Code**. Transmita respostas em tempo real, observe a execução de chamadas de ferramentas e aprove permissões conforme necessário. Suporte completo de desfazer/refazer mantém você no controle.
+Execute agentes de codificação IA diretamente dentro do Xuanpu com suporte para **OpenCode** e **Claude Code**. Transmita respostas em tempo real, observe a execução de chamadas de ferramentas e aprove permissões conforme necessário. Suporte completo de desfazer/refazer mantém você no controle.
 
 ### 📁 **Explorador de arquivos inteligente**
 Veja o que mudou num relance com indicadores de status git ao vivo. Visualize diffs inline, navegue pelo histórico de arquivos e explore seu código sem sair do app. O editor Monaco integrado proporciona uma experiência completa estilo VS Code.
@@ -70,11 +69,11 @@ Integração LSP completa com servidores de linguagem por worktree. Obtenha auto
 ### 🔌 **Conexões de Worktree**
 Conecte dois worktrees para compartilhar contexto, comparar implementações ou colaborar em tempo real. Perfeito para revisar mudanças entre branches, compartilhar sessões IA entre worktrees ou manter consistência ao trabalhar em funcionalidades relacionadas. Veja atualizações ao vivo quando worktrees conectados mudam.
 
-## Por que Hive?
+## Por que Xuanpu?
 
-Veja como o Hive transforma seu workflow git:
+Veja como o Xuanpu transforma seu workflow git:
 
-| Tarefa | Workflow tradicional | Com Hive |
+| Tarefa | Workflow tradicional | Com Xuanpu |
 |------|---------------------|-----------|
 | **Trocar de branch** | `git stash` → `git checkout` → `git stash pop` | Clique no worktree → Pronto |
 | **Trabalhar em múltiplas features** | Stash constante e troca de contexto | Abra múltiplos worktrees lado a lado |
@@ -92,22 +91,22 @@ Veja como o Hive transforma seu workflow git:
 ### Via Homebrew (recomendado)
 
 ```bash
-brew tap morapelker/hive
-brew install --cask hive
+brew tap slicenferqin/xuanpu
+brew install --cask xuanpu
 ```
 
 ### Download direto
 
-Baixe o último `.dmg` do [GitHub Releases](https://github.com/morapelker/hive/releases/latest).
+Baixe o último `.dmg` do [GitHub Releases](https://github.com/slicenferqin/xuanpu/releases/latest).
 
-É isso! Abra o Hive da pasta Aplicativos e aponte para um repositório git.
+É isso! Abra o Xuanpu da pasta Aplicativos e aponte para um repositório git.
 
 ## Início rápido
 
 Comece em menos de 2 minutos:
 
 ### 1️⃣ **Adicione seu primeiro projeto**
-Abra o Hive → Clique **"Add Project"** → Selecione qualquer repositório git na sua máquina
+Abra o Xuanpu → Clique **"Add Project"** → Selecione qualquer repositório git na sua máquina
 
 ### 2️⃣ **Crie um Worktree**
 Selecione seu projeto → Clique **"New Worktree"** → Escolha um branch (ou crie um novo)
@@ -121,7 +120,7 @@ Abra um worktree → Clique **"New Session"** → Comece a codificar com OpenCod
 
 ## 🔌 Conexões de Worktree — O diferencial
 
-A funcionalidade **Conexões de Worktree** do Hive permite vincular dois worktrees, criando uma ponte entre diferentes branches ou funcionalidades. É incrivelmente poderosa para workflows de desenvolvimento que requerem consciência entre branches.
+A funcionalidade **Conexões de Worktree** do Xuanpu permite vincular dois worktrees, criando uma ponte entre diferentes branches ou funcionalidades. É incrivelmente poderosa para workflows de desenvolvimento que requerem consciência entre branches.
 
 ### O que são Conexões de Worktree?
 
@@ -149,7 +148,7 @@ Conecte qualquer par de worktrees para:
 - ✅ **Contexto IA compartilhado** - Sessões IA podem referenciar código do worktree conectado
 - ✅ **Indicadores de status** - Veja status do build, testes e mudanças em worktrees conectados
 - ✅ **Histórico de conexões** - Rastreie quais worktrees foram conectados e quando
-- ✅ **Sugestões inteligentes** - Hive sugere worktrees relevantes para conectar baseado no seu workflow
+- ✅ **Sugestões inteligentes** - Xuanpu sugere worktrees relevantes para conectar baseado no seu workflow
 
 ### Casos de uso
 
@@ -166,7 +165,7 @@ Conecte qualquer par de worktrees para:
 ## Veja em ação
 
 <div align="center">
-  <img src="docs/screenshots/hive-full-demo.gif" alt="Demo do Hive — orquestre agentes IA entre projetos" width="900" />
+  <img src="docs/screenshots/hive-full-demo.gif" alt="Demo do Xuanpu — orquestre agentes IA entre projetos" width="900" />
 </div>
 
 <details>
@@ -174,16 +173,16 @@ Conecte qualquer par de worktrees para:
 
 <div align="center">
   <br/>
-  <img src="docs/screenshots/hive-ss-1.png" alt="Hive — sessão de codificação IA com git worktrees" width="900" />
+  <img src="docs/screenshots/hive-ss-1.png" alt="Xuanpu — sessão de codificação IA com git worktrees" width="900" />
   <sub>Sessões de codificação com IA integradas ao gerenciamento de git worktrees</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-worktree-create.png" alt="Criando um novo worktree" width="900" />
+  <img src="docs/screenshots/xuanpu-worktree-create.png" alt="Criando um novo worktree" width="900" />
   <sub>Crie e gerencie worktrees visualmente</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-file-tree.png" alt="Árvore de arquivos com status git" width="900" />
+  <img src="docs/screenshots/xuanpu-file-tree.png" alt="Árvore de arquivos com status git" width="900" />
   <sub>Explorador de arquivos com indicadores de status git ao vivo</sub>
   <br/><br/>
-  <img src="docs/screenshots/hive-themes.png" alt="Vitrine de temas" width="900" />
+  <img src="docs/screenshots/xuanpu-themes.png" alt="Vitrine de temas" width="900" />
   <sub>Temas bonitos para cada preferência</sub>
 </div>
 
@@ -194,8 +193,8 @@ Conecte qualquer par de worktrees para:
 <div align="center">
 
 [![Documentação](https://img.shields.io/badge/📖_Documentação-Ler-blue?style=for-the-badge)](docs/)
-[![Issues](https://img.shields.io/badge/🐛_Issues-Reportar-red?style=for-the-badge)](https://github.com/morapelker/hive/issues)
-[![Discussões](https://img.shields.io/badge/💬_Discussões-Participar-purple?style=for-the-badge)](https://github.com/morapelker/hive/discussions)
+[![Issues](https://img.shields.io/badge/🐛_Issues-Reportar-red?style=for-the-badge)](https://github.com/slicenferqin/xuanpu/issues)
+[![Discussões](https://img.shields.io/badge/💬_Discussões-Participar-purple?style=for-the-badge)](https://github.com/slicenferqin/xuanpu/discussions)
 [![Contribuir](https://img.shields.io/badge/🤝_Contribuir-Diretrizes-green?style=for-the-badge)](CONTRIBUTING.md)
 [![Segurança](https://img.shields.io/badge/🔒_Segurança-Política-orange?style=for-the-badge)](SECURITY.md)
 
@@ -204,9 +203,9 @@ Conecte qualquer par de worktrees para:
 ### Obtenha ajuda
 
 - 📖 Leia a [documentação](docs/) para guias detalhados
-- 🐛 [Reporte bugs](https://github.com/morapelker/hive/issues/new?template=bug_report.md) com passos de reprodução
-- 💡 [Solicite funcionalidades](https://github.com/morapelker/hive/issues/new?template=feature_request.md) que gostaria de ver
-- 💬 [Participe das discussões](https://github.com/morapelker/hive/discussions) para conectar com a comunidade
+- 🐛 [Reporte bugs](https://github.com/slicenferqin/xuanpu/issues/new?template=bug_report.md) com passos de reprodução
+- 💡 [Solicite funcionalidades](https://github.com/slicenferqin/xuanpu/issues/new?template=feature_request.md) que gostaria de ver
+- 💬 [Participe das discussões](https://github.com/slicenferqin/xuanpu/discussions) para conectar com a comunidade
 - 🔒 [Reporte vulnerabilidades de segurança](SECURITY.md) responsavelmente
 
 ### Recursos
@@ -220,7 +219,7 @@ Conecte qualquer par de worktrees para:
 ### 🚀 Em breve
 
 - **Suporte multiplataforma** — Builds para Windows e Linux
-- **Sistema de plugins** — Estenda o Hive com integrações personalizadas
+- **Sistema de plugins** — Estenda o Xuanpu com integrações personalizadas
 - **Conexões aprimoradas** — Conexões multivias, grupos de conexão, sugestões inteligentes
 - **Sincronização na nuvem** — Sincronize configurações, sessões e modelos de conexão entre dispositivos
 - **Funcionalidades de equipe** — Compartilhe worktrees e colabore em tempo real
@@ -240,7 +239,7 @@ Conecte qualquer par de worktrees para:
 - **Modo de revisão de código** — Tipo de conexão especial otimizado para revisões
 - **Rastreamento de tempo** — Análise de atividade por worktree e por conexão
 
-Quer influenciar o roadmap? [Participe da discussão](https://github.com/morapelker/hive/discussions/categories/ideas) ou [contribua](CONTRIBUTING.md)!
+Quer influenciar o roadmap? [Participe da discussão](https://github.com/slicenferqin/xuanpu/discussions/categories/ideas) ou [contribua](CONTRIBUTING.md)!
 
 ---
 
@@ -256,15 +255,15 @@ Quer influenciar o roadmap? [Participe da discussão](https://github.com/morapel
 ### Configuração
 
 ```bash
-git clone https://github.com/anomalyco/hive.git
-cd hive
+git clone https://github.com/anomalyco/xuanpu.git
+cd xuanpu
 pnpm install
 pnpm dev
 ```
 
 ### Terminal Ghostty (opcional)
 
-O Hive inclui um terminal nativo opcional alimentado pelo `libghostty` do [Ghostty](https://ghostty.org/). Necessário apenas se você quiser trabalhar na funcionalidade de terminal embutido.
+O Xuanpu inclui um terminal nativo opcional alimentado pelo `libghostty` do [Ghostty](https://ghostty.org/). Necessário apenas se você quiser trabalhar na funcionalidade de terminal embutido.
 
 **Configuração:**
 
@@ -287,7 +286,7 @@ O Hive inclui um terminal nativo opcional alimentado pelo `libghostty` do [Ghost
    cd src/native && npx node-gyp rebuild
    ```
 
-Se `libghostty` não estiver disponível, o Hive ainda compila e roda — a funcionalidade de terminal Ghostty será simplesmente desabilitada.
+Se `libghostty` não estiver disponível, o Xuanpu ainda compila e roda — a funcionalidade de terminal Ghostty será simplesmente desabilitada.
 
 ### Comandos
 
@@ -305,7 +304,7 @@ Se `libghostty` não estiver disponível, o Hive ainda compila e roda — a func
 
 ### Arquitetura
 
-O Hive usa o modelo de três processos do Electron com sandboxing rigoroso:
+O Xuanpu usa o modelo de três processos do Electron com sandboxing rigoroso:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -384,7 +383,7 @@ Documentação detalhada está em [`docs/`](docs/):
 
 ## Contribuir
 
-Adoramos contribuições! Hive é feito por desenvolvedores, para desenvolvedores, e damos boas-vindas a melhorias de todos os tipos.
+Adoramos contribuições! Xuanpu é feito por desenvolvedores, para desenvolvedores, e damos boas-vindas a melhorias de todos os tipos.
 
 ### Formas de contribuir
 
@@ -413,6 +412,6 @@ Consulte [CONTRIBUTING.md](CONTRIBUTING.md) para diretrizes detalhadas.
 
 ## Licença
 
-[MIT](LICENSE) © 2024 morapelker
+[MIT](LICENSE) © 2026 slicenfer
 
-Hive é software de código aberto licenciado sob a Licença MIT. Consulte o arquivo [LICENSE](LICENSE) para detalhes completos.
+Xuanpu é software de código aberto licenciado sob a Licença MIT. Consulte o arquivo [LICENSE](LICENSE) para detalhes completos.

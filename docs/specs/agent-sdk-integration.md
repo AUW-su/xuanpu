@@ -1,6 +1,6 @@
 # Agent SDK Integration Specification
 
-> Single source of truth for all integration decisions between Hive and AI agent SDKs.
+> Single source of truth for all integration decisions between Xuanpu and AI agent SDKs.
 
 ## Supported SDKs
 
@@ -12,7 +12,7 @@
 
 ## Architecture
 
-Hive uses a **strategy pattern** for AI agent integration. The `AgentSdkImplementer` interface
+Xuanpu uses a **strategy pattern** for AI agent integration. The `AgentSdkImplementer` interface
 (defined in `src/main/services/agent-sdk-types.ts`) is the contract that OpenCode, Claude Code,
 and Codex adapters implement. A manager (`AgentSdkManager`) routes operations to the correct
 implementer based on each session's `agent_sdk` column.
@@ -54,7 +54,7 @@ find the correct target.
 
 ### OpenCode
 
-OpenCode discovers credentials from its own configuration. No special setup required by Hive.
+OpenCode discovers credentials from its own configuration. No special setup required by Xuanpu.
 
 ### Claude Code
 
@@ -85,7 +85,7 @@ configuration files.
 **Failure handling:**
 
 - Surface to user: "Codex not authenticated. Set the OPENAI_API_KEY environment variable."
-- The Codex app-server process handles auth internally; Hive does not manage tokens directly
+- The Codex app-server process handles auth internally; Xuanpu does not manage tokens directly
 
 ### Deferred: API Key Auth (Claude)
 
@@ -114,10 +114,10 @@ These capabilities are defined as constants in `src/main/services/agent-sdk-type
 
 ## Claude SDK Event Taxonomy
 
-The Claude SDK emits `SDKMessage` (a union of 11 types). These must be mapped into Hive's
+The Claude SDK emits `SDKMessage` (a union of 11 types). These must be mapped into Xuanpu's
 `OpenCodeStreamEvent` format for the renderer.
 
-| SDK Message Type                       | Hive `type`            | Hive `statusPayload` | Notes                                           |
+| SDK Message Type                       | Xuanpu `type`            | Xuanpu `statusPayload` | Notes                                           |
 | -------------------------------------- | ---------------------- | -------------------- | ----------------------------------------------- |
 | `system` (subtype: `init`)             | `session.init`         | `{ type: 'idle' }`   | Extract `session_id`, tools, model              |
 | `user`                                 | `message.created`      | --                   | Forward message, capture `uuid` for checkpoints |
@@ -136,7 +136,7 @@ The Claude SDK emits `SDKMessage` (a union of 11 types). These must be mapped in
 Codex events are emitted by `CodexAppServerManager` via its `'event'` EventEmitter. The
 `CodexManagerEvent` type wraps all events with a `kind`, `method`, and `threadId` for routing.
 
-| Codex Event Method                           | Hive `type`            | Notes                                           |
+| Codex Event Method                           | Xuanpu `type`            | Notes                                           |
 | -------------------------------------------- | ---------------------- | ----------------------------------------------- |
 | `session/started`                            | `session.materialized` | Extract `threadId` as session identifier         |
 | `content.delta`                              | `message.part.updated` | Streaming text/reasoning deltas                  |
@@ -218,7 +218,7 @@ requires implementers to provide:
 | `connect`            | Creates deferred session state (`pending::` ID, materialized on first prompt)       |
 | `reconnect`          | Restores session state from DB; session resumes on next prompt via `options.resume` |
 | `disconnect`         | Closes active query, aborts controller, removes session from map                    |
-| `prompt`             | Calls `sdk.query()` with streaming; maps SDK events to Hive format                  |
+| `prompt`             | Calls `sdk.query()` with streaming; maps SDK events to Xuanpu format                  |
 | `abort`              | Aborts controller + calls `query.interrupt()`                                       |
 | `getMessages`        | Returns in-memory messages or falls back to JSONL transcript reader                 |
 | `getAvailableModels` | Returns static catalog (opus, sonnet, haiku)                                        |
@@ -233,7 +233,7 @@ requires implementers to provide:
 | `redo`               | Throws unsupported error (`supportsRedo: false`)                                    |
 | `listCommands`       | Returns `[]` (SDK commands require active query transport)                          |
 | `sendCommand`        | Translates to `/<command> <args>` prompt and delegates to `prompt()`                |
-| `renameSession`      | Updates session name in Hive's local DB (SDK has no rename API)                     |
+| `renameSession`      | Updates session name in Xuanpu's local DB (SDK has no rename API)                     |
 
 ### Codex
 
@@ -257,7 +257,7 @@ requires implementers to provide:
 | `redo`               | Throws unsupported error (`supportsRedo: false`)                                    |
 | `listCommands`       | Throws unsupported error (`supportsCommands: false`)                                |
 | `sendCommand`        | Throws unsupported error (`supportsCommands: false`)                                |
-| `renameSession`      | Updates session name in Hive's local DB (Codex has no rename API)                   |
+| `renameSession`      | Updates session name in Xuanpu's local DB (Codex has no rename API)                   |
 
 ## Known Limitations
 
@@ -293,7 +293,7 @@ requires implementers to provide:
 
 1. Run `claude login` in your terminal to authenticate the Claude CLI
 2. Verify credentials exist: `ls ~/.claude/`
-3. Restart Hive after authenticating
+3. Restart Xuanpu after authenticating
 
 **Symptom:** Codex sessions fail to start or prompt returns auth error.
 
@@ -301,7 +301,7 @@ requires implementers to provide:
 
 1. Set `OPENAI_API_KEY` in your environment
 2. Verify: `echo $OPENAI_API_KEY`
-3. Restart Hive after setting the key
+3. Restart Xuanpu after setting the key
 
 ### Session Reconnect Failures
 

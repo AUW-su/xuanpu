@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="resources/icon.png" alt="玄圃" width="128" />
-  <h1>玄圃 Xuanpu Workbench</h1>
+  <img src="resources/banner.png" alt="玄圃 Xuanpu Workbench" width="100%" />
   <p><strong>面向构建者的 AI 原生工作台</strong></p>
   <p>不是把 AI 塞进传统编辑器，而是把项目、上下文、任务、Agent、变更和产物放进同一个工作台。</p>
   <p><a href="./README.md"><strong>简体中文</strong></a> | <a href="./README.en.md">English</a></p>
@@ -114,9 +113,7 @@ pnpm dev
 如果你现在打开仓库，会看到一些仍在演进中的部分，这是正常状态。玄圃正在从早期 fork 产物，过渡到独立产品主线。
 
 ## 致谢与来源
-玄圃起步于对 [Hive](https://github.com/morapelker/hive) 的 fork / 演化。最初很多工程基础、工作台结构和产品启发都来自 Hive。当前这条产品线已经开始沿着中文工作流、桌面端交互和独立品牌方向持续分化，但对原项目的致谢应该保留。
-
-这段信息适合放在 README 的 `致谢与来源`，而不是放在标题、副标题或 Hero 文案里。前者是透明和尊重，后者会削弱玄圃自己的品牌心智。
+玄圃起步于对 [Hive](https://github.com/slicenferqin/xuanpu) 的 fork / 演化。最初很多工程基础、工作台结构和产品启发都来自 Hive。当前这条产品线已经开始沿着中文工作流、桌面端交互和独立品牌方向持续分化，但对原项目的致谢应该保留。
 
 ## 贡献
 欢迎贡献，尤其是这些方向：

@@ -24,6 +24,8 @@ import { toast } from '@/lib/toast'
 import { useI18n } from '@/i18n/useI18n'
 import { Button } from '@/components/ui/button'
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog'
+import onboardingBg from '@/assets/onboarding-bg.png'
+import onboardingBgDark from '@/assets/onboarding-bg-dark.png'
 
 type WizardAgentId = 'claude-code' | 'codex' | 'opencode' | 'terminal'
 type WizardStepId = 'environment' | 'agent'
@@ -230,7 +232,19 @@ export function AgentSetupWizard({
         size="lg"
         className="h-[calc(100vh-2rem)] max-h-[760px] overflow-hidden border border-border/70 bg-background p-0 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)] sm:max-w-[1040px]"
       >
-        <div className="flex h-full min-h-0 flex-col">
+        <img
+          src={onboardingBg}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40 dark:hidden"
+        />
+        <img
+          src={onboardingBgDark}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 hidden h-full w-full object-cover opacity-50 dark:block"
+        />
+        <div className="relative flex h-full min-h-0 flex-col">
           <header className="flex items-start justify-between gap-4 border-b border-border/60 px-6 py-5">
             <div>
               <div className="text-[22px] font-semibold tracking-tight text-foreground">

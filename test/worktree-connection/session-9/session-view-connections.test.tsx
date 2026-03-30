@@ -378,7 +378,7 @@ describe('Session 9: SessionView & MainPane Integration', () => {
     test('shows welcome message when neither worktree nor connection is selected', () => {
       render(<MainPane />)
 
-      expect(screen.getByText('Welcome to Hive')).toBeInTheDocument()
+      expect(screen.getByText('Welcome to Xuanpu')).toBeInTheDocument()
       expect(screen.getByText('Select a project or worktree to get started.')).toBeInTheDocument()
     })
 
@@ -667,10 +667,10 @@ describe('Session 9: SessionView & MainPane Integration', () => {
       expect(screen.getByTestId('pr-button')).toBeInTheDocument()
     })
 
-    test('shows Hive text when nothing is selected', () => {
+    test('shows Xuanpu text when nothing is selected', () => {
       render(<Header />)
 
-      expect(screen.getByText('Hive')).toBeInTheDocument()
+      expect(screen.getByText('Xuanpu')).toBeInTheDocument()
     })
   })
 

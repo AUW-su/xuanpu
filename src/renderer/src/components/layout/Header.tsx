@@ -36,7 +36,7 @@ import { useWorktreeStatusStore } from '@/stores/useWorktreeStatusStore'
 import { useVimModeStore } from '@/stores/useVimModeStore'
 import { QuickActions } from './QuickActions'
 import { usePRDetection } from '@/hooks/usePRDetection'
-import hiveLogo from '@/assets/icon.png'
+import appLogo from '@/assets/icon.png'
 import { useI18n } from '@/i18n/useI18n'
 
 type ConflictFixFlow =
@@ -496,7 +496,7 @@ export function Header(): React.JSX.Element {
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <div className="flex items-center gap-3 min-w-0 rounded-xl border border-border/60 bg-muted/35 px-3 py-1.5">
           <img
-            src={hiveLogo}
+            src={appLogo}
             alt="Xuanpu"
             className="h-5 w-5 shrink-0 rounded-md"
             draggable={false}

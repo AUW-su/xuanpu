@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="resources/icon.png" alt="Xuanpu" width="128" />
-  <h1>Xuanpu Workbench</h1>
+  <img src="resources/banner.png" alt="Xuanpu Workbench" width="100%" />
   <p><strong>An AI-native workbench for builders.</strong></p>
   <p>Not a chat box bolted onto an editor. A workspace where projects, context, tasks, agents, changes, and outputs live together.</p>
   <p><a href="./README.md">简体中文</a> | <a href="./README.en.md"><strong>English</strong></a></p>
@@ -86,9 +85,7 @@ Architecture:
 - `src/server/`: headless / remote GraphQL entry
 
 ## Origins
-Xuanpu started as a fork / evolution of [Hive](https://github.com/morapelker/hive). A meaningful part of the original engineering foundation and product inspiration came from Hive, and that credit should remain visible.
-
-The right place for that is an `Origins` or `Acknowledgements` section in the README, not the hero copy. That keeps the project transparent without weakening Xuanpu's own product identity.
+Xuanpu started as a fork / evolution of [Hive](https://github.com/slicenferqin/xuanpu). A meaningful part of the original engineering foundation and product inspiration came from Hive, and that credit should remain visible.
 
 ## Contributing
 Contributions are especially valuable in these areas:

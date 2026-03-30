@@ -5,7 +5,7 @@ import App from '@/App'
 describe('Session 1: Project Scaffolding', () => {
   test('React app renders correctly', () => {
     render(<App />)
-    expect(screen.getByText('Hive')).toBeInTheDocument()
+    expect(screen.getByText('Xuanpu')).toBeInTheDocument()
   })
 
   test('App layout container is rendered', () => {

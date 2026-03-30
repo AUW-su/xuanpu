@@ -2,17 +2,17 @@
 
 ## General Questions
 
-### What is Hive?
-Hive is a native macOS application that combines git worktree management with AI-powered coding assistance. It allows you to work on multiple branches simultaneously without the hassle of stashing and switching.
+### What is Xuanpu?
+Xuanpu is a native macOS application that combines git worktree management with AI-powered coding assistance. It allows you to work on multiple branches simultaneously without the hassle of stashing and switching.
 
-### Is Hive free?
-Yes, Hive is free and open source under the MIT license.
+### Is Xuanpu free?
+Yes, Xuanpu is free and open source under the MIT license.
 
-### Which platforms does Hive support?
-Currently, Hive is macOS-only. Windows and Linux support are planned for future releases.
+### Which platforms does Xuanpu support?
+Currently, Xuanpu is macOS-only. Windows and Linux support are planned for future releases.
 
-### Do I need to know git worktrees to use Hive?
-No! Hive handles all the worktree complexity for you. If you can use git branches, you can use Hive.
+### Do I need to know git worktrees to use Xuanpu?
+No! Xuanpu handles all the worktree complexity for you. If you can use git branches, you can use Xuanpu.
 
 ## Installation & Setup
 
@@ -23,26 +23,26 @@ No! Hive handles all the worktree complexity for you. If you can use git branche
 - At least 4GB RAM
 - 500MB free disk space
 
-### How do I install Hive?
+### How do I install Xuanpu?
 The easiest way is via Homebrew:
 ```bash
-brew tap morapelker/hive
-brew install --cask hive
+brew tap slicenferqin/xuanpu
+brew install --cask xuanpu
 ```
 
-Alternatively, download the `.dmg` file from [GitHub Releases](https://github.com/morapelker/hive/releases).
+Alternatively, download the `.dmg` file from [GitHub Releases](https://github.com/slicenferqin/xuanpu/releases).
 
-### Why does macOS say "Hive can't be opened"?
+### Why does macOS say "Xuanpu can't be opened"?
 This is macOS's Gatekeeper protection. To fix:
-1. Right-click on Hive in Applications
+1. Right-click on Xuanpu in Applications
 2. Select "Open"
 3. Click "Open" in the dialog
 4. This only needs to be done once
 
-### How do I update Hive?
+### How do I update Xuanpu?
 If installed via Homebrew:
 ```bash
-brew upgrade hive
+brew upgrade xuanpu
 ```
 
 Otherwise, download the latest version from GitHub Releases.
@@ -52,35 +52,35 @@ Otherwise, download the latest version from GitHub Releases.
 ### What is a git worktree?
 A worktree is a linked working copy of your repository. Think of it as having multiple copies of your repo, each on different branches, without duplicating the entire `.git` history.
 
-### Where does Hive store worktrees?
+### Where does Xuanpu store worktrees?
 By default, worktrees are stored in:
 ```
-~/.hive-worktrees/{project-name}/{worktree-name}
+~/.xuanpu-worktrees/{project-name}/{worktree-name}
 ```
 
 ### Can I use existing worktrees?
-Yes, if you have existing git worktrees, Hive will detect and manage them.
+Yes, if you have existing git worktrees, Xuanpu will detect and manage them.
 
 ### What happens when I archive a worktree?
 Archiving a worktree:
 - Removes it from the active list
 - Preserves the branch
-- Moves files to `~/.hive-archive`
+- Moves files to `~/.xuanpu-archive`
 - Keeps session history searchable
 
-### Can I delete branches through Hive?
+### Can I delete branches through Xuanpu?
 Yes, use the "Unbranch" option to remove both the worktree and its associated branch.
 
 ### Why do worktrees have city names?
-Hive uses city names (Tokyo, Paris, London, etc.) to make worktrees memorable and fun. It's easier to remember "the Tokyo worktree" than "feature/user-auth-refactor-v2".
+Xuanpu uses city names (Tokyo, Paris, London, etc.) to make worktrees memorable and fun. It's easier to remember "the Tokyo worktree" than "feature/user-auth-refactor-v2".
 
 ### What if I run out of city names?
-Hive has 200+ city names. If all are used, it adds version suffixes (tokyo-v1, tokyo-v2). You can also rename worktrees.
+Xuanpu has 200+ city names. If all are used, it adds version suffixes (tokyo-v1, tokyo-v2). You can also rename worktrees.
 
 ## Connections
 
 ### What is the Connections feature?
-Hive's Connections feature allows you to link two worktrees together, creating a bridge between different branches. This enables you to reference code from one branch while working in another, share AI session context, and maintain awareness of related changes across your project.
+Xuanpu's Connections feature allows you to link two worktrees together, creating a bridge between different branches. This enables you to reference code from one branch while working in another, share AI session context, and maintain awareness of related changes across your project.
 
 ### Why would I connect two worktrees?
 Common scenarios include:
@@ -112,8 +112,8 @@ Connected worktrees can share:
 ### Are changes synchronized between connected worktrees?
 No, connections don't synchronize changes. Each worktree remains independent. Connections provide visibility and context, not synchronization. You can view and reference files from connected worktrees but changes stay in their respective branches.
 
-### Do connections persist after closing Hive?
-Yes! Connections are saved and will be restored when you reopen Hive. You can also save connection patterns as templates for quick reuse.
+### Do connections persist after closing Xuanpu?
+Yes! Connections are saved and will be restored when you reopen Xuanpu. You can also save connection patterns as templates for quick reuse.
 
 ### Can AI sessions access connected worktrees?
 Yes, when AI session sharing is enabled, you can reference code from connected worktrees. For example: "Apply the same pattern used in the connected worktree's authentication system."
@@ -142,7 +142,7 @@ Look for these indicators:
 
 ## AI Coding Sessions
 
-### Which AI providers does Hive support?
+### Which AI providers does Xuanpu support?
 - **OpenCode SDK** - Default provider with full features
 - **Claude Code SDK** - Anthropic's Claude assistant
 
@@ -168,7 +168,7 @@ AI sessions can:
 - Answer questions about your code
 
 ### Are my code and conversations private?
-Yes. All AI interactions happen directly between your machine and the AI provider's API. Hive doesn't store or transmit your code to any intermediary servers.
+Yes. All AI interactions happen directly between your machine and the AI provider's API. Xuanpu doesn't store or transmit your code to any intermediary servers.
 
 ### Can I undo AI changes?
 - **OpenCode**: Full undo/redo support
@@ -183,15 +183,15 @@ Common reasons:
 
 ## Performance & Troubleshooting
 
-### Hive is running slowly. What can I do?
+### Xuanpu is running slowly. What can I do?
 1. Limit open worktrees to 10-15
 2. Close unused file tabs
 3. Disable unused language servers in settings
 4. Check Activity Monitor for memory usage
-5. Restart Hive if it's been running for days
+5. Restart Xuanpu if it's been running for days
 
 ### The file tree isn't showing all files
-Hive respects `.gitignore` by default. To show ignored files:
+Xuanpu respects `.gitignore` by default. To show ignored files:
 1. Open Settings
 2. Toggle "Show ignored files"
 
@@ -201,50 +201,50 @@ Hive respects `.gitignore` by default. To show ignored files:
 3. Restart the language server from the command palette
 4. Some languages require additional setup (see documentation)
 
-### How do I reset Hive to defaults?
-To completely reset Hive:
-1. Quit Hive
-2. Delete `~/.hive` directory
-3. Delete `~/Library/Application Support/hive`
-4. Restart Hive
+### How do I reset Xuanpu to defaults?
+To completely reset Xuanpu:
+1. Quit Xuanpu
+2. Delete `~/.xuanpu` directory
+3. Delete `~/Library/Application Support/xuanpu`
+4. Restart Xuanpu
 
 **Warning**: This will remove all projects, settings, and session history.
 
-### Where are Hive's logs?
+### Where are Xuanpu's logs?
 Logs are stored in:
 ```
-~/Library/Logs/hive/
+~/Library/Logs/xuanpu/
 ```
 
-Use Console.app or `tail -f ~/Library/Logs/hive/main.log` to view them.
+Use Console.app or `tail -f ~/Library/Logs/xuanpu/main.log` to view them.
 
 ## Data & Privacy
 
-### Where does Hive store its data?
-- Database: `~/.hive/hive.db` (SQLite)
-- Worktrees: `~/.hive-worktrees/`
-- Archives: `~/.hive-archive/`
-- Logs: `~/Library/Logs/hive/`
-- Settings: `~/Library/Application Support/hive/`
+### Where does Xuanpu store its data?
+- Database: `~/.xuanpu/xuanpu.db` (SQLite)
+- Worktrees: `~/.xuanpu-worktrees/`
+- Archives: `~/.xuanpu-archive/`
+- Logs: `~/Library/Logs/xuanpu/`
+- Settings: `~/Library/Application Support/xuanpu/`
 
 ### Is my data backed up?
-Hive doesn't automatically backup data. We recommend:
+Xuanpu doesn't automatically backup data. We recommend:
 - Using Time Machine for system backups
-- Backing up `~/.hive` for settings and history
+- Backing up `~/.xuanpu` for settings and history
 - Your git repositories are already backed up via git
 
 ### Can I sync settings across machines?
-Not yet, but this feature is on our roadmap. For now, you can manually copy the `~/.hive` directory.
+Not yet, but this feature is on our roadmap. For now, you can manually copy the `~/.xuanpu` directory.
 
-### Does Hive collect telemetry?
-Hive includes optional, anonymous usage analytics via PostHog. You can disable this in Settings → Privacy.
+### Does Xuanpu collect telemetry?
+Xuanpu includes optional, anonymous usage analytics via PostHog. You can disable this in Settings → Privacy.
 
 ## Common Issues
 
 ### "Permission denied" when creating worktrees
 Ensure you have write permissions to:
 - The repository directory
-- `~/.hive-worktrees/`
+- `~/.xuanpu-worktrees/`
 
 ### Git operations fail with "not a git repository"
 This usually means:
@@ -267,35 +267,35 @@ Check:
 
 ## Advanced Usage
 
-### Can I use Hive with monorepos?
-Yes! Hive works great with monorepos. Each worktree can focus on different parts of your monorepo.
+### Can I use Xuanpu with monorepos?
+Yes! Xuanpu works great with monorepos. Each worktree can focus on different parts of your monorepo.
 
-### Does Hive support git submodules?
+### Does Xuanpu support git submodules?
 Yes, with limitations. Submodules are supported but may require manual initialization in each worktree.
 
 ### Can I use custom git hooks?
 Yes, place hooks in your repository's `.git/hooks/` directory. They'll apply to all worktrees.
 
-### How do I use Hive with CI/CD?
+### How do I use Xuanpu with CI/CD?
 Worktrees are regular git checkouts, so they work with any CI/CD system. Push from a worktree and your CI/CD will trigger normally.
 
-### Can I script Hive operations?
+### Can I script Xuanpu operations?
 Not directly, but you can:
 - Use git commands on worktree directories
-- Access the SQLite database at `~/.hive/hive.db`
+- Access the SQLite database at `~/.xuanpu/xuanpu.db`
 - Use the command palette for common operations
 
 ## Getting Help
 
 ### Where can I report bugs?
-[Create an issue](https://github.com/morapelker/hive/issues) on GitHub with:
+[Create an issue](https://github.com/slicenferqin/xuanpu/issues) on GitHub with:
 - Steps to reproduce
 - Expected vs actual behavior
 - System information
 - Screenshots if applicable
 
 ### How can I request features?
-[Open a discussion](https://github.com/morapelker/hive/discussions) or [create a feature request](https://github.com/morapelker/hive/issues/new?template=feature_request.md).
+[Open a discussion](https://github.com/slicenferqin/xuanpu/discussions) or [create a feature request](https://github.com/slicenferqin/xuanpu/issues/new?template=feature_request.md).
 
 ### Where can I find more documentation?
 - [User Guide](GUIDE.md) - Detailed usage instructions
@@ -310,8 +310,8 @@ See our [Contributing Guidelines](../CONTRIBUTING.md). We welcome:
 - Translations
 
 ### Is there a community Discord/Slack?
-Not yet, but join our [GitHub Discussions](https://github.com/morapelker/hive/discussions) to connect with other users.
+Not yet, but join our [GitHub Discussions](https://github.com/slicenferqin/xuanpu/discussions) to connect with other users.
 
 ---
 
-Still have questions? [Open a discussion](https://github.com/morapelker/hive/discussions/new?category=q-a) and we'll help!
+Still have questions? [Open a discussion](https://github.com/slicenferqin/xuanpu/discussions/new?category=q-a) and we'll help!

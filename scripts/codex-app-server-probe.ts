@@ -98,7 +98,7 @@ class CodexProbeClient {
     await this.request('initialize', {
       clientInfo: {
         name: 'hive_codex_probe',
-        title: 'Hive Codex Probe',
+        title: 'Xuanpu Codex Probe',
         version: '1.0.0'
       },
       capabilities: {
@@ -371,7 +371,7 @@ async function main(): Promise<void> {
           turn.requestMethods.some((method) => method.includes('requestApproval'))
         ),
         acceptPlanMechanism:
-          'No dedicated plan approval request was observed. The practical acceptance path is a normal follow-up user turn (Hive\'s non-Claude "Implement" flow).',
+          'No dedicated plan approval request was observed. The practical acceptance path is a normal follow-up user turn (Xuanpu\'s non-Claude "Implement" flow).',
         finalPlanLooksStructured: isPlanMessage(finalPlanText)
       }
     }

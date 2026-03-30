@@ -11,7 +11,7 @@ We release patches for security vulnerabilities in the following versions:
 
 ## Reporting a Vulnerability
 
-We take the security of Hive seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+We take the security of Xuanpu seriously. If you believe you have found a security vulnerability, please report it to us as described below.
 
 ### Please DO NOT
 
@@ -20,7 +20,7 @@ We take the security of Hive seriously. If you believe you have found a security
 
 ### Please DO
 
-- **Email us** at morapelker@gmail.com with details of the vulnerability
+- **Email us** at slicenferqin@gmail.com with details of the vulnerability
 - **Include** as much information as possible:
   - Type of vulnerability (e.g., remote code execution, SQL injection, cross-site scripting)
   - Full paths of source file(s) related to the vulnerability
@@ -46,12 +46,12 @@ After you submit a vulnerability report:
 
 ## Security Best Practices for Users
 
-To keep your Hive installation secure:
+To keep your Xuanpu installation secure:
 
-### Keep Hive Updated
-- Always run the latest version of Hive
+### Keep Xuanpu Updated
+- Always run the latest version of Xuanpu
 - Enable automatic updates if available
-- Check for updates regularly via `brew upgrade hive`
+- Check for updates regularly via `brew upgrade xuanpu`
 
 ### Protect Your Data
 - Keep your git repositories secure
@@ -63,7 +63,7 @@ To keep your Hive installation secure:
 - Keep macOS updated with the latest security patches
 - Use full disk encryption (FileVault)
 - Enable firewall if working in public networks
-- Regularly backup your `~/.hive` directory
+- Regularly backup your `~/.xuanpu` directory
 
 ### AI Session Security
 - Review tool permissions before approving AI actions
@@ -71,9 +71,9 @@ To keep your Hive installation secure:
 - Don't share session logs containing sensitive data
 - Rotate API keys periodically
 
-## Security Features in Hive
+## Security Features in Xuanpu
 
-Hive implements several security measures:
+Xuanpu implements several security measures:
 
 ### Electron Security
 - **Context Isolation**: Enabled to prevent renderer access to Node.js
@@ -83,7 +83,7 @@ Hive implements several security measures:
 - **HTTPS Only**: External resources loaded via HTTPS only
 
 ### Data Protection
-- **Local Storage Only**: All data stored locally in `~/.hive`
+- **Local Storage Only**: All data stored locally in `~/.xuanpu`
 - **SQLite Encryption**: Optional database encryption support
 - **Secure IPC**: Type-safe IPC communication between processes
 - **Permission System**: AI agents require explicit permission for sensitive operations
@@ -108,16 +108,16 @@ Hive implements several security measures:
 
 ## Security Hall of Fame
 
-We're grateful to the security researchers who have helped make Hive more secure:
+We're grateful to the security researchers who have helped make Xuanpu more secure:
 
 - *Your name could be here!*
 
 ## Questions?
 
 If you have questions about this security policy, please:
-- Open a [discussion](https://github.com/morapelker/hive/discussions/new?category=q-a) (for non-sensitive topics)
-- Email us at morapelker@gmail.com (for sensitive topics)
+- Open a [discussion](https://github.com/slicenferqin/xuanpu/discussions/new?category=q-a) (for non-sensitive topics)
+- Email us at slicenferqin@gmail.com (for sensitive topics)
 
 ---
 
-Thank you for helping keep Hive and its users safe!
+Thank you for helping keep Xuanpu and its users safe!

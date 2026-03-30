@@ -11,6 +11,8 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useFileViewerStore } from '@/stores/useFileViewerStore'
 import { useLayoutStore } from '@/stores/useLayoutStore'
 import { useI18n } from '@/i18n/useI18n'
+import onboardingBg from '@/assets/onboarding-bg.png'
+import onboardingBgDark from '@/assets/onboarding-bg-dark.png'
 
 const MonacoDiffView = lazy(() => import('@/components/diff/MonacoDiffView'))
 const WorktreeContextEditor = lazy(() =>
@@ -162,8 +164,20 @@ export function MainPane({ children }: MainPaneProps): React.JSX.Element {
     // No worktree or connection selected - show welcome message
     if (!selectedWorktreeId && !selectedConnectionId) {
       return (
-        <div className="flex-1 flex items-center justify-center text-muted-foreground">
-          <div className="text-center">
+        <div className="relative flex-1 flex items-center justify-center text-muted-foreground">
+          <img
+            src={onboardingBg}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30 dark:hidden"
+          />
+          <img
+            src={onboardingBgDark}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden h-full w-full object-cover opacity-40 dark:block"
+          />
+          <div className="relative text-center">
             <p className="text-lg font-medium">{t('mainPane.welcomeTitle')}</p>
             <p className="text-sm mt-2">{t('mainPane.welcomeDescription')}</p>
           </div>
@@ -274,8 +288,20 @@ export function MainPane({ children }: MainPaneProps): React.JSX.Element {
     // Worktree or connection selected but no session - show create session prompt
     if (!activeSessionId) {
       return (
-        <div className="flex-1 flex items-center justify-center text-muted-foreground">
-          <div className="text-center">
+        <div className="relative flex-1 flex items-center justify-center text-muted-foreground">
+          <img
+            src={onboardingBg}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30 dark:hidden"
+          />
+          <img
+            src={onboardingBgDark}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden h-full w-full object-cover opacity-40 dark:block"
+          />
+          <div className="relative text-center">
             <p className="text-lg font-medium">{t('mainPane.noActiveSessionTitle')}</p>
             <p className="text-sm mt-2">{t('mainPane.noActiveSessionDescription')}</p>
           </div>

@@ -199,7 +199,7 @@ describe('Settings i18n', () => {
     expect(translate('zh-CN', 'projectList.empty.noProjects')).toBe('还没有添加任何项目。')
     expect(translate('zh-CN', 'fileViewer.externalChanges.keepMine')).toBe('保留我的更改')
     expect(translate('zh-CN', 'spaces.dialogs.createTitle')).toBe('创建空间')
-    expect(translate('zh-CN', 'mainPane.welcomeTitle')).toBe('欢迎使用 Hive')
+    expect(translate('zh-CN', 'mainPane.welcomeTitle')).toBe('欢迎使用玄圃')
     expect(translate('zh-CN', 'agentPicker.title')).toBe('选择默认 AI Agent')
     expect(translate('zh-CN', 'fileMentionPopover.noFiles')).toBe('没有找到文件')
     expect(translate('zh-CN', 'sessionView.empty.title')).toBe('开始一段对话')
