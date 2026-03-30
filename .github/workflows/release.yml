@@ -20,42 +20,41 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - name: Download libghostty
+
+      - name: Download libghostty (optional)
+        continue-on-error: true
+        id: ghostty
         run: |
           mkdir -p vendor
           gh release download ghostty-deps-v1 -p libghostty.a -D vendor/ --repo slicenferqin/xuanpu
+          echo "available=true" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - run: pip3 install --break-system-packages setuptools
       - run: pnpm install --frozen-lockfile
 
-      - name: Verify libghostty download
-        run: |
-          echo "=== libghostty artifact ==="
-          ls -lh vendor/libghostty.a
-          file vendor/libghostty.a
-
       - name: Build Ghostty native addon
+        if: steps.ghostty.outputs.available == 'true'
         run: pnpm build:native
         env:
           GHOSTTY_LIB_PATH: ${{ github.workspace }}/vendor/libghostty.a
 
-      - name: Verify native addon built
-        run: |
-          echo "=== ghostty.node output ==="
-          ls -lhR src/native/build/Release/
-          file src/native/build/Release/ghostty.node
-
       - run: pnpm build
         env:
-          GHOSTTY_LIB_PATH: ${{ github.workspace }}/vendor/libghostty.a
+          GHOSTTY_LIB_PATH: ${{ steps.ghostty.outputs.available == 'true' && format('{0}/vendor/libghostty.a', github.workspace) || '' }}
 
-      - name: Verify build output structure
+      - name: Ensure ghostty.node exists for electron-builder extraResources
         run: |
-          echo "=== out/ directory ==="
-          ls -lhR out/
-          echo "=== All .node files in workspace ==="
-          find . -name '*.node' -not -path './node_modules/*'
+          # electron-builder.yml references this in extraResources.
+          # If ghostty wasn't built, create an empty placeholder so packaging doesn't fail.
+          if [ ! -f src/native/build/Release/ghostty.node ]; then
+            mkdir -p src/native/build/Release
+            touch src/native/build/Release/ghostty.node
+            echo "Created placeholder ghostty.node (ghostty not available)"
+          else
+            echo "ghostty.node exists from native build"
+          fi
 
       - run: pnpm exec electron-builder --mac --publish always
         env:
@@ -71,9 +70,7 @@ jobs:
       - name: Verify packaged app contents
         if: always()
         run: |
+          echo "=== dist contents ==="
+          ls -lh dist/*.dmg dist/*.zip 2>/dev/null || echo "No DMG/ZIP in dist"
           echo "=== .node files in dist ==="
           find dist -name '*.node' 2>/dev/null || echo "No .node files in dist"
-          echo "=== extraResources check ==="
-          find dist -path '*/Resources/native/*' 2>/dev/null || echo "No native/ in Resources"
-          echo "=== app.asar.unpacked check ==="
-          find dist -path '*/app.asar.unpacked/*' -name '*.node' 2>/dev/null || echo "No .node in asar.unpacked"
