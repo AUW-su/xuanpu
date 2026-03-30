@@ -23,6 +23,7 @@ export function SettingsTerminal(): React.JSX.Element {
     customTerminalCommand,
     embeddedTerminalBackend,
     ghosttyFontSize,
+    terminalFontFamily,
     updateSetting
   } = useSettingsStore()
   const [detectedTerminals, setDetectedTerminals] = useState<DetectedTerminal[]>([])
@@ -226,6 +227,23 @@ export function SettingsTerminal(): React.JSX.Element {
             </div>
           </>
         )}
+
+        {/* Terminal Font Family — applies regardless of backend */}
+        <div className="mt-4 space-y-2">
+          <label className="text-sm font-medium">
+            {t('settings.terminal.embedded.fontFamilyLabel')}
+          </label>
+          <Input
+            value={terminalFontFamily}
+            onChange={(e) => updateSetting('terminalFontFamily', e.target.value)}
+            placeholder='e.g., "MesloLGS Nerd Font", monospace'
+            className="font-mono text-sm"
+            data-testid="terminal-font-family"
+          />
+          <p className="text-xs text-muted-foreground">
+            {t('settings.terminal.embedded.fontFamilyDescription')}
+          </p>
+        </div>
       </div>
 
       {/* External Terminal (Open in Terminal) */}

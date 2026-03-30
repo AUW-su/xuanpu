@@ -146,7 +146,10 @@ export const messages: Record<AppLocale, MessageTree> = {
           fontSizeLabel: 'Font Size',
           fontSizeUnit: 'pt (8-32)',
           fontSizeDescription:
-            'Font size for the embedded Ghostty terminal. Restart the terminal for changes to take effect.'
+            'Font size for the embedded Ghostty terminal. Restart the terminal for changes to take effect.',
+          fontFamilyLabel: 'Terminal Font',
+          fontFamilyDescription:
+            'CSS font-family for the embedded terminal. Leave empty to auto-detect or use default. Use Nerd Font names (e.g. "MesloLGS Nerd Font") for icon glyph support.'
         },
         external: {
           title: 'External Terminal',
@@ -2105,7 +2108,10 @@ export const messages: Record<AppLocale, MessageTree> = {
           info: 'Ghostty 通过 Metal 提供更原生的渲染性能。切换后端时终端会重启。颜色和光标样式会读取你的 Ghostty 配置。',
           fontSizeLabel: '字体大小',
           fontSizeUnit: 'pt（8-32）',
-          fontSizeDescription: '内置 Ghostty 终端的字体大小。修改后需重启终端才能生效。'
+          fontSizeDescription: '内置 Ghostty 终端的字体大小。修改后需重启终端才能生效。',
+          fontFamilyLabel: '终端字体',
+          fontFamilyDescription:
+            '内置终端的 CSS font-family。留空则自动检测或使用默认值。使用 Nerd Font 字体名（如 "MesloLGS Nerd Font"）可正确显示图标字形。'
         },
         external: {
           title: '外部终端',

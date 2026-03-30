@@ -57,6 +57,7 @@ export interface AppSettings {
   customTerminalCommand: string
   embeddedTerminalBackend: EmbeddedTerminalBackend
   ghosttyFontSize: number
+  terminalFontFamily: string
   ghosttyPromotionDismissed: boolean
 
   // Model
@@ -118,6 +119,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   customTerminalCommand: '',
   embeddedTerminalBackend: 'xterm',
   ghosttyFontSize: 14,
+  terminalFontFamily: '',
   ghosttyPromotionDismissed: false,
   selectedModel: null,
   selectedModelByProvider: {},
@@ -236,6 +238,7 @@ function extractSettings(state: SettingsState): AppSettings {
     customTerminalCommand: state.customTerminalCommand,
     embeddedTerminalBackend: state.embeddedTerminalBackend,
     ghosttyFontSize: state.ghosttyFontSize,
+    terminalFontFamily: state.terminalFontFamily,
     ghosttyPromotionDismissed: state.ghosttyPromotionDismissed,
     selectedModel: state.selectedModel,
     selectedModelByProvider: state.selectedModelByProvider,
@@ -445,6 +448,7 @@ export const useSettingsStore = create<SettingsState>()(
         customTerminalCommand: state.customTerminalCommand,
         embeddedTerminalBackend: state.embeddedTerminalBackend,
         ghosttyFontSize: state.ghosttyFontSize,
+        terminalFontFamily: state.terminalFontFamily,
         ghosttyPromotionDismissed: state.ghosttyPromotionDismissed,
         selectedModel: state.selectedModel,
         selectedModelByProvider: state.selectedModelByProvider,
