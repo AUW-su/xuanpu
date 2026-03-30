@@ -16,17 +16,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS ARM64 — native arm64 runner, no cross-compilation needed
+          # macOS ARM64 — native build on ARM64 runner
           - os: macos-latest
             platform: mac
             arch: arm64
             eb_flags: --mac --arm64
-          # macOS x64 — Intel runner to build native modules natively
-          - os: macos-13
+          # macOS x64 — cross-compile on ARM64 runner via @electron/rebuild
+          - os: macos-latest
             platform: mac
             arch: x64
             eb_flags: --mac --x64
-          # Windows x64 — native x64 runner
+            needs_rebuild: true
+          # Windows x64
           - os: windows-latest
             platform: win
             arch: x64
@@ -77,6 +78,12 @@ jobs:
       - run: pnpm build
         env:
           GHOSTTY_LIB_PATH: ${{ matrix.platform == 'mac' && steps.ghostty.outputs.available == 'true' && format('{0}/vendor/libghostty.a', github.workspace) || '' }}
+
+      # Cross-architecture: rebuild native modules for the target arch
+      # This is needed when host arch != target arch (e.g., arm64 runner building x64)
+      - name: Rebuild native modules for ${{ matrix.arch }}
+        if: matrix.needs_rebuild
+        run: pnpm exec electron-rebuild --arch=${{ matrix.arch }}
 
       # macOS: electron-builder.yml mac.extraResources references ghostty.node
       - name: Ensure ghostty.node placeholder (macOS)
