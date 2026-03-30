@@ -49,7 +49,7 @@ import { usePermissionStore } from '@/stores/usePermissionStore'
 import { useCommandApprovalStore } from '@/stores/useCommandApprovalStore'
 import { checkAutoApprove } from '@/lib/permissionUtils'
 import { usePromptHistoryStore } from '@/stores/usePromptHistoryStore'
-import { useWorktreeStore, useDropAttachmentStore } from '@/stores'
+import { useWorktreeStore, useDropAttachmentStore, useDraftAttachmentStore } from '@/stores'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { usePRReviewStore } from '@/stores/usePRReviewStore'
@@ -155,6 +155,14 @@ function getRoundTerminalMessageIds(messages: OpenCodeMessage[]): Set<string> {
     const isBoundary = i === messages.length || messages[i]?.role === 'user'
     if (!isBoundary) continue
 
+    // Mark the user message that opens this round so its send-time is visible
+    const opener = messages[chunkStart]
+    if (opener?.role === 'user' && hasMeaningfulMessagePart(opener)) {
+      ids.add(opener.id)
+    }
+
+    // Mark the last meaningful message (typically the assistant reply) as the
+    // round closer – its timestamp shows when the round finished.
     for (let j = i - 1; j >= chunkStart; j--) {
       if (hasMeaningfulMessagePart(messages[j])) {
         ids.add(messages[j].id)
@@ -562,7 +570,25 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       timestamp: number
     }>
   >([])
-  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [attachments, setAttachments] = useState<Attachment[]>(
+    () => useDraftAttachmentStore.getState().restore(sessionId)
+  )
+  // Keep a ref for the unmount cleanup (closure can't capture latest state)
+  const attachmentsStateRef = useRef(attachments)
+  attachmentsStateRef.current = attachments
+
+  /** Clear attachments in both React state and the draft store */
+  const clearAttachments = useCallback(() => {
+    clearAttachments()
+    useDraftAttachmentStore.getState().clear(sessionId)
+  }, [sessionId])
+
+  // Save unsent attachments when unmounting (session switch)
+  useEffect(() => {
+    return () => {
+      useDraftAttachmentStore.getState().save(sessionId, attachmentsStateRef.current)
+    }
+  }, [sessionId])
 
   // Consume files dropped from Finder via the global drop zone
   const pendingDropFiles = useDropAttachmentStore((s) => s.pending)
@@ -3486,7 +3512,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
           // Build message parts (support file attachments if any)
           const parts = buildMessageParts(attachments, prefixedQuestion)
-          setAttachments([])
+          clearAttachments()
           usePRReviewStore.getState().clearAttachments()
 
           try {
@@ -3649,7 +3675,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               }
 
               lastSentPromptRef.current = trimmedValue
-              setAttachments([])
+              clearAttachments()
               usePRReviewStore.getState().clearAttachments()
               const result = await window.opencodeOps.command(
                 worktreePath,
@@ -3683,7 +3709,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               const promptMessage = prContext + modePrefix + trimmedValue
               lastSentPromptRef.current = promptMessage
               const parts = buildMessageParts(attachments, promptMessage)
-              setAttachments([])
+              clearAttachments()
               usePRReviewStore.getState().clearAttachments()
               const result = await window.opencodeOps.prompt(
                 worktreePath,
@@ -3720,7 +3746,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             // role field, making it indistinguishable from assistant text).
             lastSentPromptRef.current = promptMessage
             const parts = buildMessageParts(attachments, promptMessage)
-            setAttachments([])
+            clearAttachments()
             usePRReviewStore.getState().clearAttachments()
             const result = await window.opencodeOps.prompt(
               worktreePath,
@@ -3738,7 +3764,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           // Don't set isSending to false here - wait for streaming to complete
         } else {
           // No OpenCode connection - show placeholder
-          setAttachments([])
+          clearAttachments()
           usePRReviewStore.getState().clearAttachments()
           console.warn('No OpenCode connection, showing placeholder response')
           setTimeout(() => {
@@ -3772,6 +3798,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       fileMentions,
       resetAutoScrollState,
       stripAtMentions,
+      clearAttachments,
       t
     ]
   )

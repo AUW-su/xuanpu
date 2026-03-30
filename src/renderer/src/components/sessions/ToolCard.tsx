@@ -1025,10 +1025,13 @@ export const ToolCard = memo(function ToolCard({
     )
   }
 
-  // ExitPlanMode: always-expanded plan card with fake user message on acceptance/rejection
+  // ExitPlanMode: collapsible plan card with fake user message on acceptance/rejection
   if (isExitPlanMode) {
     const planAccepted = toolUse.status === 'success'
     const planRejected = toolUse.status === 'error'
+    const isSettled = planAccepted || planRejected
+    // Pending/running plans stay expanded; settled plans collapse by default
+    const shouldShowContent = isSettled ? isExpanded : true
     return (
       <ToolCallContextMenu toolUse={toolUse}>
         <div>
@@ -1044,12 +1047,16 @@ export const ToolCard = memo(function ToolCard({
             data-tool-name={toolUse.name}
             data-tool-status={toolUse.status}
           >
-            {/* Header */}
-            <div
+            {/* Header — clickable to toggle when settled */}
+            <button
+              onClick={() => isSettled && hasPlanInput && setIsExpanded(!isExpanded)}
               className={cn(
                 'flex items-center gap-1.5 w-full text-left',
-                compact ? 'px-2 py-1.5' : 'px-2.5 py-1.5'
+                compact ? 'px-2 py-1.5' : 'px-2.5 py-1.5',
+                isSettled && hasPlanInput && 'cursor-pointer hover:bg-muted/50 transition-colors'
               )}
+              disabled={!isSettled || !hasPlanInput}
+              aria-expanded={isSettled && hasPlanInput ? isExpanded : undefined}
               data-testid="tool-card-header"
             >
               <CollapsedContent toolUse={toolUse} cwd={cwd} />
@@ -1064,12 +1071,31 @@ export const ToolCard = memo(function ToolCard({
                 </span>
               )}
               <StatusIndicator status={toolUse.status} />
-            </div>
-            {/* Always-visible plan content */}
-            {hasPlanInput && (
+              {/* Expand/Collapse affordance — only when settled */}
+              {isSettled && hasPlanInput && (
+                <span className="ml-1 inline-flex items-center gap-1 rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  {isExpanded ? t('toolCard.actions.hide') : t('toolCard.actions.view')}
+                  <ChevronDown
+                    className={cn(
+                      'h-2.5 w-2.5 shrink-0 transition-transform duration-150',
+                      !isExpanded && '-rotate-90'
+                    )}
+                  />
+                </span>
+              )}
+            </button>
+            {/* Plan content — collapsed by default when settled */}
+            <div
+              className={cn(
+                'transition-all duration-150 overflow-hidden',
+                shouldShowContent && hasPlanInput
+                  ? 'max-h-[2000px] opacity-100'
+                  : 'max-h-0 opacity-0'
+              )}
+              data-testid="tool-output"
+            >
               <div
                 className={cn('border-t border-border', compact ? 'px-3 py-2.5' : 'px-4 py-3')}
-                data-testid="tool-output"
               >
                 <Renderer
                   name={toolUse.name}
@@ -1079,7 +1105,7 @@ export const ToolCard = memo(function ToolCard({
                   status={toolUse.status}
                 />
               </div>
-            )}
+            </div>
           </div>
           {/* Fake user message after plan acceptance */}
           {planAccepted && (
