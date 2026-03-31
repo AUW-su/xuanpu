@@ -1029,9 +1029,10 @@ export const ToolCard = memo(function ToolCard({
   if (isExitPlanMode) {
     const planAccepted = toolUse.status === 'success'
     const planRejected = toolUse.status === 'error'
-    const isSettled = planAccepted || planRejected
-    // Pending/running plans stay expanded; settled plans collapse by default
-    const shouldShowContent = isSettled ? isExpanded : true
+    const isPlanPending = toolUse.status === 'pending'
+    // Only pending plans stay expanded for review; all other states collapse by default
+    const isSettled = !isPlanPending
+    const shouldShowContent = isPlanPending ? true : isExpanded
     return (
       <ToolCallContextMenu toolUse={toolUse}>
         <div>
@@ -1084,18 +1085,21 @@ export const ToolCard = memo(function ToolCard({
                 </span>
               )}
             </button>
-            {/* Plan content — collapsed by default when settled */}
+            {/* Plan content — collapsed by default when not pending */}
             <div
               className={cn(
                 'transition-all duration-150 overflow-hidden',
                 shouldShowContent && hasPlanInput
-                  ? 'max-h-[2000px] opacity-100'
+                  ? 'max-h-[10000px] opacity-100'
                   : 'max-h-0 opacity-0'
               )}
               data-testid="tool-output"
             >
               <div
-                className={cn('border-t border-border', compact ? 'px-3 py-2.5' : 'px-4 py-3')}
+                className={cn(
+                  'border-t border-border max-h-[600px] overflow-y-auto',
+                  compact ? 'px-3 py-2.5' : 'px-4 py-3'
+                )}
               >
                 <Renderer
                   name={toolUse.name}
