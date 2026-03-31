@@ -843,6 +843,7 @@ export const messages: Record<AppLocale, MessageTree> = {
       }
     },
     sessionView: {
+      compacting: 'Compressing context...',
       loading: {
         title: 'Connecting to session...',
         subtitle: 'This may take a moment'
@@ -2795,6 +2796,7 @@ export const messages: Record<AppLocale, MessageTree> = {
       }
     },
     sessionView: {
+      compacting: '正在压缩上下文窗口...',
       loading: {
         title: '正在连接会话...',
         subtitle: '这可能需要一点时间'

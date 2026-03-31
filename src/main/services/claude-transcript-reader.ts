@@ -42,6 +42,8 @@ interface ClaudeJsonlEntry {
     model?: unknown
   }
   isSidechain?: boolean
+  /** Synthetic user message containing the conversation summary after context compaction */
+  isCompactSummary?: boolean
 }
 
 function extractTextFromContent(content: ClaudeContentBlock[] | string | undefined): string {
@@ -220,6 +222,12 @@ export async function readClaudeTranscript(
     // to child session transcripts, not the main conversation.
     const rawEntry = entry as unknown as Record<string, unknown>
     if (rawEntry.parent_tool_use_id) {
+      continue
+    }
+
+    // Skip compaction summary — a synthetic user message containing the
+    // conversation summary after context compaction.
+    if (entry.isCompactSummary === true) {
       continue
     }
 
