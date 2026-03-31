@@ -1,3 +1,5 @@
+import type { MessagePart } from '@shared/types/opencode'
+
 export interface ToolUseInfo {
   id: string
   name: string
@@ -38,6 +40,8 @@ export interface OpenCodeMessage {
   content: string
   timestamp: string
   parts?: StreamingPart[]
+  /** File attachments for user messages (images, PDFs, etc.) */
+  attachments?: MessagePart[]
 }
 
 interface MappedMessage {
@@ -242,6 +246,24 @@ function mapMessage(rawMessage: unknown, index: number): MappedMessage {
     .map((part, partIndex) => mapOpencodePartToStreamingPart(part, partIndex))
     .filter((part): part is StreamingPart => part !== null)
 
+  // Extract file attachments from raw parts (these are silently dropped by
+  // mapOpencodePartToStreamingPart since it doesn't handle type: 'file').
+  const fileAttachments: MessagePart[] = rawParts
+    .filter((p) => {
+      const r = asRecord(p)
+      return r && asString(r.type) === 'file'
+    })
+    .map((p) => {
+      const r = asRecord(p)!
+      return {
+        type: 'file' as const,
+        mime: asString(r.mime) ?? '',
+        url: asString(r.url) ?? '',
+        filename: asString(r.filename)
+      }
+    })
+    .filter((f) => f.url)
+
   const content =
     extractTextContentFromParts(rawParts) ||
     asString(info?.content) ||
@@ -267,7 +289,10 @@ function mapMessage(rawMessage: unknown, index: number): MappedMessage {
       role,
       content,
       timestamp,
-      parts: mappedParts.length > 0 ? mappedParts : undefined
+      parts: mappedParts.length > 0 ? mappedParts : undefined,
+      ...(role === 'user' && fileAttachments.length > 0
+        ? { attachments: fileAttachments }
+        : {})
     },
     sortTime,
     originalIndex: index
