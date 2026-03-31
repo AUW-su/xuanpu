@@ -242,6 +242,12 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer {
       return { success: true, sessionStatus, revertMessageID: existing.revertMessageID ?? null }
     }
 
+    // Sessions with pending:: prefix were never materialized — they were created
+    // by connect() but never sent a prompt before the app restarted. Setting
+    // materialized=false ensures prompt() won't pass the fake ID as `resume`,
+    // which would cause the Claude Code process to exit with code 1.
+    const isPending = agentSessionId.startsWith('pending::')
+
     const state: ClaudeSessionState = {
       claudeSessionId: agentSessionId,
       hiveSessionId,
@@ -251,7 +257,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer {
       checkpoints: new Map(),
       query: null,
       lastQuery: null,
-      materialized: true,
+      materialized: !isPending,
       messages: [],
       toolNames: new Map(),
       pendingQuestion: null,
