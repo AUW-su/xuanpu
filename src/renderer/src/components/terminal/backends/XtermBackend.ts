@@ -5,6 +5,21 @@ import { WebglAddon } from '@xterm/addon-webgl'
 import { SearchAddon } from '@xterm/addon-search'
 import type { TerminalBackend, TerminalOpts, TerminalBackendCallbacks } from './types'
 
+/** Fallback font stack for the embedded terminal.
+ *  "Symbols Nerd Font Mono" is bundled with the app (@font-face in xterm.css)
+ *  and provides Powerline / Devicon glyphs for ANY primary monospace font.
+ *  User-installed Nerd Font variants are tried first for best aesthetics. */
+const DEFAULT_FONT_FAMILY =
+  'JetBrains Mono, Menlo, Monaco, Consolas, "Symbols Nerd Font Mono", monospace'
+
+/** Append the bundled symbol font to a user-provided font-family string so
+ *  Powerline / Nerd Font glyphs render even when the primary font lacks them. */
+function ensureSymbolFallback(fontFamily: string | undefined): string {
+  if (!fontFamily) return ''
+  if (fontFamily.includes('Symbols Nerd Font Mono')) return fontFamily
+  return `${fontFamily}, "Symbols Nerd Font Mono"`
+}
+
 /** Default Catppuccin Mocha theme used when no Ghostty config is found */
 const DEFAULT_TERMINAL_THEME: ITheme = {
   background: '#1e1e2e',
@@ -153,7 +168,7 @@ export class XtermBackend implements TerminalBackend {
     }
 
     const terminal = new Terminal({
-      fontFamily: opts.fontFamily || 'JetBrains Mono, Menlo, Monaco, Consolas, monospace',
+      fontFamily: ensureSymbolFallback(opts.fontFamily) || DEFAULT_FONT_FAMILY,
       fontSize: opts.fontSize || 13,
       lineHeight: 1.2,
       cursorStyle: opts.cursorStyle || 'block',
@@ -332,6 +347,13 @@ export class XtermBackend implements TerminalBackend {
   updateTheme(): void {
     if (this.terminal) {
       this.terminal.options.theme = buildTheme(this.ghosttyConfig)
+    }
+  }
+
+  updateFontFamily(fontFamily: string): void {
+    if (this.terminal) {
+      this.terminal.options.fontFamily = ensureSymbolFallback(fontFamily) || DEFAULT_FONT_FAMILY
+      this.fitAddon?.fit()
     }
   }
 

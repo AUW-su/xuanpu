@@ -57,6 +57,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
     (s) => s.embeddedTerminalBackend
   ) as EmbeddedTerminalBackend
   const ghosttyFontSize = useSettingsStore((s) => s.ghosttyFontSize)
+  const terminalFontFamily = useSettingsStore((s) => s.terminalFontFamily)
   const ghosttyOverlaySuppressed = useLayoutStore((s) => s.ghosttyOverlaySuppressed)
 
   const effectiveVisible = isVisible && !ghosttyOverlaySuppressed
@@ -90,6 +91,17 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
     }, 50)
     return () => clearTimeout(timer)
   }, [themeId])
+
+  // React to terminal font family changes — update xterm font in real-time
+  useEffect(() => {
+    const backend = backendRef.current
+    if (!backend || backend.type !== 'xterm') return
+
+    const timer = setTimeout(() => {
+      ;(backend as XtermBackend).updateFontFamily(terminalFontFamily)
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [terminalFontFamily])
 
   // Re-fit and focus when becoming visible
   useEffect(() => {
@@ -188,7 +200,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
         {
           worktreeId,
           cwd,
-          fontFamily: config.fontFamily,
+          fontFamily: terminalFontFamily || config.fontFamily,
           fontSize: config.fontSize,
           cursorStyle: config.cursorStyle,
           scrollback: config.scrollbackLimit,
@@ -204,7 +216,7 @@ export const TerminalView = forwardRef<TerminalViewHandle, TerminalViewProps>(fu
 
       backendRef.current = backend
     },
-    [worktreeId, cwd, destroyTerminal]
+    [worktreeId, cwd, destroyTerminal, terminalFontFamily]
   )
 
   // Handle restart — destroy old PTY and re-create terminal

@@ -1,5 +1,15 @@
 /* xterm.js terminal customizations — integrates with app theme */
 
+/* Bundled Nerd Font Symbols — provides Powerline / Devicon glyphs as a
+   fallback regardless of what fonts the user has installed. */
+@font-face {
+  font-family: 'Symbols Nerd Font Mono';
+  src: url('../assets/fonts/SymbolsNerdFontMono-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
 /* Ensure terminal fills its container */
 .terminal-view-container {
   width: 100%;

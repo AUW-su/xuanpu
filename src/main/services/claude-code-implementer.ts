@@ -792,6 +792,11 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer {
         // Accumulate translated messages in-memory for getMessages()
         if (msgType === 'user' || msgType === 'assistant') {
           const sdkMsg = sdkMessage as Record<string, unknown>
+
+          // Skip compaction summary — a synthetic user message containing the
+          // conversation summary after context compaction. Should not appear in UI.
+          if (sdkMsg.isCompactSummary === true) return
+
           const msgContent = (
             sdkMsg.message as { content?: { type: string; [key: string]: unknown }[] } | undefined
           )?.content

@@ -9,7 +9,8 @@ import {
   X,
   Github,
   MessageCircleQuestion,
-  Shield
+  Shield,
+  Minimize2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,7 @@ import { CodexFastToggle } from './CodexFastToggle'
 import { SessionTaskTracker } from './SessionTaskTracker'
 import type { Attachment } from './AttachmentPreview'
 import { buildMessageParts, MAX_ATTACHMENTS } from '@/lib/file-attachment-utils'
+import type { MessagePart } from '@shared/types/opencode'
 import { SlashCommandPopover } from './SlashCommandPopover'
 import { FileMentionPopover } from './FileMentionPopover'
 import { ScrollToBottomFab } from './ScrollToBottomFab'
@@ -48,7 +50,7 @@ import { usePermissionStore } from '@/stores/usePermissionStore'
 import { useCommandApprovalStore } from '@/stores/useCommandApprovalStore'
 import { checkAutoApprove } from '@/lib/permissionUtils'
 import { usePromptHistoryStore } from '@/stores/usePromptHistoryStore'
-import { useWorktreeStore, useDropAttachmentStore } from '@/stores'
+import { useWorktreeStore, useDropAttachmentStore, useDraftAttachmentStore } from '@/stores'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { usePRReviewStore } from '@/stores/usePRReviewStore'
@@ -120,11 +122,14 @@ export interface OpenCodeMessage {
   timestamp: string
   /** Interleaved parts for assistant messages with tool calls */
   parts?: StreamingPart[]
+  /** File attachments for user messages (images, PDFs, etc.) */
+  attachments?: MessagePart[]
 }
 
 function hasMeaningfulMessagePart(message: OpenCodeMessage): boolean {
   if (message.role === 'system') return false
-  if (message.role === 'user') return message.content.trim().length > 0
+  if (message.role === 'user')
+    return message.content.trim().length > 0 || (message.attachments?.length ?? 0) > 0
 
   if (message.content.trim().length > 0) return true
 
@@ -151,6 +156,14 @@ function getRoundTerminalMessageIds(messages: OpenCodeMessage[]): Set<string> {
     const isBoundary = i === messages.length || messages[i]?.role === 'user'
     if (!isBoundary) continue
 
+    // Mark the user message that opens this round so its send-time is visible
+    const opener = messages[chunkStart]
+    if (opener?.role === 'user' && hasMeaningfulMessagePart(opener)) {
+      ids.add(opener.id)
+    }
+
+    // Mark the last meaningful message (typically the assistant reply) as the
+    // round closer – its timestamp shows when the round finished.
     for (let j = i - 1; j >= chunkStart; j--) {
       if (hasMeaningfulMessagePart(messages[j])) {
         ids.add(messages[j].id)
@@ -328,13 +341,44 @@ function extractSessionErrorStderr(data: unknown): string | null {
   return asString(nestedData?.stderr) || asString(record.stderr) || null
 }
 
-function createLocalMessage(role: OpenCodeMessage['role'], content: string): OpenCodeMessage {
+function createLocalMessage(
+  role: OpenCodeMessage['role'],
+  content: string,
+  attachments?: MessagePart[]
+): OpenCodeMessage {
   return {
     id: `local-${crypto.randomUUID()}`,
     role,
     content,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    ...(attachments && attachments.length > 0 ? { attachments } : {})
   }
+}
+
+/** Extract file-type MessageParts from local Attachment state for display in user bubbles */
+function toFilePartsForDisplay(attachments: Attachment[]): MessagePart[] {
+  return attachments
+    .filter((a) => a.kind === 'data')
+    .map((a) => ({ type: 'file' as const, mime: a.mime, url: a.dataUrl, filename: a.name }))
+}
+
+/**
+ * Re-attach cached user message attachments to messages loaded from backend.
+ * The backend transcript doesn't carry image data, so we match user messages
+ * by normalised content and restore the attachments from our local cache.
+ */
+function restoreUserAttachments(
+  messages: OpenCodeMessage[],
+  cache: Map<string, MessagePart[]>
+): OpenCodeMessage[] {
+  if (cache.size === 0) return messages
+  return messages.map((msg) => {
+    if (msg.role === 'user' && !msg.attachments) {
+      const stored = cache.get(msg.content.trim())
+      if (stored) return { ...msg, attachments: stored }
+    }
+    return msg
+  })
 }
 
 function getLatestTodoSnapshotFromParts(
@@ -527,7 +571,25 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       timestamp: number
     }>
   >([])
-  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [attachments, setAttachments] = useState<Attachment[]>(
+    () => useDraftAttachmentStore.getState().restore(sessionId)
+  )
+  // Keep a ref for the unmount cleanup (closure can't capture latest state)
+  const attachmentsStateRef = useRef(attachments)
+  attachmentsStateRef.current = attachments
+
+  /** Clear attachments in both React state and the draft store */
+  const clearAttachments = useCallback(() => {
+    setAttachments([])
+    useDraftAttachmentStore.getState().clear(sessionId)
+  }, [sessionId])
+
+  // Save unsent attachments when unmounting (session switch)
+  useEffect(() => {
+    return () => {
+      useDraftAttachmentStore.getState().save(sessionId, attachmentsStateRef.current)
+    }
+  }, [sessionId])
 
   // Consume files dropped from Finder via the global drop zone
   const pendingDropFiles = useDropAttachmentStore((s) => s.pending)
@@ -599,6 +661,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const [connectionId, setConnectionId] = useState<string | null>(null)
   const [opencodeSessionId, setOpencodeSessionId] = useState<string | null>(null)
   const [isStreaming, setIsStreaming] = useState(false)
+  const [isCompacting, setIsCompacting] = useState(false)
   const [sessionRetry, setSessionRetry] = useState<SessionRetryState | null>(null)
   const [sessionErrorMessage, setSessionErrorMessage] = useState<string | null>(null)
   const [sessionErrorStderr, setSessionErrorStderr] = useState<string | null>(null)
@@ -782,6 +845,11 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     worktreePath: null,
     opencodeSessionId: null
   })
+
+  // Cache user message attachments so they survive transcript refreshes.
+  // Backend-loaded messages don't carry attachment data, so we preserve
+  // them from local messages and re-attach after loadMessages().
+  const userAttachmentsRef = useRef(new Map<string, MessagePart[]>())
 
   const getModelForRequests = useCallback((): SelectedModel | undefined => {
     const state = useSessionStore.getState()
@@ -1425,7 +1493,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       }
 
       if (isCodexSession && loadedMessages.length > 0) {
-        setMessages(loadedMessages)
+        setMessages(restoreUserAttachments(loadedMessages, userAttachmentsRef.current))
       } else if (loadedFromOpenCode) {
         // Guard: don't replace existing messages with an empty transcript.
         // This prevents a race where getMessages returns before the SDK has
@@ -1440,7 +1508,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             : useCache
               ? cachedMessages
               : loadedMessages
-          return nextMessages
+          return restoreUserAttachments(nextMessages, userAttachmentsRef.current)
         })
       } else {
         setMessages((currentMessages) => {
@@ -1448,7 +1516,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           const localOnly = currentMessages.filter((m) => !loadedIds.has(m.id))
           const nextMessages =
             localOnly.length > 0 ? [...loadedMessages, ...localOnly] : loadedMessages
-          return nextMessages
+          return restoreUserAttachments(nextMessages, userAttachmentsRef.current)
         })
       }
 
@@ -1891,9 +1959,21 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             return
           }
 
+          // Codex context compaction — no streaming part, just a notification.
+          // Show compacting indicator so the user knows what's happening.
+          if (event.type === 'session.context_compacted') {
+            setIsCompacting(true)
+            useContextStore.getState().clearSessionTokenSnapshot(sessionId)
+            return
+          }
+
           if (event.type === 'message.part.updated') {
             // Skip user-message echoes; user messages are already rendered locally.
             if (eventRole === 'user') return
+
+            // Skip system messages (task-notification etc.) — they're rendered
+            // as lightweight notification bars from the transcript, not streamed.
+            if (eventRole === 'system') return
 
             // Route child/subagent events into their SubtaskCard
             if (event.childSessionId) {
@@ -2275,11 +2355,15 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               // the accumulated cost and model identity for the session.
               useContextStore.getState().clearSessionTokenSnapshot(sessionId)
               immediateFlush()
+              setIsCompacting(true)
               setIsStreaming(true)
             }
           } else if (event.type === 'message.updated') {
             // Skip user-message echoes
             if (eventRole === 'user') return
+
+            // Skip system messages (task-notification etc.)
+            if (eventRole === 'system') return
 
             // Skip child/subagent messages
             if (event.childSessionId) return
@@ -2348,6 +2432,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             // This catches edge cases where session.status events are unavailable.
             immediateFlush()
             setIsSending(false)
+            setIsCompacting(false)
             setQueuedMessages([])
             // Clear any stale command approvals when session goes idle
             useCommandApprovalStore.getState().clearSession(sessionId)
@@ -2374,6 +2459,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               setSessionErrorMessage(null)
               setSessionErrorStderr(null)
               setIsStreaming(true)
+              setIsCompacting(false)
               hasFinalizedCurrentResponseRef.current = false
               newPromptPendingRef.current = false
               planXmlDetectionRef.current = { state: 'scanning', buffer: '', cardId: null }
@@ -2394,6 +2480,11 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                 hasFinalizedCurrentResponseRef.current = false
                 setIsSending(true)
                 setMessages((prev) => [...prev, createLocalMessage('user', followUp)])
+                // Remove the consumed message from the UI queue
+                setQueuedMessages((prev) => {
+                  const idx = prev.findIndex((m) => m.content === followUp)
+                  return idx >= 0 ? [...prev.slice(0, idx), ...prev.slice(idx + 1)] : prev
+                })
                 newPromptPendingRef.current = true
                 messageSendTimes.set(sessionId, Date.now())
                 lastSendMode.set(sessionId, 'build')
@@ -2430,6 +2521,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               setSessionErrorStderr(null)
               immediateFlush()
               setIsSending(false)
+              setIsCompacting(false)
               setQueuedMessages([])
               // Clear any stale command approvals when session goes idle
               useCommandApprovalStore.getState().clearSession(sessionId)
@@ -3066,7 +3158,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         const durableState = await loadCodexDurableState(sessionId)
         loadedMessages = mergeCodexActivityMessages(loadedMessages, durableState.activities)
       }
-      setMessages(loadedMessages)
+      setMessages(restoreUserAttachments(loadedMessages, userAttachmentsRef.current))
       setViewState({ status: 'connected' })
     } catch (error) {
       console.error('Retry failed:', error)
@@ -3164,13 +3256,13 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             ),
             durableState.activities
           )
-          setMessages(liveMessages)
+          setMessages(restoreUserAttachments(liveMessages, userAttachmentsRef.current))
           return liveMessages.length > 0
         }
       }
 
       if (durableState.messages.length > 0) {
-        setMessages(durableState.messages)
+        setMessages(restoreUserAttachments(durableState.messages, userAttachmentsRef.current))
         return true
       }
     }
@@ -3186,7 +3278,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     const loadedMessages = mapOpencodeMessagesToSessionViewMessages(
       Array.isArray(transcriptResult.messages) ? transcriptResult.messages : []
     )
-    setMessages(loadedMessages)
+    setMessages(restoreUserAttachments(loadedMessages, userAttachmentsRef.current))
     return true
   }, [opencodeSessionId, sessionId, sessionRecord?.agent_sdk, worktreePath])
 
@@ -3426,7 +3518,14 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           const prefixedQuestion = prAskContext + ASK_MODE_PREFIX + question
 
           // Add user message to UI immediately (before response)
-          setMessages((prev) => [...prev, createLocalMessage('user', prefixedQuestion)])
+          const askFileAttachments = toFilePartsForDisplay(attachments)
+          if (askFileAttachments.length > 0) {
+            userAttachmentsRef.current.set(prefixedQuestion.trim(), askFileAttachments)
+          }
+          setMessages((prev) => [
+            ...prev,
+            createLocalMessage('user', prefixedQuestion, askFileAttachments)
+          ])
 
           // Mark that a new prompt is in flight
           newPromptPendingRef.current = true
@@ -3439,7 +3538,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
           // Build message parts (support file attachments if any)
           const parts = buildMessageParts(attachments, prefixedQuestion)
-          setAttachments([])
+          clearAttachments()
           usePRReviewStore.getState().clearAttachments()
 
           try {
@@ -3477,6 +3576,12 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           ...prev,
           { id: crypto.randomUUID(), content: trimmedValue, timestamp: Date.now() }
         ])
+        // Also persist in session store so it gets sent when session goes idle
+        const existing =
+          useSessionStore.getState().pendingFollowUpMessages.get(sessionId) ?? []
+        useSessionStore
+          .getState()
+          .setPendingFollowUpMessages(sessionId, [...existing, trimmedValue])
       }
       setInputValue('')
       inputValueRef.current = ''
@@ -3485,6 +3590,12 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       window.db.session.updateDraft(sessionId, null)
 
       resetAutoScrollState()
+
+      // Queued messages only go into the queue — don't create a local message or send
+      if (isQueuedMessage) {
+        clearAttachments()
+        return
+      }
 
       // Clear any stale command approvals from previous turns
       useCommandApprovalStore.getState().clearSession(sessionId)
@@ -3510,6 +3621,10 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         const currentRevertId = revertMessageID
         setRevertMessageID(null)
         revertDiffRef.current = null
+        const sendFileAttachments = toFilePartsForDisplay(attachments)
+        if (sendFileAttachments.length > 0) {
+          userAttachmentsRef.current.set(trimmedValue.trim(), sendFileAttachments)
+        }
         setMessages((prev) => {
           let base = prev
           if (currentRevertId) {
@@ -3518,7 +3633,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               base = prev.slice(0, boundaryIndex)
             }
           }
-          return [...base, createLocalMessage('user', trimmedValue)]
+          return [...base, createLocalMessage('user', trimmedValue, sendFileAttachments)]
         })
 
         // Mark that a new prompt is in flight — prevents finalizeResponse
@@ -3598,7 +3713,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               }
 
               lastSentPromptRef.current = trimmedValue
-              setAttachments([])
+              clearAttachments()
               usePRReviewStore.getState().clearAttachments()
               const result = await window.opencodeOps.command(
                 worktreePath,
@@ -3632,7 +3747,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               const promptMessage = prContext + modePrefix + trimmedValue
               lastSentPromptRef.current = promptMessage
               const parts = buildMessageParts(attachments, promptMessage)
-              setAttachments([])
+              clearAttachments()
               usePRReviewStore.getState().clearAttachments()
               const result = await window.opencodeOps.prompt(
                 worktreePath,
@@ -3669,7 +3784,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             // role field, making it indistinguishable from assistant text).
             lastSentPromptRef.current = promptMessage
             const parts = buildMessageParts(attachments, promptMessage)
-            setAttachments([])
+            clearAttachments()
             usePRReviewStore.getState().clearAttachments()
             const result = await window.opencodeOps.prompt(
               worktreePath,
@@ -3687,7 +3802,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           // Don't set isSending to false here - wait for streaming to complete
         } else {
           // No OpenCode connection - show placeholder
-          setAttachments([])
+          clearAttachments()
           usePRReviewStore.getState().clearAttachments()
           console.warn('No OpenCode connection, showing placeholder response')
           setTimeout(() => {
@@ -3721,6 +3836,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       fileMentions,
       resetAutoScrollState,
       stripAtMentions,
+      clearAttachments,
       t
     ]
   )
@@ -4824,17 +4940,24 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               {/* Typing indicator — shows while busy unless the blinking cursor is visible */}
               {isSending && !hasVisibleWritingCursor && (
                 <div className="px-6 py-5" data-testid="typing-indicator">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" />
-                    <span
-                      className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    />
-                    <span
-                      className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    />
-                  </div>
+                  {isCompacting ? (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Minimize2 className="h-3.5 w-3.5 shrink-0 animate-pulse" />
+                      <span>{t('sessionView.compacting')}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" />
+                      <span
+                        className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"
+                        style={{ animationDelay: '0.1s' }}
+                      />
+                      <span
+                        className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"
+                        style={{ animationDelay: '0.2s' }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
               {/* Queued messages rendered as visible bubbles */}
