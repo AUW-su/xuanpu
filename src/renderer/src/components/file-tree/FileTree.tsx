@@ -5,9 +5,12 @@ import { useFileTreeStore } from '@/stores/useFileTreeStore'
 import { useGitStore } from '@/stores/useGitStore'
 import { FileTreeHeader } from './FileTreeHeader'
 import { FileTreeFilter } from './FileTreeFilter'
+import { FileIcon } from './FileIcon'
 import { VirtualFileTreeNode } from './FileTreeNode'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n/useI18n'
+import { scoreMatch } from '@/lib/file-search-utils'
+import type { FlatFile } from '@/lib/file-search-utils'
 
 // File tree node structure
 interface FileTreeNode {
@@ -124,6 +127,8 @@ export function FileTree({
   const setFilter = useFileTreeStore((state) => state.setFilter)
   const startWatching = useFileTreeStore((state) => state.startWatching)
   const stopWatching = useFileTreeStore((state) => state.stopWatching)
+  const fileIndexByWorktree = useFileTreeStore((state) => state.fileIndexByWorktree)
+  const loadFileIndex = useFileTreeStore((state) => state.loadFileIndex)
 
   const fileStatusesByWorktree = useGitStore((state) => state.fileStatusesByWorktree)
   const loadFileStatuses = useGitStore((state) => state.loadFileStatuses)
@@ -179,6 +184,41 @@ export function FileTree({
     return map
   }, [gitStatuses])
 
+  // ── Flat search mode: when filter ≥2 chars, use full file index ──
+  const isSearchMode = filter.length >= 2
+  const flatIndex = worktreePath ? fileIndexByWorktree.get(worktreePath) : undefined
+
+  // Load flat file index on-demand when search mode activates
+  useEffect(() => {
+    if (isSearchMode && worktreePath && !flatIndex) {
+      loadFileIndex(worktreePath)
+    }
+  }, [isSearchMode, worktreePath, flatIndex, loadFileIndex])
+
+  const MAX_FLAT_RESULTS = 100
+
+  const flatSearchResults = useMemo(() => {
+    if (!isSearchMode || !flatIndex) return null
+    return flatIndex
+      .map((file) => ({ ...file, score: scoreMatch(filter, file) }))
+      .filter((file) => file.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, MAX_FLAT_RESULTS)
+  }, [isSearchMode, flatIndex, filter])
+
+  const handleFlatFileClick = useCallback(
+    (file: FlatFile) => {
+      onFileClick?.({
+        name: file.name,
+        path: file.path,
+        relativePath: file.relativePath,
+        isDirectory: false,
+        extension: file.extension
+      })
+    },
+    [onFileClick]
+  )
+
   // Flatten tree for virtual scrolling
   const flatNodes = useMemo(
     () => flattenTree(tree, expandedPaths, filter),
@@ -186,8 +226,10 @@ export function FileTree({
   )
 
   // Virtual scrolling
+  const displayCount =
+    flatSearchResults !== null ? flatSearchResults.length : flatNodes.length
   const virtualizer = useVirtualizer({
-    count: flatNodes.length,
+    count: displayCount,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 10
@@ -393,48 +435,95 @@ export function FileTree({
       <div
         ref={parentRef}
         className="flex-1 overflow-auto py-1"
-        role="tree"
+        role={flatSearchResults !== null ? 'listbox' : 'tree'}
         aria-label={t('fileTree.ariaLabel')}
         data-testid="file-tree-content"
       >
-        <div
-          style={{
-            height: `${virtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative'
-          }}
-        >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const { node, depth, isExpanded } = flatNodes[virtualRow.index]
-            return (
-              <div
-                key={node.path}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`
-                }}
-              >
-                <VirtualFileTreeNode
-                  node={node}
-                  depth={depth}
-                  isExpanded={isExpanded}
-                  isFiltered={isFiltered}
-                  filter={filter}
-                  onToggle={handleToggle}
-                  onFileClick={onFileClick}
-                  worktreePath={worktreePath}
-                  gitStatusMap={gitStatusMap}
-                  hideGitIndicators={hideGitIndicators}
-                  hideGitContextActions={hideGitContextActions}
-                />
-              </div>
-            )
-          })}
-        </div>
+        {flatSearchResults !== null ? (
+          // ── Flat search results mode ──
+          flatSearchResults.length === 0 ? (
+            <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
+              {t('fileTree.empty.noFiles')}
+            </div>
+          ) : (
+            <div
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative'
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualRow) => {
+                const file = flatSearchResults[virtualRow.index]
+                return (
+                  <div
+                    key={file.path}
+                    role="option"
+                    className="absolute top-0 left-0 w-full flex items-center gap-2 px-3 cursor-pointer text-xs hover:bg-accent/50 rounded-sm"
+                    style={{
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`
+                    }}
+                    onClick={() => handleFlatFileClick(file)}
+                  >
+                    <FileIcon
+                      name={file.name}
+                      extension={file.extension}
+                      isDirectory={false}
+                      className="flex-shrink-0"
+                    />
+                    <div className="flex flex-col min-w-0 leading-tight">
+                      <span className="truncate font-medium">{file.name}</span>
+                      <span className="truncate text-[10px] text-muted-foreground">
+                        {file.relativePath}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        ) : (
+          // ── Normal tree mode ──
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative'
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const { node, depth, isExpanded } = flatNodes[virtualRow.index]
+              return (
+                <div
+                  key={node.path}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`
+                  }}
+                >
+                  <VirtualFileTreeNode
+                    node={node}
+                    depth={depth}
+                    isExpanded={isExpanded}
+                    isFiltered={isFiltered}
+                    filter={filter}
+                    onToggle={handleToggle}
+                    onFileClick={onFileClick}
+                    worktreePath={worktreePath}
+                    gitStatusMap={gitStatusMap}
+                    hideGitIndicators={hideGitIndicators}
+                    hideGitContextActions={hideGitContextActions}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
