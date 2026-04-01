@@ -564,6 +564,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const [inputValue, setInputValue] = useState('')
   const [viewState, setViewState] = useState<SessionViewState>({ status: 'connecting' })
   const [isSending, setIsSending] = useState(false)
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editingContent, setEditingContent] = useState<string>('')
+  const [_editingAttachments, _setEditingAttachments] = useState<MessagePart[]>([])
   const [queuedMessages, setQueuedMessages] = useState<
     Array<{
       id: string
@@ -3985,6 +3988,54 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     t
   ])
 
+  const handleEditMessage = useCallback(
+    (message: OpenCodeMessage) => {
+      setEditingMessageId(message.id)
+      const isPlanMode = message.content.startsWith(PLAN_MODE_PREFIX)
+      const isAskMode = message.content.startsWith(ASK_MODE_PREFIX)
+      const displayContent = isPlanMode
+        ? message.content.slice(PLAN_MODE_PREFIX.length)
+        : isAskMode
+          ? message.content.slice(ASK_MODE_PREFIX.length)
+          : message.content
+      setEditingContent(displayContent)
+      _setEditingAttachments(message.attachments ?? [])
+    },
+    []
+  )
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingMessageId(null)
+    setEditingContent('')
+    _setEditingAttachments([])
+  }, [])
+
+  const handleSaveEdit = useCallback(
+    async (messageId: string) => {
+      const trimmedContent = editingContent.trim()
+      if (!trimmedContent) return
+
+      const messageIndex = messages.findIndex((m) => m.id === messageId)
+      if (messageIndex === -1) return
+
+      const trimmedMessages = messages.slice(0, messageIndex)
+      setMessages(trimmedMessages)
+
+      const originalMessage = messages[messageIndex]
+      const isPlanMode = originalMessage.content.startsWith(PLAN_MODE_PREFIX)
+      const isAskMode = originalMessage.content.startsWith(ASK_MODE_PREFIX)
+      const modePrefix = isPlanMode ? PLAN_MODE_PREFIX : isAskMode ? ASK_MODE_PREFIX : ''
+      const contentToSend = modePrefix + trimmedContent
+
+      setEditingMessageId(null)
+      setEditingContent('')
+      _setEditingAttachments([])
+
+      await handleSend(contentToSend)
+    },
+    [editingContent, messages, handleSend]
+  )
+
   const handlePlanReject = useCallback(
     async (feedback: string) => {
       if (!pendingPlan) return
@@ -4574,6 +4625,18 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     )
   }, [messages, revertMessageID])
 
+  const lastUserMessageId = useMemo(() => {
+    const userMessages = visibleMessages.filter((m) => m.role === 'user')
+    return userMessages.length > 0 ? userMessages[userMessages.length - 1].id : null
+  }, [visibleMessages])
+
+  const canEditMessage = useCallback(
+    (messageId: string) => {
+      return messageId === lastUserMessageId && !hasStreamingContent && !isSending
+    },
+    [lastUserMessageId, hasStreamingContent, isSending]
+  )
+
   const revertedUserCount = useMemo(() => {
     if (!revertMessageID) return 0
 
@@ -4873,6 +4936,14 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                   onForkAssistantMessage={handleForkFromAssistantMessage}
                   forkDisabled={forkingMessageId !== null && forkingMessageId !== message.id}
                   isForking={forkingMessageId === message.id}
+                  isEditing={editingMessageId === message.id}
+                  isLastUserMessage={message.id === lastUserMessageId}
+                  canEdit={canEditMessage(message.id)}
+                  onEditClick={() => handleEditMessage(message)}
+                  onEditSave={() => handleSaveEdit(message.id)}
+                  onEditCancel={handleCancelEdit}
+                  editingContent={editingMessageId === message.id ? editingContent : undefined}
+                  onEditingContentChange={setEditingContent}
                 />
               ))}
               {/* Revert banner — shows when messages have been undone */}

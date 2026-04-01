@@ -27,6 +27,14 @@ interface MessageRendererProps {
   isForking?: boolean
   showTimestamp?: boolean
   executionStatus?: MessageExecutionStatus | null
+  isEditing?: boolean
+  isLastUserMessage?: boolean
+  canEdit?: boolean
+  onEditClick?: () => void
+  onEditSave?: () => void
+  onEditCancel?: () => void
+  editingContent?: string
+  onEditingContentChange?: (content: string) => void
 }
 
 export function MessageRenderer({
@@ -37,7 +45,15 @@ export function MessageRenderer({
   forkDisabled = false,
   isForking = false,
   showTimestamp = false,
-  executionStatus = null
+  executionStatus = null,
+  isEditing,
+  isLastUserMessage,
+  canEdit,
+  onEditClick,
+  onEditSave,
+  onEditCancel,
+  editingContent,
+  onEditingContentChange
 }: MessageRendererProps): React.JSX.Element {
   const isPlanMode = message.role === 'user' && message.content.startsWith(PLAN_MODE_PREFIX)
   const isAskMode = message.role === 'user' && message.content.startsWith(ASK_MODE_PREFIX)
@@ -75,6 +91,14 @@ export function MessageRenderer({
           isPlanMode={isPlanMode}
           isAskMode={isAskMode}
           attachments={message.attachments}
+          isEditing={isEditing}
+          isLastUserMessage={isLastUserMessage}
+          canEdit={canEdit}
+          onEditClick={onEditClick}
+          onEditSave={onEditSave}
+          onEditCancel={onEditCancel}
+          editingContent={editingContent}
+          onEditingContentChange={onEditingContentChange}
         />
       ) : (
         <AssistantCanvas
