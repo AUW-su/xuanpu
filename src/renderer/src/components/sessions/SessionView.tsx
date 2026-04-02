@@ -564,6 +564,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const [inputValue, setInputValue] = useState('')
   const [viewState, setViewState] = useState<SessionViewState>({ status: 'connecting' })
   const [isSending, setIsSending] = useState(false)
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editingContent, setEditingContent] = useState<string>('')
+  const [_editingAttachments, _setEditingAttachments] = useState<MessagePart[]>([])
   const [queuedMessages, setQueuedMessages] = useState<
     Array<{
       id: string
@@ -619,6 +622,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
   const [slashCommands, setSlashCommands] = useState<SlashCommandInfo[]>([])
   const [showSlashCommands, setShowSlashCommands] = useState(false)
+  const showSlashCommandsRef = useRef(false)
   const [revertMessageID, setRevertMessageID] = useState<string | null>(null)
   const [forkingMessageId, setForkingMessageId] = useState<string | null>(null)
   const revertDiffRef = useRef<string | null>(null)
@@ -803,6 +807,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
   // File mentions hook
   const fileMentions = useFileMentions(inputValue, cursorPosition, fileIndex)
+  // Stable ref for use in callbacks to avoid dependency churn
+  const fileMentionsRef = useRef(fileMentions)
+  fileMentionsRef.current = fileMentions
 
   // stripAtMentions setting
   const stripAtMentions = useSettingsStore((state) => state.stripAtMentions)
@@ -1102,16 +1109,19 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     sessionRecord?.model_variant
   ])
 
-  // Auto-resize textarea (depends on sessionId to handle pre-populated drafts)
-  // Uses useLayoutEffect to measure and set height synchronously before paint,
-  // ensuring correct height when drafts are loaded on worktree navigation.
+  // Auto-resize textarea via CSS field-sizing:content (Chromium 123+).
+  // useLayoutEffect is only needed for the initial draft load where the textarea
+  // has a pre-populated value and CSS field-sizing might not have kicked in yet.
   useLayoutEffect(() => {
     const textarea = textareaRef.current
-    if (textarea) {
+    if (textarea && inputValue) {
+      // Force a single reflow for draft restoration
       textarea.style.height = 'auto'
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 220)}px`
     }
-  }, [inputValue, sessionId])
+    // Only run on session switch, not on every keystroke
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId])
 
   // Set 'answering' status when a question is pending, revert when answered.
   // Guard: only mutate the store when the status actually needs to change,
@@ -1363,6 +1373,21 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         inputValueRef.current = draft
       }
     })
+
+    // Restore queued messages from store
+    const followUpMessages =
+      useSessionStore.getState().pendingFollowUpMessages.get(sessionId) ?? []
+    if (followUpMessages.length > 0) {
+      setQueuedMessages(
+        followUpMessages.map((content) => ({
+          id: crypto.randomUUID(),
+          content,
+          timestamp: Date.now()
+        }))
+      )
+    } else {
+      setQueuedMessages([])
+    }
 
     transcriptSourceRef.current = {
       worktreePath: null,
@@ -3985,6 +4010,54 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     t
   ])
 
+  const handleEditMessage = useCallback(
+    (message: OpenCodeMessage) => {
+      setEditingMessageId(message.id)
+      const isPlanMode = message.content.startsWith(PLAN_MODE_PREFIX)
+      const isAskMode = message.content.startsWith(ASK_MODE_PREFIX)
+      const displayContent = isPlanMode
+        ? message.content.slice(PLAN_MODE_PREFIX.length)
+        : isAskMode
+          ? message.content.slice(ASK_MODE_PREFIX.length)
+          : message.content
+      setEditingContent(displayContent)
+      _setEditingAttachments(message.attachments ?? [])
+    },
+    []
+  )
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingMessageId(null)
+    setEditingContent('')
+    _setEditingAttachments([])
+  }, [])
+
+  const handleSaveEdit = useCallback(
+    async (messageId: string) => {
+      const trimmedContent = editingContent.trim()
+      if (!trimmedContent) return
+
+      const messageIndex = messages.findIndex((m) => m.id === messageId)
+      if (messageIndex === -1) return
+
+      const trimmedMessages = messages.slice(0, messageIndex)
+      setMessages(trimmedMessages)
+
+      const originalMessage = messages[messageIndex]
+      const isPlanMode = originalMessage.content.startsWith(PLAN_MODE_PREFIX)
+      const isAskMode = originalMessage.content.startsWith(ASK_MODE_PREFIX)
+      const modePrefix = isPlanMode ? PLAN_MODE_PREFIX : isAskMode ? ASK_MODE_PREFIX : ''
+      const contentToSend = modePrefix + trimmedContent
+
+      setEditingMessageId(null)
+      setEditingContent('')
+      _setEditingAttachments([])
+
+      await handleSend(contentToSend)
+    },
+    [editingContent, messages, handleSend]
+  )
+
   const handlePlanReject = useCallback(
     async (feedback: string) => {
       if (!pendingPlan) return
@@ -4390,7 +4463,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       // Update mention indices for the text change (skip if pasting to avoid
       // opening the popover for pasted '@' characters)
       if (!isPastingRef.current) {
-        fileMentions.updateMentions(oldValue, value)
+        fileMentionsRef.current.updateMentions(oldValue, value)
       }
       isPastingRef.current = false
 
@@ -4405,10 +4478,10 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         setHistoryIndex(null)
       }
 
-      if (value.startsWith('/') && !value.includes(' ')) {
-        setShowSlashCommands(true)
-      } else {
-        setShowSlashCommands(false)
+      const shouldShowSlash = value.startsWith('/') && !value.includes(' ')
+      if (shouldShowSlash !== showSlashCommandsRef.current) {
+        setShowSlashCommands(shouldShowSlash)
+        showSlashCommandsRef.current = shouldShowSlash
       }
 
       // Debounce draft persistence (3 seconds)
@@ -4417,7 +4490,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         window.db.session.updateDraft(sessionId, value || null)
       }, 3000)
     },
-    [sessionId, historyIndex, fileMentions]
+    [sessionId, historyIndex]
   )
 
   const handleCommandSelect = useCallback((cmd: { name: string; template: string }) => {
@@ -4573,6 +4646,18 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       (message, index) => message.id.startsWith('local-') || index < boundaryIndex
     )
   }, [messages, revertMessageID])
+
+  const lastUserMessageId = useMemo(() => {
+    const userMessages = visibleMessages.filter((m) => m.role === 'user')
+    return userMessages.length > 0 ? userMessages[userMessages.length - 1].id : null
+  }, [visibleMessages])
+
+  const canEditMessage = useCallback(
+    (messageId: string) => {
+      return messageId === lastUserMessageId && !hasStreamingContent && !isSending
+    },
+    [lastUserMessageId, hasStreamingContent, isSending]
+  )
 
   const revertedUserCount = useMemo(() => {
     if (!revertMessageID) return 0
@@ -4873,6 +4958,14 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                   onForkAssistantMessage={handleForkFromAssistantMessage}
                   forkDisabled={forkingMessageId !== null && forkingMessageId !== message.id}
                   isForking={forkingMessageId === message.id}
+                  isEditing={editingMessageId === message.id}
+                  isLastUserMessage={message.id === lastUserMessageId}
+                  canEdit={canEditMessage(message.id)}
+                  onEditClick={() => handleEditMessage(message)}
+                  onEditSave={() => handleSaveEdit(message.id)}
+                  onEditCancel={handleCancelEdit}
+                  editingContent={editingMessageId === message.id ? editingContent : undefined}
+                  onEditingContentChange={setEditingContent}
                 />
               ))}
               {/* Revert banner — shows when messages have been undone */}
@@ -5119,9 +5212,20 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                     handleInputChange(e.target.value, pos)
                   }}
                   onKeyUp={(e) => {
-                    const pos = e.currentTarget.selectionStart ?? 0
-                    cursorPositionRef.current = pos
-                    setCursorPosition(pos)
+                    // Only update cursor position for navigation keys that don't trigger onChange.
+                    // onChange already handles position updates for typed characters.
+                    if (
+                      e.key === 'ArrowLeft' ||
+                      e.key === 'ArrowRight' ||
+                      e.key === 'ArrowUp' ||
+                      e.key === 'ArrowDown' ||
+                      e.key === 'Home' ||
+                      e.key === 'End'
+                    ) {
+                      const pos = e.currentTarget.selectionStart ?? 0
+                      cursorPositionRef.current = pos
+                      setCursorPosition(pos)
+                    }
                   }}
                   onClick={(e) => {
                     const pos = e.currentTarget.selectionStart ?? 0
@@ -5150,7 +5254,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                     'text-[15px] leading-7 placeholder:text-muted-foreground',
                     'focus:outline-none border-none',
                     'disabled:cursor-not-allowed disabled:opacity-50',
-                    'min-h-[92px] max-h-[220px]'
+                    'min-h-[92px] max-h-[220px]',
+                    '[field-sizing:content]'
                   )}
                   rows={3}
                   data-testid="message-input"
