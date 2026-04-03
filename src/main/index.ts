@@ -10,8 +10,8 @@ import {
   registerDatabaseHandlers,
   registerProjectHandlers,
   registerWorktreeHandlers,
-  registerAgentHandlers,
-  cleanupAgentHandlers,
+  registerOpenCodeHandlers,
+  cleanupOpenCode,
   registerFileTreeHandlers,
   cleanupFileTreeWatchers,
   registerGitFileHandlers,
@@ -30,7 +30,7 @@ import {
 import { buildMenu, updateMenuState } from './menu'
 import type { MenuState } from './menu'
 import { createLogger, getLogDir } from './services/logger'
-import { detectAgentRuntimes } from './services/system-info'
+import { detectAgentSdks } from './services/system-info'
 import {
   openCommandInSystemTerminal,
   runOnboardingDoctor
@@ -40,9 +40,9 @@ import { notificationService } from './services/notification-service'
 import { updaterService } from './services/updater'
 import { ClaudeCodeImplementer } from './services/claude-code-implementer'
 import { CodexImplementer } from './services/codex-implementer'
-import { AgentRuntimeManager } from './services/agent-runtime-manager'
+import { AgentSdkManager } from './services/agent-sdk-manager'
 import { resolveClaudeBinaryPath } from './services/claude-binary-resolver'
-import type { AgentRuntimeAdapter } from './services/agent-runtime-types'
+import type { AgentSdkImplementer } from './services/agent-sdk-types'
 import { telemetryService } from './services/telemetry-service'
 import { ensureForkDataDir } from './services/fork-data-migration'
 import { APP_BUNDLE_ID, APP_CLI_NAME, APP_PRODUCT_NAME } from '@shared/app-identity'
@@ -209,16 +209,7 @@ function createWindow(): void {
       mainWindow!.webContents.send('shortcut:close-session')
     }
 
-    // Block zoom shortcuts — Ghostty native overlay requires 1:1 coordinate mapping.
-    // Any zoom level breaks the CSS-to-AppKit point sync for the NSView overlay.
-    if (
-      (input.meta || input.control) &&
-      !input.alt &&
-      (input.key === '=' || input.key === '+' || input.key === '-') &&
-      input.type === 'keyDown'
-    ) {
-      event.preventDefault()
-    }
+    // Allow standard zoom shortcuts (Cmd+=/-, Cmd+0) to pass through to Chromium.
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -339,7 +330,7 @@ function registerSystemHandlers(): void {
 
   // Detect which agent SDKs are installed on the system (first-launch setup)
   ipcMain.handle('system:detectAgentRuntimes', () => {
-    return detectAgentRuntimes()
+    return detectAgentSdks()
   })
 
   ipcMain.handle('system:runOnboardingDoctor', () => {
@@ -608,7 +599,7 @@ app.whenReady().then(async () => {
 
     // Create SDK manager for multi-provider dispatch
     // OpenCode sessions still route through openCodeService directly (fallback path in handlers)
-    // The placeholder just satisfies AgentRuntimeManager's constructor signature
+    // The placeholder just satisfies AgentSdkManager's constructor signature
     const claudeImpl = new ClaudeCodeImplementer()
     claudeImpl.setDatabaseService(getDatabase())
     claudeImpl.setClaudeBinaryPath(claudeBinaryPath)
@@ -645,16 +636,16 @@ app.whenReady().then(async () => {
       sendCommand: async () => {},
       renameSession: async () => {},
       setMainWindow: () => {}
-    } satisfies AgentRuntimeAdapter
+    } satisfies AgentSdkImplementer
     const codexImpl = new CodexImplementer()
     codexImpl.setDatabaseService(getDatabase())
-    const runtimeManager = new AgentRuntimeManager([openCodePlaceholder, claudeImpl, codexImpl])
-    runtimeManager.setMainWindow(mainWindow)
+    const sdkManager = new AgentSdkManager([openCodePlaceholder, claudeImpl, codexImpl])
+    sdkManager.setMainWindow(mainWindow)
 
     const databaseService = getDatabase()
 
     log.info('Registering OpenCode handlers')
-    registerAgentHandlers(mainWindow, runtimeManager, databaseService)
+    registerOpenCodeHandlers(mainWindow, sdkManager, databaseService)
     log.info('Registering FileTree handlers')
     registerFileTreeHandlers(mainWindow)
     log.info('Registering GitFile handlers')
@@ -711,7 +702,7 @@ app.on('will-quit', async () => {
   // Cleanup branch watchers (sidebar branch names)
   await cleanupBranchWatchers()
   // Cleanup OpenCode connections
-  await cleanupAgentHandlers()
+  await cleanupOpenCode()
   // Flush telemetry before closing database
   telemetryService.track('app_session_ended', {
     session_duration_ms: Date.now() - appStartTime
