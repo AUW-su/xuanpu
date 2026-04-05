@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+vi.mock('electron', () => ({
+  app: {
+    getPath: vi.fn().mockReturnValue('/tmp')
+  }
+}))
+
 vi.mock('../../../src/main/services/logger', () => ({
   createLogger: () => ({
     info: vi.fn(),
@@ -19,8 +25,13 @@ vi.mock('../../../src/main/services/claude-transcript-reader', () => ({
   translateEntry: vi.fn().mockReturnValue(null)
 }))
 
+vi.mock('../../../src/main/services/claude-project-memory-loader', () => ({
+  maybeWithClaudeProjectMemory: vi.fn(async (options) => options)
+}))
+
 import { ClaudeCodeImplementer } from '../../../src/main/services/claude-code-implementer'
 import { loadClaudeSDK } from '../../../src/main/services/claude-sdk-loader'
+import { maybeWithClaudeProjectMemory } from '../../../src/main/services/claude-project-memory-loader'
 
 function createMockSDK() {
   const queryFn = vi.fn().mockImplementation(() => ({
@@ -45,9 +56,10 @@ describe('ClaudeCodeImplementer prompt model selection', () => {
   let mockSDK: ReturnType<typeof createMockSDK>
 
   beforeEach(async () => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     mockSDK = createMockSDK()
     vi.mocked(loadClaudeSDK).mockResolvedValue(mockSDK as any)
+    vi.mocked(maybeWithClaudeProjectMemory).mockImplementation(async (options) => options)
 
     impl = new ClaudeCodeImplementer()
     impl.setMainWindow(createMockWindow())
@@ -66,6 +78,12 @@ describe('ClaudeCodeImplementer prompt model selection', () => {
         options: expect.objectContaining({ model: 'opus' })
       })
     )
+    expect(maybeWithClaudeProjectMemory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cwd: '/test/path',
+        model: 'opus'
+      })
+    )
   })
 
   it('prompt uses selectedModel default when no override', async () => {
@@ -76,6 +94,12 @@ describe('ClaudeCodeImplementer prompt model selection', () => {
     expect(mockSDK.query).toHaveBeenCalledWith(
       expect.objectContaining({
         options: expect.objectContaining({ model: 'sonnet' })
+      })
+    )
+    expect(maybeWithClaudeProjectMemory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cwd: '/test/path',
+        model: 'sonnet'
       })
     )
   })
@@ -90,6 +114,12 @@ describe('ClaudeCodeImplementer prompt model selection', () => {
     expect(mockSDK.query).toHaveBeenCalledWith(
       expect.objectContaining({
         options: expect.objectContaining({ model: 'haiku' })
+      })
+    )
+    expect(maybeWithClaudeProjectMemory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cwd: '/test/path',
+        model: 'haiku'
       })
     )
   })

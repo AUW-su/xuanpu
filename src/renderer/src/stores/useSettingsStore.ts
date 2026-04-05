@@ -4,6 +4,25 @@ import { APP_SETTINGS_DB_KEY } from '@shared/types/settings'
 import { DEFAULT_LOCALE, type AppLocale } from '@/i18n/messages'
 
 // ==========================================
+// Migration helpers
+// ==========================================
+
+/**
+ * Migrate legacy settings shape to current shape.
+ * Converts `defaultAgentSdk` → `defaultRuntimeId` and removes the old field.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function migrateSettingsShape(raw: Record<string, any>): Record<string, any> {
+  const result = { ...raw }
+  // Migrate defaultAgentSdk → defaultRuntimeId (prefer new field if both present)
+  if ('defaultAgentSdk' in result && !('defaultRuntimeId' in result)) {
+    result.defaultRuntimeId = result.defaultAgentSdk
+  }
+  delete result.defaultAgentSdk
+  return result
+}
+
+// ==========================================
 // Types
 // ==========================================
 
@@ -327,9 +346,11 @@ export const useSettingsStore = create<SettingsState>()(
           return get().setSelectedModelForSdk(agentSdk, model)
         }
         set({ selectedModel: model })
-        // Persist to backend (settings DB + opencode service)
+        // Persist to backend (settings DB + agent runtime service)
         try {
-          await window.opencodeOps.setModel(model)
+          const defaultSdk = get().defaultAgentSdk ?? 'opencode'
+          const runtimeId = defaultSdk === 'terminal' ? 'opencode' : defaultSdk
+          await window.agentOps.setModel(model ? { ...model, runtimeId } : null)
         } catch (error) {
           console.error('Failed to persist model selection:', error)
         }
@@ -354,7 +375,7 @@ export const useSettingsStore = create<SettingsState>()(
         // Push to backend (skip for terminal — no backend service, or when caller already pushed)
         if (agentSdk !== 'terminal' && !options?.skipBackendPush) {
           try {
-            await window.opencodeOps.setModel(model ? { ...model, agentSdk } : null)
+            await window.agentOps.setModel(model ? { ...model, runtimeId: agentSdk } : null)
           } catch (error) {
             console.error('Failed to persist model selection for SDK:', error)
           }
@@ -430,7 +451,7 @@ export const useSettingsStore = create<SettingsState>()(
 
       detectAvailableAgentSdks: async () => {
         try {
-          const result = await window.systemOps.detectAgentSdks()
+          const result = await window.systemOps.detectAgentRuntimes()
           set({ availableAgentSdks: result })
         } catch {
           // Fail gracefully — context menu just won't show

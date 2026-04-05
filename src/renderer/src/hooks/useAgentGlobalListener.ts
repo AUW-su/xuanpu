@@ -5,7 +5,7 @@ import { useWorktreeStatusStore } from '@/stores/useWorktreeStatusStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useQuestionStore } from '@/stores/useQuestionStore'
 import { usePermissionStore } from '@/stores/usePermissionStore'
-import { useCommandApprovalStore, type CommandApprovalRequest } from '@/stores/useCommandApprovalStore'
+import { useCommandApprovalStore } from '@/stores/useCommandApprovalStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useContextStore, type TokenInfo, type SessionModelRef } from '@/stores/useContextStore'
 import { useRecentStore } from '@/stores/useRecentStore'
@@ -164,7 +164,7 @@ function markBackgroundSessionCompleted(sessionId: string): void {
  * - Title updates for background sessions (active session handled by SessionView)
  * - Branch auto-rename notifications from the main process
  */
-export function useOpenCodeGlobalListener(): void {
+export function useAgentGlobalListener(): void {
   const backgroundFollowUpDispatchingRef = useRef<Set<string>>(new Set())
   const deferredIdleWhileDispatchingRef = useRef<Set<string>>(new Set())
 
@@ -181,8 +181,8 @@ export function useOpenCodeGlobalListener(): void {
   }, [])
 
   useEffect(() => {
-    const unsubscribe = window.opencodeOps?.onStream
-      ? window.opencodeOps.onStream((event) => {
+    const unsubscribe = window.agentOps?.onStream
+      ? window.agentOps.onStream((event) => {
           const sessionId = event.sessionId
           const activeId = useSessionStore.getState().activeSessionId
 
@@ -318,7 +318,7 @@ export function useOpenCodeGlobalListener(): void {
               if (isAutoApprovable) {
                 // Background: auto-approve directly
                 if (sessionId !== activeId) {
-                  window.opencodeOps
+                  window.agentOps
                     .permissionReply(request.id, 'once', undefined)
                     .catch((err: unknown) => {
                       console.warn('Auto-approve permissionReply (background) failed:', err)
@@ -363,7 +363,7 @@ export function useOpenCodeGlobalListener(): void {
               if (!commandFilter.enabled) {
                 // Background: auto-approve directly when security is disabled
                 if (sessionId !== activeId) {
-                  window.opencodeOps
+                  window.agentOps
                     .commandApprovalReply(request.id, true)
                     .catch((err: unknown) => {
                       console.warn('Auto-approve commandApprovalReply (background) failed:', err)
@@ -548,7 +548,7 @@ export function useOpenCodeGlobalListener(): void {
               let dispatchSucceeded = false
               try {
                 const context = await resolvePromptDispatchContext(sessionId)
-                if (!context || !window.opencodeOps?.prompt) {
+                if (!context || !window.agentOps?.prompt) {
                   useSessionStore.getState().requeueFollowUpMessageFront(sessionId, message)
                   markBackgroundSessionCompleted(sessionId)
                   return
@@ -565,7 +565,7 @@ export function useOpenCodeGlobalListener(): void {
                   .getState()
                   .setSessionStatus(sessionId, mode === 'plan' ? 'planning' : 'working')
 
-                const result = await window.opencodeOps.prompt(
+                const result = await window.agentOps.prompt(
                   context.worktreePath,
                   context.opencodeSessionId,
                   [{ type: 'text', text: message }]
@@ -583,31 +583,32 @@ export function useOpenCodeGlobalListener(): void {
                 markBackgroundSessionCompleted(sessionId)
               } finally {
                 backgroundFollowUpDispatchingRef.current.delete(sessionId)
-
-                if (!deferredIdleWhileDispatchingRef.current.has(sessionId)) {
-                  return
-                }
-
-                deferredIdleWhileDispatchingRef.current.delete(sessionId)
-
-                // If dispatch failed, we've already requeued + set completed above.
-                if (!dispatchSucceeded) return
-
-                // Don't overwrite plan_ready — session is blocked waiting for plan approval
-                if (useSessionStore.getState().getPendingPlan(sessionId)) return
-
-                // Don't overwrite command_approval — session is blocked waiting for command approval
-                const followUpStatus = useWorktreeStatusStore.getState().sessionStatuses[sessionId]
-                if (followUpStatus?.status === 'command_approval') return
-
-                const nextFollowUp = useSessionStore.getState().dequeueFollowUpMessage(sessionId)
-                if (nextFollowUp) {
-                  dispatchBackgroundFollowUp(nextFollowUp)
-                  return
-                }
-
-                markBackgroundSessionCompleted(sessionId)
               }
+
+              // Handle deferred idle events that arrived while dispatching
+              if (!deferredIdleWhileDispatchingRef.current.has(sessionId)) {
+                return
+              }
+
+              deferredIdleWhileDispatchingRef.current.delete(sessionId)
+
+              // If dispatch failed, we've already requeued + set completed above.
+              if (!dispatchSucceeded) return
+
+              // Don't overwrite plan_ready — session is blocked waiting for plan approval
+              if (useSessionStore.getState().getPendingPlan(sessionId)) return
+
+              // Don't overwrite command_approval — session is blocked waiting for command approval
+              const followUpStatus = useWorktreeStatusStore.getState().sessionStatuses[sessionId]
+              if (followUpStatus?.status === 'command_approval') return
+
+              const nextFollowUp = useSessionStore.getState().dequeueFollowUpMessage(sessionId)
+              if (nextFollowUp) {
+                dispatchBackgroundFollowUp(nextFollowUp)
+                return
+              }
+
+              markBackgroundSessionCompleted(sessionId)
             })()
           }
 

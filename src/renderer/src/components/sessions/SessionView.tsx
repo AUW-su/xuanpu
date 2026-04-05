@@ -79,6 +79,9 @@ import { PermissionPrompt } from './PermissionPrompt'
 import { CommandApprovalPrompt } from './CommandApprovalPrompt'
 import type { ToolStatus, ToolUseInfo } from './ToolCard'
 import { PLAN_MODE_PREFIX, ASK_MODE_PREFIX, stripPlanModePrefix } from '@/lib/constants'
+import { SessionCostPill } from './SessionCostPill'
+import type { UsageAnalyticsSessionSummary } from '@shared/types/usage-analytics'
+import type { SessionActivity } from '@shared/types/session'
 
 interface SlashCommandInfo {
   name: string
@@ -280,6 +283,7 @@ interface DbSession {
   name: string | null
   status: 'active' | 'completed' | 'error'
   opencode_session_id: string | null
+  agent_sdk: 'opencode' | 'claude-code' | 'codex' | 'terminal'
   model_provider_id: string | null
   model_id: string | null
   model_variant: string | null
@@ -683,7 +687,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       setSessionCapabilities(null)
       return
     }
-    window.opencodeOps
+    window.agentOps
       ?.capabilities?.(opencodeSessionId)
       ?.then((result) => {
         if (result.success && result.capabilities) {
@@ -711,6 +715,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     return null
   })
   const sessionAgentSdk = sessionRecord?.agent_sdk ?? 'opencode'
+  const supportsUsageAnalytics =
+    sessionAgentSdk === 'claude-code' || sessionAgentSdk === 'codex'
   const globalModel = useSettingsStore((state) => resolveModelForSdk(sessionAgentSdk, state))
   const effectiveModel: SelectedModel | null =
     sessionRecord?.model_provider_id && sessionRecord.model_id
@@ -734,6 +740,11 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
   // Pending plan approval (ExitPlanMode blocking tool)
   const pendingPlan = useSessionStore((s) => s.pendingPlans.get(sessionId) ?? null)
+  const sessionCostSnapshot = useContextStore((state) => state.costBySession[sessionId] ?? 0)
+  const sessionTokenSnapshot = useContextStore((state) => state.tokensBySession[sessionId] ?? null)
+  const [sessionUsageSummary, setSessionUsageSummary] = useState<UsageAnalyticsSessionSummary | null>(
+    null
+  )
 
   // Streaming parts - tracks interleaved text and tool use during streaming
   const [streamingParts, setStreamingParts] = useState<StreamingPart[]>([])
@@ -894,6 +905,26 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     const agentSdk = session?.agent_sdk ?? 'opencode'
     return resolveModelForSdk(agentSdk) ?? undefined
   }, [sessionId])
+
+  const refreshSessionUsageSummary = useCallback(async (): Promise<void> => {
+    if (!supportsUsageAnalytics || !window.usageAnalyticsOps?.fetchSessionSummary) {
+      setSessionUsageSummary(null)
+      return
+    }
+
+    try {
+      const result = await window.usageAnalyticsOps.fetchSessionSummary(sessionId)
+      if (!result.success || !result.data) return
+
+      setSessionUsageSummary(result.data)
+
+      if (result.data.total_cost > 0) {
+        useContextStore.getState().setSessionCost(sessionId, result.data.total_cost)
+      }
+    } catch {
+      // Non-fatal — session cost pill falls back to live context store state.
+    }
+  }, [sessionId, supportsUsageAnalytics])
 
   // Extract message role from OpenCode stream payloads across known shapes
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1099,8 +1130,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   useEffect(() => {
     const model = getModelForRequests()
     if (!model) return
-    window.opencodeOps.setModel(model).catch((error) => {
-      console.error('Failed to push session model to OpenCode:', error)
+    window.agentOps.setModel({ ...model, runtimeId: sessionAgentSdk === 'terminal' ? 'opencode' : sessionAgentSdk }).catch((error) => {
+      console.error('Failed to push session model to agent backend:', error)
     })
   }, [
     getModelForRequests,
@@ -1368,6 +1399,11 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     planXmlDetectionRef.current = { state: 'scanning', buffer: '', cardId: null }
   }, [])
 
+  useEffect(() => {
+    setSessionUsageSummary(null)
+    void refreshSessionUsageSummary()
+  }, [refreshSessionUsageSummary])
+
   // Load session info and connect to OpenCode
   useEffect(() => {
     finalizedMessageIdsRef.current.clear()
@@ -1425,7 +1461,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       }
 
       const canUseOpenCodeSource =
-        Boolean(window.opencodeOps) &&
+        Boolean(window.agentOps) &&
         typeof sourceWorktreePath === 'string' &&
         sourceWorktreePath.length > 0 &&
         typeof sourceOpencodeSessionId === 'string' &&
@@ -1464,7 +1500,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         (!isCodexSession || loadedMessages.length === 0 || preferLiveCodexSource) &&
         canUseOpenCodeSource
       ) {
-        const result = await window.opencodeOps.getMessages(
+        const result = await window.agentOps.getMessages(
           sourceWorktreePath,
           sourceOpencodeSessionId
         )
@@ -1712,8 +1748,8 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     // This prevents a race condition where session.idle arrives during async
     // initialization (DB loads, reconnect) and is missed by both this handler
     // (not yet set up) and the global listener (which skips the active session).
-    const unsubscribe = window.opencodeOps?.onStream
-      ? window.opencodeOps.onStream((event) => {
+    const unsubscribe = window.agentOps?.onStream
+      ? window.agentOps.onStream((event) => {
           // Only handle events for this session
           if (event.sessionId !== sessionId) return
 
@@ -1778,6 +1814,14 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               transcriptSourceRef.current.opencodeSessionId = newId
               useSessionStore.getState().setOpenCodeSessionId(sessionId, newId)
 
+              // Persist to DB so runtime dispatch (getRuntimeIdForSession) can
+              // look up the real SDK session ID instead of the stale pending:: ID.
+              window.db.session
+                .update(sessionId, { opencode_session_id: newId })
+                .catch((err: unknown) => {
+                  console.warn('Failed to persist materialized session ID:', err)
+                })
+
               // On fork, the new session has its own transcript. Clear old
               // messages so the user only sees the local prompt bubble while
               // the fork streams. finalizeResponse() will reload from the
@@ -1794,7 +1838,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             const wtPath = transcriptSourceRef.current.worktreePath
             const opcSid = transcriptSourceRef.current.opencodeSessionId
             if (wtPath) {
-              window.opencodeOps
+              window.agentOps
                 .commands(wtPath, opcSid ?? undefined)
                 .then((result) => {
                   if (result.success && result.commands) {
@@ -1835,7 +1879,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                 !commandFilter.enabled ||
                 checkAutoApprove(request as PermissionRequest, commandFilter.allowlist)
               ) {
-                window.opencodeOps
+                window.agentOps
                   .permissionReply(request.id, 'once', worktreePath || undefined)
                   .catch((err: unknown) => {
                     console.warn('Auto-approve permissionReply failed:', err)
@@ -2515,6 +2559,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             setIsSending(false)
             setIsCompacting(false)
             setQueuedMessages([])
+            void refreshSessionUsageSummary()
             // Clear any stale command approvals when session goes idle
             useCommandApprovalStore.getState().clearSession(sessionId)
 
@@ -2579,7 +2624,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                   setIsSending(false)
                   return
                 }
-                window.opencodeOps
+                window.agentOps
                   .prompt(wtPath, opcSid, [{ type: 'text', text: followUp }], getModelForRequests())
                   .then((result) => {
                     if (!result.success) {
@@ -2604,6 +2649,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               setIsSending(false)
               setIsCompacting(false)
               setQueuedMessages([])
+              void refreshSessionUsageSummary()
               // Clear any stale command approvals when session goes idle
               useCommandApprovalStore.getState().clearSession(sessionId)
 
@@ -2659,11 +2705,12 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
         if (session.model_provider_id && session.model_id) {
           sessionModelHydratedRef.current = true
-          await window.opencodeOps
+          await window.agentOps
             .setModel({
               providerID: session.model_provider_id,
               modelID: session.model_id,
-              variant: session.model_variant ?? undefined
+              variant: session.model_variant ?? undefined,
+              runtimeId: session.agent_sdk === 'terminal' ? 'opencode' : session.agent_sdk
             })
             .catch((error) => {
               console.error('Failed to hydrate session model from database:', error)
@@ -2704,9 +2751,9 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
         // 1b. Hydrate revert boundary BEFORE loading messages so the filter
         // is applied to the very first render that includes transcript data.
-        if (wtPath && existingOpcSessionId && window.opencodeOps?.sessionInfo) {
+        if (wtPath && existingOpcSessionId && window.agentOps?.sessionInfo) {
           try {
-            const sessionInfo = await window.opencodeOps.sessionInfo(wtPath, existingOpcSessionId)
+            const sessionInfo = await window.agentOps.sessionInfo(wtPath, existingOpcSessionId)
             if (shouldAbortInit()) return
             if (sessionInfo.success) {
               setRevertMessageID(sessionInfo.revertMessageID ?? null)
@@ -2806,7 +2853,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           return
         }
 
-        if (!window.opencodeOps) {
+        if (!window.agentOps) {
           console.warn('OpenCode API unavailable, session view running in local-only mode')
           setViewState({ status: 'connected' })
           return
@@ -2851,8 +2898,11 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         // This avoids model-id collisions across providers and lets context usage use
         // the exact model that produced the latest assistant message.
         const fetchModelLimits = (): void => {
-          window.opencodeOps
-            .listModels()
+          const runtimeId = sessionRecord?.agent_sdk === 'terminal'
+            ? 'opencode'
+            : (sessionRecord?.agent_sdk ?? 'opencode')
+          window.agentOps
+            .listModels({ runtimeId })
             .then((result) => {
               const providers = Array.isArray(result.providers)
                 ? result.providers
@@ -2894,7 +2944,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
         // Fetch slash commands (fire-and-forget)
         const fetchCommands = (path: string, opcSessionId?: string): void => {
-          window.opencodeOps
+          window.agentOps
             .commands(path, opcSessionId)
             .then((result) => {
               if (result.success && result.commands) {
@@ -2908,7 +2958,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
         // Hydrate any pending permission requests (fire-and-forget)
         const hydratePermissions = (path: string): void => {
-          window.opencodeOps
+          window.agentOps
             .permissionList(path)
             .then((result) => {
               if (result.success && result.permissions) {
@@ -2967,7 +3017,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             const parts: Array<{ type: 'text'; text: string }> = [
               { type: 'text' as const, text: promptMessage }
             ]
-            const result = await window.opencodeOps.prompt(
+            const result = await window.agentOps.prompt(
               path,
               opcId,
               parts,
@@ -2997,7 +3047,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
         if (existingOpcSessionId) {
           // Try to reconnect to existing session
-          const reconnectResult = await window.opencodeOps.reconnect(
+          const reconnectResult = await window.agentOps.reconnect(
             wtPath,
             existingOpcSessionId,
             sessionId
@@ -3080,7 +3130,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         }
 
         // Create new OpenCode session
-        const connectResult = await window.opencodeOps.connect(wtPath, sessionId)
+        const connectResult = await window.agentOps.connect(wtPath, sessionId)
         if (shouldAbortInit()) return
         if (connectResult.success && connectResult.sessionId) {
           setOpencodeSessionId(connectResult.sessionId)
@@ -3191,7 +3241,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       transcriptSourceRef.current.worktreePath = worktree.path
       const existingOpcSessionId = session.opencode_session_id
 
-      if (!window.opencodeOps) {
+      if (!window.agentOps) {
         console.warn('OpenCode API unavailable, retry falling back to local-only mode')
         setMessages([])
         setViewState({ status: 'connected' })
@@ -3201,7 +3251,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       let activeOpcSessionId = existingOpcSessionId
 
       if (existingOpcSessionId) {
-        const reconnectResult = await window.opencodeOps.reconnect(
+        const reconnectResult = await window.agentOps.reconnect(
           worktree.path,
           existingOpcSessionId,
           sessionId
@@ -3221,7 +3271,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       }
 
       if (!activeOpcSessionId) {
-        const connectResult = await window.opencodeOps.connect(worktree.path, sessionId)
+        const connectResult = await window.agentOps.connect(worktree.path, sessionId)
         if (!connectResult.success || !connectResult.sessionId) {
           throw new Error(connectResult.error || t('sessionView.error.connectGeneric'))
         }
@@ -3238,7 +3288,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         }
       }
 
-      const transcriptResult = await window.opencodeOps.getMessages(
+      const transcriptResult = await window.agentOps.getMessages(
         worktree.path,
         activeOpcSessionId
       )
@@ -3270,7 +3320,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const handleQuestionReply = useCallback(
     async (requestId: string, answers: string[][]) => {
       try {
-        await window.opencodeOps.questionReply(requestId, answers, worktreePath || undefined)
+        await window.agentOps.questionReply(requestId, answers, worktreePath || undefined)
       } catch (err) {
         console.error('Failed to reply to question:', err)
         toast.error(t('sessionView.toasts.answerError'))
@@ -3283,7 +3333,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const handleQuestionReject = useCallback(
     async (requestId: string) => {
       try {
-        await window.opencodeOps.questionReject(requestId, worktreePath || undefined)
+        await window.agentOps.questionReject(requestId, worktreePath || undefined)
       } catch (err) {
         console.error('Failed to reject question:', err)
         toast.error(t('sessionView.toasts.dismissQuestionError'))
@@ -3296,7 +3346,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
   const handlePermissionReply = useCallback(
     async (requestId: string, reply: 'once' | 'always' | 'reject', message?: string) => {
       try {
-        await window.opencodeOps.permissionReply(
+        await window.agentOps.permissionReply(
           requestId,
           reply,
           worktreePath || undefined,
@@ -3320,7 +3370,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       patterns?: string[]
     ) => {
       try {
-        await window.opencodeOps.commandApprovalReply(
+        await window.agentOps.commandApprovalReply(
           requestId,
           approved,
           remember,
@@ -3342,7 +3392,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     if (sessionRecord?.agent_sdk === 'codex') {
       const durableState = await loadCodexDurableState(sessionId)
       if (worktreePath && opencodeSessionId) {
-        const transcriptResult = await window.opencodeOps.getMessages(
+        const transcriptResult = await window.agentOps.getMessages(
           worktreePath,
           opencodeSessionId
         )
@@ -3366,7 +3416,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
     if (!worktreePath || !opencodeSessionId) return false
 
-    const transcriptResult = await window.opencodeOps.getMessages(worktreePath, opencodeSessionId)
+    const transcriptResult = await window.agentOps.getMessages(worktreePath, opencodeSessionId)
     if (!transcriptResult.success) {
       console.warn('Failed to refresh OpenCode transcript:', transcriptResult.error)
       return false
@@ -3413,7 +3463,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       setForkingMessageId(message.id)
 
       try {
-        const forkResult = await window.opencodeOps.fork(
+        const forkResult = await window.agentOps.fork(
           worktreePath,
           opencodeSessionId,
           cutoffMessage?.id
@@ -3484,7 +3534,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
           try {
             if (commandName === 'undo') {
-              const result = await window.opencodeOps.undo(worktreePath, opencodeSessionId)
+              const result = await window.agentOps.undo(worktreePath, opencodeSessionId)
               if (!result.success) {
                 toast.error(result.error || t('sessionView.toasts.nothingToUndo'))
                 return
@@ -3504,7 +3554,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                 toast.error(t('sessionView.toasts.redoUnsupported'))
                 return
               }
-              const result = await window.opencodeOps.redo(worktreePath, opencodeSessionId)
+              const result = await window.agentOps.redo(worktreePath, opencodeSessionId)
               if (!result.success) {
                 toast.error(result.error || t('sessionView.toasts.nothingToRedo'))
                 return
@@ -3639,7 +3689,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
           usePRReviewStore.getState().clearAttachments()
 
           try {
-            const result = await window.opencodeOps.prompt(
+            const result = await window.agentOps.prompt(
               worktreePath,
               opencodeSessionId,
               parts,
@@ -3814,7 +3864,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               lastSentPromptRef.current = trimmedValue
               clearAttachments()
               usePRReviewStore.getState().clearAttachments()
-              const result = await window.opencodeOps.command(
+              const result = await window.agentOps.command(
                 worktreePath,
                 opencodeSessionId,
                 commandName,
@@ -3848,7 +3898,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
               const parts = buildMessageParts(attachments, promptMessage)
               clearAttachments()
               usePRReviewStore.getState().clearAttachments()
-              const result = await window.opencodeOps.prompt(
+              const result = await window.agentOps.prompt(
                 worktreePath,
                 opencodeSessionId,
                 parts,
@@ -3885,7 +3935,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
             const parts = buildMessageParts(attachments, promptMessage)
             clearAttachments()
             usePRReviewStore.getState().clearAttachments()
-            const result = await window.opencodeOps.prompt(
+            const result = await window.agentOps.prompt(
               worktreePath,
               opencodeSessionId,
               parts,
@@ -3974,7 +4024,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
 
       try {
         // Approve first (unblocks the SDK), then update frontend state.
-        const result = await window.opencodeOps.planApprove(
+        const result = await window.agentOps.planApprove(
           worktreePath,
           sessionId,
           pendingBeforeAction.requestId
@@ -4103,7 +4153,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       useWorktreeStatusStore.getState().clearSessionStatus(sessionId)
       try {
         // Reject first (unblocks the SDK with feedback), then clear frontend state
-        const result = await window.opencodeOps.planReject(
+        const result = await window.agentOps.planReject(
           worktreePath,
           sessionId,
           feedback,
@@ -4333,7 +4383,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
     if (!worktreePath || !opencodeSessionId) return
     // Clear any pending command approvals — the abort will auto-deny them on the main process side
     useCommandApprovalStore.getState().clearSession(sessionId)
-    await window.opencodeOps.abort(worktreePath, opencodeSessionId)
+    await window.agentOps.abort(worktreePath, opencodeSessionId)
   }, [worktreePath, opencodeSessionId, sessionId])
 
   // Handle keyboard shortcuts
@@ -4593,7 +4643,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
       if (useSessionStore.getState().activeSessionId !== sessionId) return
       if (!worktreePath || !opencodeSessionId) return
       try {
-        const result = await window.opencodeOps.undo(worktreePath, opencodeSessionId)
+        const result = await window.agentOps.undo(worktreePath, opencodeSessionId)
         if (!result.success) {
           toast.error(result.error || t('sessionView.toasts.nothingToUndo'))
           return
@@ -4620,7 +4670,7 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
         return
       }
       try {
-        const result = await window.opencodeOps.redo(worktreePath, opencodeSessionId)
+        const result = await window.agentOps.redo(worktreePath, opencodeSessionId)
         if (!result.success) {
           toast.error(result.error || t('sessionView.toasts.nothingToRedo'))
           return
@@ -5196,6 +5246,20 @@ export function SessionView({ sessionId }: SessionViewProps): React.JSX.Element 
                       sessionId={sessionId}
                       modelId={currentModelId}
                       providerId={currentProviderId}
+                    />
+                    <SessionCostPill
+                      summary={sessionUsageSummary}
+                      fallbackCost={sessionCostSnapshot}
+                      fallbackTokens={
+                        sessionTokenSnapshot
+                          ? {
+                              input: sessionTokenSnapshot.input,
+                              output: sessionTokenSnapshot.output,
+                              cacheRead: sessionTokenSnapshot.cacheRead,
+                              cacheWrite: sessionTokenSnapshot.cacheWrite
+                            }
+                          : null
+                      }
                     />
                     {pendingPlan ? (
                       <span className="text-[12px] text-muted-foreground">
