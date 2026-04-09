@@ -564,7 +564,7 @@ export const messages: Record<AppLocale, MessageTree> = {
         title: 'Update v{version} available',
         later: 'Later',
         skip: 'Skip this version',
-        download: 'Download'
+        download: 'View Release'
       },
       progress: {
         title: 'Downloading v{version}...'
@@ -2610,7 +2610,7 @@ export const messages: Record<AppLocale, MessageTree> = {
         title: '发现 v{version} 更新',
         later: '稍后',
         skip: '跳过此版本',
-        download: '下载'
+        download: '前往下载'
       },
       progress: {
         title: '正在下载 v{version}...'
