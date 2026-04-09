@@ -28,7 +28,23 @@ export const messages: Record<AppLocale, MessageTree> = {
         title: 'Appearance',
         description: 'Choose a theme for the application.',
         darkThemes: 'Dark Themes',
-        lightThemes: 'Light Themes'
+        lightThemes: 'Light Themes',
+        fontSize: {
+          title: 'Font Size',
+          description: 'Adjust text size without changing layout or icons.',
+          presets: {
+            small: 'Small',
+            default: 'Default',
+            medium: 'Medium',
+            large: 'Large',
+            xlarge: 'X-Large'
+          }
+        },
+        uiScale: {
+          title: 'UI Scale',
+          description:
+            'Scale the entire interface, including icons and spacing. You can also use Cmd+/Cmd- shortcuts.'
+        }
       },
       general: {
         title: 'General',
@@ -2088,7 +2104,22 @@ export const messages: Record<AppLocale, MessageTree> = {
         title: '外观',
         description: '为应用选择主题。',
         darkThemes: '深色主题',
-        lightThemes: '浅色主题'
+        lightThemes: '浅色主题',
+        fontSize: {
+          title: '字体大小',
+          description: '仅调整文字大小，不影响图标和布局。',
+          presets: {
+            small: '较小',
+            default: '默认',
+            medium: '稍大',
+            large: '较大',
+            xlarge: '最大'
+          }
+        },
+        uiScale: {
+          title: '界面缩放',
+          description: '等比缩放整体界面，包括图标和间距。也可使用 Cmd+/Cmd- 快捷键。'
+        }
       },
       general: {
         title: '通用',
