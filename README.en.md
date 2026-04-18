@@ -84,18 +84,6 @@ pnpm dev
 - `Windows`: supported — all core features work; Ghostty terminal is macOS-only
 - `Linux`: planned target, still evolving
 
-## Download Trends
-
-> Data from GitHub Releases, updated manually with each release.
-
-```mermaid
-xychart-beta
-    title "Downloads per Release"
-    x-axis ["v1.1.5", "v1.2.1", "v1.2.2", "v1.2.3", "v1.2.4", "v1.2.5"]
-    y-axis "Downloads" 0 --> 100
-    bar [9, 8, 12, 14, 21, 79]
-```
-
 <p>
   <a href="https://github.com/slicenferqin/xuanpu/releases"><img src="https://img.shields.io/github/downloads/slicenferqin/xuanpu/total?style=flat-square&label=total%20downloads&color=blue" alt="Total Downloads" /></a>
   <a href="https://github.com/slicenferqin/xuanpu/releases/latest"><img src="https://img.shields.io/github/downloads/slicenferqin/xuanpu/latest/total?style=flat-square&label=latest%20release&color=brightgreen" alt="Latest Release Downloads" /></a>
