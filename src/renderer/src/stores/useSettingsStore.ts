@@ -117,6 +117,7 @@ export interface AppSettings {
 
   // Chat
   stripAtMentions: boolean
+  skipForkFromMessageConfirm: boolean
   codexFastMode: boolean
   codexFastModeAccepted: boolean
 
@@ -136,6 +137,9 @@ export interface AppSettings {
   // Appearance
   uiZoomLevel: number
   uiFontScale: number
+
+  // Experimental — Phase 7 feature flag
+  sessionUiV2Enabled: boolean
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -163,6 +167,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   showUsageIndicator: true,
   defaultAgentSdk: 'opencode',
   stripAtMentions: true,
+  skipForkFromMessageConfirm: false,
   codexFastMode: false,
   codexFastModeAccepted: false,
   updateChannel: 'stable',
@@ -187,7 +192,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   telemetryEnabled: true,
   autoPullBeforeWorktree: true,
   uiZoomLevel: 0,
-  uiFontScale: 1
+  uiFontScale: 1,
+  sessionUiV2Enabled: false
 }
 
 interface SettingsState extends AppSettings {
@@ -285,6 +291,7 @@ function extractSettings(state: SettingsState): AppSettings {
     showUsageIndicator: state.showUsageIndicator,
     defaultAgentSdk: state.defaultAgentSdk,
     stripAtMentions: state.stripAtMentions,
+    skipForkFromMessageConfirm: state.skipForkFromMessageConfirm,
     codexFastMode: state.codexFastMode,
     codexFastModeAccepted: state.codexFastModeAccepted,
     updateChannel: state.updateChannel,
@@ -294,7 +301,8 @@ function extractSettings(state: SettingsState): AppSettings {
     telemetryEnabled: state.telemetryEnabled,
     autoPullBeforeWorktree: state.autoPullBeforeWorktree,
     uiZoomLevel: state.uiZoomLevel,
-    uiFontScale: state.uiFontScale
+    uiFontScale: state.uiFontScale,
+    sessionUiV2Enabled: state.sessionUiV2Enabled
   }
 }
 
@@ -501,6 +509,7 @@ export const useSettingsStore = create<SettingsState>()(
         defaultAgentSdk: state.defaultAgentSdk,
         activeSection: state.activeSection,
         stripAtMentions: state.stripAtMentions,
+        skipForkFromMessageConfirm: state.skipForkFromMessageConfirm,
         codexFastMode: state.codexFastMode,
         codexFastModeAccepted: state.codexFastModeAccepted,
         updateChannel: state.updateChannel,
@@ -509,7 +518,8 @@ export const useSettingsStore = create<SettingsState>()(
         commandFilter: state.commandFilter,
         telemetryEnabled: state.telemetryEnabled,
         uiZoomLevel: state.uiZoomLevel,
-        uiFontScale: state.uiFontScale
+        uiFontScale: state.uiFontScale,
+        sessionUiV2Enabled: state.sessionUiV2Enabled
       })
     }
   )

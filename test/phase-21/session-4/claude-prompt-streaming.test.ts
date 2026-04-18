@@ -5,9 +5,25 @@ import type { BrowserWindow } from 'electron'
 const { mockQuery } = vi.hoisted(() => ({
   mockQuery: vi.fn()
 }))
+vi.mock('electron', () => ({
+  app: {
+    getPath: vi.fn().mockReturnValue('/tmp')
+  }
+}))
 vi.mock('../../../src/main/services/claude-sdk-loader', () => ({
   loadClaudeSDK: vi.fn().mockResolvedValue({ query: mockQuery })
 }))
+
+vi.mock('../../../src/main/services/claude-transcript-reader', async () => {
+  const actual = await vi.importActual<
+    typeof import('../../../src/main/services/claude-transcript-reader')
+  >('../../../src/main/services/claude-transcript-reader')
+
+  return {
+    ...actual,
+    readClaudeTranscript: vi.fn().mockResolvedValue([])
+  }
+})
 
 vi.mock('../../../src/main/services/logger', () => ({
   createLogger: () => ({
@@ -22,6 +38,9 @@ import {
   ClaudeCodeImplementer,
   type ClaudeSessionState
 } from '../../../src/main/services/claude-code-implementer'
+import { readClaudeTranscript } from '../../../src/main/services/claude-transcript-reader'
+
+const readClaudeTranscriptMock = vi.mocked(readClaudeTranscript)
 
 function createMockWindow(): BrowserWindow {
   return {
@@ -50,7 +69,7 @@ function createMockQueryIterator(messages: Array<Record<string, unknown>>) {
 function getStreamEvents(window: BrowserWindow): any[] {
   const send = (window.webContents as any).send as ReturnType<typeof vi.fn>
   return send.mock.calls
-    .filter((call: any[]) => call[0] === 'opencode:stream')
+    .filter((call: any[]) => call[0] === 'agent:stream')
     .map((call: any[]) => call[1])
 }
 
@@ -61,6 +80,7 @@ describe('ClaudeCodeImplementer – prompt streaming (Session 4)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    readClaudeTranscriptMock.mockResolvedValue([])
     impl = new ClaudeCodeImplementer()
     sessions = (impl as any).sessions
     mockWindow = createMockWindow()
@@ -137,7 +157,7 @@ describe('ClaudeCodeImplementer – prompt streaming (Session 4)', () => {
       expect(state.materialized).toBe(true)
     })
 
-    it('emits message.part.updated for assistant text', async () => {
+    it('emits message.updated for a completed assistant message', async () => {
       const { sessionId } = await impl.connect('/proj', 'hive-1')
 
       const iter = createMockQueryIterator([
@@ -155,15 +175,13 @@ describe('ClaudeCodeImplementer – prompt streaming (Session 4)', () => {
       await impl.prompt('/proj', sessionId, 'test')
 
       const events = getStreamEvents(mockWindow)
-      const partEvents = events.filter((e: any) => e.type === 'message.part.updated')
-      expect(partEvents.length).toBeGreaterThanOrEqual(2)
-      expect(partEvents[0].data.content).toMatchObject({
-        type: 'text',
-        text: 'First block'
-      })
-      expect(partEvents[1].data.content).toMatchObject({
-        type: 'text',
-        text: 'Second block'
+      const messageEvent = events.find((event: any) => event.type === 'message.updated')
+      expect(messageEvent).toMatchObject({
+        type: 'message.updated',
+        sessionId: 'hive-1',
+        data: {
+          role: 'assistant'
+        }
       })
     })
 
@@ -245,6 +263,104 @@ describe('ClaudeCodeImplementer – prompt streaming (Session 4)', () => {
         type: 'session.status',
         statusPayload: { type: 'idle' }
       })
+    })
+
+    it('refreshes exact context usage after compact_boundary before marking compaction complete', async () => {
+      const { sessionId } = await impl.connect('/proj', 'hive-1')
+
+      const iter = createMockQueryIterator([
+        {
+          type: 'system',
+          subtype: 'status',
+          status: 'compacting',
+          session_id: 'sdk-compact-1'
+        },
+        {
+          type: 'system',
+          subtype: 'compact_boundary',
+          compact_metadata: { trigger: 'auto' },
+          session_id: 'sdk-compact-1'
+        }
+      ]) as ReturnType<typeof createMockQueryIterator> & {
+        getContextUsage: ReturnType<typeof vi.fn>
+      }
+
+      iter.getContextUsage = vi.fn().mockResolvedValue({
+        categories: [{ name: 'Messages', tokens: 50000, color: '#237a68' }],
+        totalTokens: 50000,
+        maxTokens: 200000,
+        rawMaxTokens: 1000000,
+        percentage: 25,
+        gridRows: [],
+        model: 'claude-opus-4-7',
+        memoryFiles: [],
+        mcpTools: []
+      })
+      mockQuery.mockReturnValue(iter)
+
+      await impl.prompt('/proj', sessionId, 'compact me')
+
+      const events = getStreamEvents(mockWindow)
+      const types = events.map((event: any) => event.type)
+      const contextUsageIndex = types.indexOf('session.context_usage')
+      const compactedIndex = types.indexOf('session.context_compacted')
+
+      expect(types).toContain('session.compaction_started')
+      expect(types).toContain('message.part.updated')
+      expect(contextUsageIndex).toBeGreaterThan(-1)
+      expect(compactedIndex).toBeGreaterThan(contextUsageIndex)
+      expect(events[contextUsageIndex]).toMatchObject({
+        type: 'session.context_usage',
+        sessionId: 'hive-1',
+        data: {
+          contextWindow: 200000,
+          model: {
+            providerID: 'anthropic',
+            modelID: 'opus'
+          },
+          breakdown: {
+            usedTokens: 50000,
+            maxTokens: 200000,
+            rawMaxTokens: 1000000,
+            percentage: 25
+          }
+        }
+      })
+      expect(iter.getContextUsage).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not emit fake context usage when post-compaction refresh fails', async () => {
+      const { sessionId } = await impl.connect('/proj', 'hive-1')
+
+      const iter = createMockQueryIterator([
+        {
+          type: 'system',
+          subtype: 'status',
+          status: 'compacting',
+          session_id: 'sdk-compact-2'
+        },
+        {
+          type: 'system',
+          subtype: 'compact_boundary',
+          compact_metadata: { trigger: 'manual' },
+          session_id: 'sdk-compact-2'
+        }
+      ]) as ReturnType<typeof createMockQueryIterator> & {
+        getContextUsage: ReturnType<typeof vi.fn>
+      }
+
+      iter.getContextUsage = vi.fn().mockRejectedValue(new Error('not supported'))
+      mockQuery.mockReturnValue(iter)
+
+      await impl.prompt('/proj', sessionId, 'compact me again')
+
+      const events = getStreamEvents(mockWindow)
+      const types = events.map((event: any) => event.type)
+
+      expect(types).toContain('session.compaction_started')
+      expect(types).toContain('session.context_compacted')
+      expect(types).not.toContain('session.context_usage')
+      expect(iter.getContextUsage).toHaveBeenCalledTimes(1)
     })
 
     it('passes resume ID to SDK when session is materialized', async () => {
@@ -347,6 +463,65 @@ describe('ClaudeCodeImplementer – prompt streaming (Session 4)', () => {
 
       // DB should NOT be updated since session was already materialized
       expect(mockDb.updateSession).not.toHaveBeenCalled()
+    })
+
+    it('reconciles final assistant usage from transcript before persisting messages', async () => {
+      const mockDb = {
+        updateSession: vi.fn(),
+        getSession: vi.fn(),
+        replaceSessionMessages: vi.fn()
+      }
+      impl.setDatabaseService(mockDb as any)
+
+      readClaudeTranscriptMock.mockResolvedValue([
+        {
+          id: 'assistant-final-1',
+          role: 'assistant',
+          timestamp: '2026-04-18T10:00:01.000Z',
+          content: 'Done.',
+          parts: [{ type: 'text', text: 'Done.' }],
+          usage: {
+            input_tokens: 1,
+            output_tokens: 42,
+            cache_creation_input_tokens: 63194,
+            cache_read_input_tokens: 0
+          },
+          model: 'claude-opus-4-7',
+          cost: 0.395111
+        }
+      ])
+
+      const { sessionId } = await impl.connect('/proj', 'hive-1')
+      const iter = createMockQueryIterator([
+        {
+          type: 'assistant',
+          session_id: 'real-sdk-id',
+          uuid: 'assistant-final-1',
+          message: {
+            id: 'assistant-message-1',
+            role: 'assistant',
+            content: [{ type: 'text', text: 'Done.' }],
+            usage: {
+              input_tokens: 1,
+              output_tokens: 1,
+              cache_creation_input_tokens: 63194,
+              cache_read_input_tokens: 0
+            },
+            model: 'claude-opus-4-7'
+          }
+        }
+      ])
+      mockQuery.mockReturnValue(iter)
+
+      await impl.prompt('/proj', sessionId, 'hello')
+
+      const lastPersistCall = mockDb.replaceSessionMessages.mock.calls.at(-1)
+      expect(lastPersistCall).toBeDefined()
+
+      const persistedRows = lastPersistCall?.[1] as Array<{ opencode_message_json: string }>
+      const persistedMessage = JSON.parse(persistedRows[0].opencode_message_json)
+      expect(persistedMessage.usage.output_tokens).toBe(42)
+      expect(persistedMessage.cost).toBe(0.395111)
     })
   })
 

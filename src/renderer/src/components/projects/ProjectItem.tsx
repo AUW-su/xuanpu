@@ -49,7 +49,7 @@ import {
 } from '@/stores'
 import { HintBadge } from '@/components/ui/HintBadge'
 import { WorktreeList, BranchPickerDialog } from '@/components/worktrees'
-import { LanguageIcon } from './LanguageIcon'
+import { ProjectAvatar } from '@/components/projects/ProjectAvatar'
 import { HighlightedText } from './HighlightedText'
 import { useI18n } from '@/i18n/useI18n'
 
@@ -286,7 +286,7 @@ export function ProjectItem({
         <ContextMenuTrigger asChild>
           <div
             className={cn(
-              'group flex items-center gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-colors',
+              'group flex items-center gap-2 px-2.5 py-2.5 rounded-xl cursor-pointer transition-colors',
               isSelected
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-sidebar-border/60 shadow-sm'
                 : 'hover:bg-sidebar-accent/70',
@@ -326,8 +326,8 @@ export function ProjectItem({
               />
             </Button>
 
-            {/* Language Icon */}
-            <LanguageIcon language={project.language} customIcon={project.custom_icon} />
+            {/* Project Avatar */}
+            <ProjectAvatar name={project.name} customIcon={project.custom_icon} />
 
             {/* Project Name */}
             {isEditing ? (

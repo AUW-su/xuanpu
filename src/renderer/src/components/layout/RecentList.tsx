@@ -13,7 +13,7 @@ import { useRecentStore } from '@/stores/useRecentStore'
 import { useGitStore } from '@/stores/useGitStore'
 import { ModelIcon } from '@/components/worktrees/ModelIcon'
 import { PulseAnimation } from '@/components/worktrees/PulseAnimation'
-import { LanguageIcon } from '@/components/projects/LanguageIcon'
+import { ProjectAvatar } from '@/components/projects/ProjectAvatar'
 import { useI18n } from '@/i18n/useI18n'
 import { formatRelativeTime } from '@/lib/format-utils'
 
@@ -90,7 +90,7 @@ export function RecentList(): React.JSX.Element | null {
           <RecentConnectionItem key={`conn-${item.id}`} connectionId={item.id} />
         )
       )}
-      <div className="border-b border-border/50 mx-2 mt-1 mb-1" />
+      <div className="border-b border-sidebar-border/50 mx-2 mt-1 mb-1" />
     </div>
   )
 }
@@ -154,13 +154,13 @@ function RecentWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
     <div
       className={cn(
         'group flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors mx-1',
-        isSelected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
+        isSelected ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/70'
       )}
       onClick={handleClick}
       data-testid={`recent-worktree-${worktreeId}`}
     >
       {/* Project icon */}
-      <LanguageIcon language={project.language} customIcon={project.custom_icon} />
+      <ProjectAvatar name={project.name} customIcon={project.custom_icon} />
 
       {/* Status indicators (heartbeat + AI status) */}
       {isRunProcessAlive && <PulseAnimation className="h-3.5 w-3.5 text-green-500 shrink-0" />}
@@ -243,7 +243,7 @@ function RecentConnectionItem({
     <div
       className={cn(
         'group flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors mx-1',
-        isSelected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
+        isSelected ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/70'
       )}
       onClick={handleClick}
       data-testid={`recent-connection-${connectionId}`}

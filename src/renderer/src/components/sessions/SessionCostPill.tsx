@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n/useI18n'
+import { formatModelLabelSummary, getSessionSummaryModelLabels } from '@/lib/model-labels'
 
 interface SessionCostPillProps {
   summary: UsageAnalyticsSessionSummary | null
@@ -49,18 +50,17 @@ function formatDuration(seconds: number): string {
 export function SessionCostPill({
   summary,
   fallbackCost,
-  fallbackTokens
+  fallbackTokens: _fallbackTokens
 }: SessionCostPillProps): React.JSX.Element | null {
   const { t } = useI18n()
-  const totalCost = summary?.total_cost ?? fallbackCost
-  const totalTokens =
-    summary?.total_tokens ??
-    ((fallbackTokens?.input ?? 0) +
-      (fallbackTokens?.output ?? 0) +
-      (fallbackTokens?.cacheRead ?? 0) +
-      (fallbackTokens?.cacheWrite ?? 0))
+  const modelSummary = formatModelLabelSummary(getSessionSummaryModelLabels(summary))
+  const totalCost = Math.max(summary?.total_cost ?? 0, fallbackCost ?? 0)
+  const hasSummaryTokens = (summary?.total_tokens ?? 0) > 0
+  const totalTokens = summary?.total_tokens ?? 0
 
-  if (totalCost <= 0) return null
+  void _fallbackTokens
+
+  if (totalCost <= 0 && !hasSummaryTokens) return null
 
   return (
     <Popover>
@@ -93,46 +93,54 @@ export function SessionCostPill({
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground">{t('sessionView.costPill.totalTokens')}</span>
-            <span className="font-mono">{formatTokens(totalTokens)}</span>
+            {hasSummaryTokens ? (
+              <span className="font-mono">{formatTokens(totalTokens)}</span>
+            ) : (
+              <span className="text-muted-foreground">
+                {t('sessionView.costPill.totalsSyncing')}
+              </span>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-2 border-t border-border/70 pt-2">
-            <div className="rounded-lg bg-muted/45 px-2 py-1.5">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {t('sessionView.costPill.input')}
+          {hasSummaryTokens ? (
+            <div className="grid grid-cols-2 gap-2 border-t border-border/70 pt-2">
+              <div className="rounded-lg bg-muted/45 px-2 py-1.5">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {t('sessionView.costPill.input')}
+                </div>
+                <div className="mt-1 font-mono">{formatTokens(summary?.input_tokens ?? 0)}</div>
               </div>
-              <div className="mt-1 font-mono">{formatTokens(summary?.input_tokens ?? fallbackTokens?.input ?? 0)}</div>
+              <div className="rounded-lg bg-muted/45 px-2 py-1.5">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {t('sessionView.costPill.output')}
+                </div>
+                <div className="mt-1 font-mono">{formatTokens(summary?.output_tokens ?? 0)}</div>
+              </div>
+              <div className="rounded-lg bg-muted/45 px-2 py-1.5">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {t('sessionView.costPill.cacheWrite')}
+                </div>
+                <div className="mt-1 font-mono">
+                  {formatTokens(summary?.cache_write_tokens ?? 0)}
+                </div>
+              </div>
+              <div className="rounded-lg bg-muted/45 px-2 py-1.5">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {t('sessionView.costPill.cacheRead')}
+                </div>
+                <div className="mt-1 font-mono">
+                  {formatTokens(summary?.cache_read_tokens ?? 0)}
+                </div>
+              </div>
             </div>
-            <div className="rounded-lg bg-muted/45 px-2 py-1.5">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {t('sessionView.costPill.output')}
-              </div>
-              <div className="mt-1 font-mono">{formatTokens(summary?.output_tokens ?? fallbackTokens?.output ?? 0)}</div>
-            </div>
-            <div className="rounded-lg bg-muted/45 px-2 py-1.5">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {t('sessionView.costPill.cacheWrite')}
-              </div>
-              <div className="mt-1 font-mono">
-                {formatTokens(summary?.cache_write_tokens ?? fallbackTokens?.cacheWrite ?? 0)}
-              </div>
-            </div>
-            <div className="rounded-lg bg-muted/45 px-2 py-1.5">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {t('sessionView.costPill.cacheRead')}
-              </div>
-              <div className="mt-1 font-mono">
-                {formatTokens(summary?.cache_read_tokens ?? fallbackTokens?.cacheRead ?? 0)}
-              </div>
-            </div>
-          </div>
-          {summary?.latest_model_label && (
+          ) : null}
+          {modelSummary && (
             <div className="flex items-center justify-between gap-3 border-t border-border/70 pt-2">
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <Layers3 className="h-3.5 w-3.5" />
                 {t('sessionView.costPill.model')}
               </span>
-              <span className="truncate font-medium" title={summary.latest_model_label}>
-                {summary.latest_model_label}
+              <span className="truncate font-medium" title={modelSummary.full}>
+                {modelSummary.short}
               </span>
             </div>
           )}

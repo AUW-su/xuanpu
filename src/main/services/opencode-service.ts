@@ -5,8 +5,9 @@ import { notificationService } from './notification-service'
 import { getDatabase } from '../db'
 import { autoRenameWorktreeBranch } from './git-service'
 import { getEventBus } from '../../server/event-bus'
-import type { AgentSdkImplementer } from './agent-sdk-types'
+import type { AgentSdkImplementer } from './agent-runtime-types'
 import type { AgentRuntimeAdapter } from './agent-runtime-types'
+import { emitAgentEvent } from '@shared/lib/normalize-agent-event'
 
 const log = createLogger({ component: 'OpenCodeService' })
 
@@ -1240,7 +1241,7 @@ class OpenCodeService implements AgentSdkImplementer, AgentRuntimeAdapter {
         : {})
     }
 
-    this.sendToRenderer('opencode:stream', streamEvent)
+    emitAgentEvent(this.mainWindow, streamEvent)
   }
 
   /**
@@ -1295,7 +1296,7 @@ class OpenCodeService implements AgentSdkImplementer, AgentRuntimeAdapter {
     }
     try {
       const bus = getEventBus()
-      if (channel === 'opencode:stream') bus.emit('opencode:stream', data)
+      if (channel === 'agent:stream') bus.emit('agent:stream', data)
       else if (channel === 'worktree:branchRenamed') bus.emit('worktree:branchRenamed', data)
     } catch {
       // EventBus not available

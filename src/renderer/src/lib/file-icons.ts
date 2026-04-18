@@ -12,204 +12,382 @@ import {
   Package,
   Settings,
   BookOpen,
+  Container,
+  Terminal,
   type LucideIcon
 } from 'lucide-react'
 
-// SVG icon imports (Vite resolves these to hashed asset URLs at build time)
-import typescriptIcon from '@/assets/file-icons/typescript.svg'
-import reactIcon from '@/assets/file-icons/react.svg'
-import javascriptIcon from '@/assets/file-icons/javascript.svg'
-import pythonIcon from '@/assets/file-icons/python.svg'
-import goIcon from '@/assets/file-icons/go.svg'
-import rustIcon from '@/assets/file-icons/rust.svg'
-import swiftIcon from '@/assets/file-icons/swift.svg'
-import javaIcon from '@/assets/file-icons/java.svg'
-import kotlinIcon from '@/assets/file-icons/kotlin.svg'
-import cIcon from '@/assets/file-icons/c.svg'
-import cppIcon from '@/assets/file-icons/c-plusplus.svg'
-import csharpIcon from '@/assets/file-icons/csharp.svg'
-import rubyIcon from '@/assets/file-icons/ruby.svg'
-import phpIcon from '@/assets/file-icons/php.svg'
-import dartIcon from '@/assets/file-icons/dart.svg'
-import yamlIcon from '@/assets/file-icons/yaml.svg'
-import tomlIcon from '@/assets/file-icons/toml.svg'
-import markdownIcon from '@/assets/file-icons/markdown.svg'
-import htmlIcon from '@/assets/file-icons/html.svg'
-import cssIcon from '@/assets/file-icons/css.svg'
-import sassIcon from '@/assets/file-icons/sass.svg'
-import vueIcon from '@/assets/file-icons/vue.svg'
-import svelteIcon from '@/assets/file-icons/svelte.svg'
-import dockerIcon from '@/assets/file-icons/docker.svg'
-import graphqlIcon from '@/assets/file-icons/graphql.svg'
-import luaIcon from '@/assets/file-icons/lua.svg'
-import rLangIcon from '@/assets/file-icons/r-lang.svg'
-import scalaIcon from '@/assets/file-icons/scala.svg'
-import zigIcon from '@/assets/file-icons/zig.svg'
-import elixirIcon from '@/assets/file-icons/elixir.svg'
-import astroIcon from '@/assets/file-icons/astro.svg'
-import shellIcon from '@/assets/file-icons/shell.svg'
-import jsonIcon from '@/assets/file-icons/json.svg'
-import sqlIcon from '@/assets/file-icons/sql.svg'
-import xmlIcon from '@/assets/file-icons/xml.svg'
-import haskellIcon from '@/assets/file-icons/haskell.svg'
-import erlangIcon from '@/assets/file-icons/erlang.svg'
-import clojureIcon from '@/assets/file-icons/clojure.svg'
-import perlIcon from '@/assets/file-icons/perl.svg'
+// ---------------------------------------------------------------------------
+// Catppuccin icon mappings (via @iconify-json/catppuccin)
+// ---------------------------------------------------------------------------
 
-/** Maps file extensions (lowercase, with dot prefix) to bundled SVG asset URLs */
-export const svgIconMap: Record<string, string> = {
+/** Extension → Catppuccin icon name */
+export const catppuccinExtMap: Record<string, string> = {
+  '.ts': 'catppuccin:typescript',
+  '.mts': 'catppuccin:typescript',
+  '.cts': 'catppuccin:typescript',
+  '.tsx': 'catppuccin:typescript-react',
+  '.jsx': 'catppuccin:javascript-react',
+  '.js': 'catppuccin:javascript',
+  '.mjs': 'catppuccin:javascript',
+  '.cjs': 'catppuccin:javascript',
+  '.py': 'catppuccin:python',
+  '.pyi': 'catppuccin:python',
+  '.pyx': 'catppuccin:python',
+  '.go': 'catppuccin:go',
+  '.rs': 'catppuccin:rust',
+  '.swift': 'catppuccin:swift',
+  '.java': 'catppuccin:java',
+  '.kt': 'catppuccin:kotlin',
+  '.kts': 'catppuccin:kotlin',
+  '.c': 'catppuccin:c',
+  '.h': 'catppuccin:c-header',
+  '.cpp': 'catppuccin:cpp',
+  '.hpp': 'catppuccin:cpp-header',
+  '.cc': 'catppuccin:cpp',
+  '.cxx': 'catppuccin:cpp',
+  '.cs': 'catppuccin:csharp',
+  '.rb': 'catppuccin:ruby',
+  '.erb': 'catppuccin:ruby',
+  '.php': 'catppuccin:php',
+  '.dart': 'catppuccin:dart',
+  '.yaml': 'catppuccin:yaml',
+  '.yml': 'catppuccin:yaml',
+  '.toml': 'catppuccin:toml',
+  '.md': 'catppuccin:markdown',
+  '.mdx': 'catppuccin:markdown-mdx',
+  '.html': 'catppuccin:html',
+  '.htm': 'catppuccin:html',
+  '.css': 'catppuccin:css',
+  '.scss': 'catppuccin:sass',
+  '.sass': 'catppuccin:sass',
+  '.less': 'catppuccin:less',
+  '.vue': 'catppuccin:vue',
+  '.svelte': 'catppuccin:svelte',
+  '.json': 'catppuccin:json',
+  '.jsonc': 'catppuccin:json',
+  '.json5': 'catppuccin:json',
+  '.graphql': 'catppuccin:graphql',
+  '.gql': 'catppuccin:graphql',
+  '.lua': 'catppuccin:lua',
+  '.r': 'catppuccin:r',
+  '.scala': 'catppuccin:scala',
+  '.zig': 'catppuccin:zig',
+  '.ex': 'catppuccin:elixir',
+  '.exs': 'catppuccin:elixir',
+  '.astro': 'catppuccin:astro',
+  '.sh': 'catppuccin:bash',
+  '.bash': 'catppuccin:bash',
+  '.zsh': 'catppuccin:bash',
+  '.fish': 'catppuccin:bash',
+  '.ps1': 'catppuccin:powershell',
+  '.bat': 'catppuccin:batch',
+  '.sql': 'catppuccin:sql',
+  '.xml': 'catppuccin:xml',
+  '.svg': 'catppuccin:svg',
+  '.png': 'catppuccin:image',
+  '.jpg': 'catppuccin:image',
+  '.jpeg': 'catppuccin:image',
+  '.gif': 'catppuccin:image',
+  '.webp': 'catppuccin:image',
+  '.ico': 'catppuccin:image',
+  '.mp4': 'catppuccin:video',
+  '.webm': 'catppuccin:video',
+  '.mov': 'catppuccin:video',
+  '.mp3': 'catppuccin:audio',
+  '.wav': 'catppuccin:audio',
+  '.ogg': 'catppuccin:audio',
+  '.flac': 'catppuccin:audio',
+  '.zip': 'catppuccin:zip',
+  '.tar': 'catppuccin:zip',
+  '.gz': 'catppuccin:zip',
+  '.7z': 'catppuccin:zip',
+  '.rar': 'catppuccin:zip',
+  '.pdf': 'catppuccin:pdf',
+  '.txt': 'catppuccin:text',
+  '.env': 'catppuccin:env',
+  '.clj': 'catppuccin:clojure',
+  '.cljs': 'catppuccin:clojure',
+  '.erl': 'catppuccin:erlang',
+  '.hs': 'catppuccin:haskell',
+  '.pl': 'catppuccin:perl',
+  '.pm': 'catppuccin:perl',
+  '.ttf': 'catppuccin:font',
+  '.otf': 'catppuccin:font',
+  '.woff': 'catppuccin:font',
+  '.woff2': 'catppuccin:font'
+}
+
+/** Special filename → Catppuccin icon name */
+export const catppuccinSpecialMap: Record<string, string> = {
+  'package.json': 'catppuccin:package-json',
+  'package-lock.json': 'catppuccin:npm-lock',
+  'pnpm-lock.yaml': 'catppuccin:pnpm-lock',
+  'yarn.lock': 'catppuccin:yarn-lock',
+  'bun.lockb': 'catppuccin:bun-lock',
+  'dockerfile': 'catppuccin:docker',
+  'docker-compose.yml': 'catppuccin:docker-compose',
+  'docker-compose.yaml': 'catppuccin:docker-compose',
+  '.dockerignore': 'catppuccin:docker-ignore',
+  'makefile': 'catppuccin:makefile',
+  'tsconfig.json': 'catppuccin:typescript-config',
+  'jsconfig.json': 'catppuccin:javascript-config',
+  '.eslintrc': 'catppuccin:eslint',
+  '.eslintrc.js': 'catppuccin:eslint',
+  '.eslintrc.json': 'catppuccin:eslint',
+  '.eslintrc.cjs': 'catppuccin:eslint',
+  'eslint.config.js': 'catppuccin:eslint',
+  'eslint.config.mjs': 'catppuccin:eslint',
+  '.prettierrc': 'catppuccin:prettier',
+  '.prettierrc.js': 'catppuccin:prettier',
+  '.prettierrc.json': 'catppuccin:prettier',
+  '.gitignore': 'catppuccin:git',
+  '.gitattributes': 'catppuccin:git',
+  '.editorconfig': 'catppuccin:editorconfig',
+  'license': 'catppuccin:license',
+  'readme.md': 'catppuccin:readme',
+  'changelog.md': 'catppuccin:changelog',
+  'cargo.toml': 'catppuccin:cargo',
+  'cargo.lock': 'catppuccin:cargo-lock',
+  'go.mod': 'catppuccin:go-mod',
+  'vite.config.ts': 'catppuccin:vite',
+  'vite.config.js': 'catppuccin:vite',
+  'vitest.config.ts': 'catppuccin:vitest',
+  '.npmrc': 'catppuccin:npm',
+  'tailwind.config.js': 'catppuccin:tailwindcss',
+  'tailwind.config.ts': 'catppuccin:tailwindcss',
+  'postcss.config.js': 'catppuccin:postcss',
+  'postcss.config.cjs': 'catppuccin:postcss',
+  '.babelrc': 'catppuccin:babel',
+  'babel.config.js': 'catppuccin:babel'
+}
+
+/** Folder name → Catppuccin icon name (closed) */
+export const catppuccinFolderMap: Record<string, { closed: string; open: string }> = {
+  'src': { closed: 'catppuccin:folder-src', open: 'catppuccin:folder-src-open' },
+  'lib': { closed: 'catppuccin:folder-lib', open: 'catppuccin:folder-lib-open' },
+  'dist': { closed: 'catppuccin:folder-dist', open: 'catppuccin:folder-dist-open' },
+  'build': { closed: 'catppuccin:folder-dist', open: 'catppuccin:folder-dist-open' },
+  'node_modules': { closed: 'catppuccin:folder-node', open: 'catppuccin:folder-node-open' },
+  'components': { closed: 'catppuccin:folder-components', open: 'catppuccin:folder-components-open' },
+  'hooks': { closed: 'catppuccin:folder-hooks', open: 'catppuccin:folder-hooks-open' },
+  'utils': { closed: 'catppuccin:folder-utils', open: 'catppuccin:folder-utils-open' },
+  'assets': { closed: 'catppuccin:folder-assets', open: 'catppuccin:folder-assets-open' },
+  'images': { closed: 'catppuccin:folder-images', open: 'catppuccin:folder-images-open' },
+  'styles': { closed: 'catppuccin:folder-styles', open: 'catppuccin:folder-styles-open' },
+  'docs': { closed: 'catppuccin:folder-docs', open: 'catppuccin:folder-docs-open' },
+  'test': { closed: 'catppuccin:folder-tests', open: 'catppuccin:folder-tests-open' },
+  'tests': { closed: 'catppuccin:folder-tests', open: 'catppuccin:folder-tests-open' },
+  '__tests__': { closed: 'catppuccin:folder-tests', open: 'catppuccin:folder-tests-open' },
+  'config': { closed: 'catppuccin:folder-config', open: 'catppuccin:folder-config-open' },
+  'public': { closed: 'catppuccin:folder-public', open: 'catppuccin:folder-public-open' },
+  'scripts': { closed: 'catppuccin:folder-scripts', open: 'catppuccin:folder-scripts-open' },
+  'types': { closed: 'catppuccin:folder-types', open: 'catppuccin:folder-types-open' },
+  '.git': { closed: 'catppuccin:folder-git', open: 'catppuccin:folder-git-open' },
+  '.github': { closed: 'catppuccin:folder-github', open: 'catppuccin:folder-github-open' },
+  '.vscode': { closed: 'catppuccin:folder-vscode', open: 'catppuccin:folder-vscode-open' },
+  'docker': { closed: 'catppuccin:folder-docker', open: 'catppuccin:folder-docker-open' },
+  'api': { closed: 'catppuccin:folder-api', open: 'catppuccin:folder-api-open' },
+  'server': { closed: 'catppuccin:folder-server', open: 'catppuccin:folder-server-open' },
+  'client': { closed: 'catppuccin:folder-client', open: 'catppuccin:folder-client-open' },
+  'shared': { closed: 'catppuccin:folder-shared', open: 'catppuccin:folder-shared-open' },
+  'routes': { closed: 'catppuccin:folder-routes', open: 'catppuccin:folder-routes-open' },
+  'middleware': { closed: 'catppuccin:folder-middleware', open: 'catppuccin:folder-middleware-open' },
+  'plugins': { closed: 'catppuccin:folder-plugins', open: 'catppuccin:folder-plugins-open' },
+  'packages': { closed: 'catppuccin:folder-packages', open: 'catppuccin:folder-packages-open' },
+  'prisma': { closed: 'catppuccin:folder-prisma', open: 'catppuccin:folder-prisma-open' },
+  'database': { closed: 'catppuccin:folder-database', open: 'catppuccin:folder-database-open' },
+  'db': { closed: 'catppuccin:folder-database', open: 'catppuccin:folder-database-open' }
+}
+
+/**
+ * Look up a Catppuccin icon name for a file.
+ * Returns the iconify icon string (e.g. 'catppuccin:typescript') or null.
+ */
+export function getCatppuccinIcon(
+  name: string,
+  extension: string | null,
+  isDirectory: boolean,
+  isExpanded?: boolean
+): string | null {
+  if (isDirectory) {
+    const folder = catppuccinFolderMap[name.toLowerCase()]
+    if (folder) return isExpanded ? folder.open : folder.closed
+    return isExpanded ? 'catppuccin:folder-open' : 'catppuccin:folder'
+  }
+
+  const lowerName = name.toLowerCase()
+  const special = catppuccinSpecialMap[lowerName]
+  if (special) return special
+
+  if (lowerName.startsWith('.env')) return 'catppuccin:env'
+
+  const ext = extension?.toLowerCase() ?? null
+  if (ext) {
+    const icon = catppuccinExtMap[ext]
+    if (icon) return icon
+  }
+
+  return null // fallback to legacy icons
+}
+
+/**
+ * Demo4-style colored text labels for language/code files.
+ * Each extension maps to a short abbreviation and a Tailwind color class.
+ */
+export const textLabelMap: Record<string, { label: string; colorClass: string }> = {
   // TypeScript
-  '.ts': typescriptIcon,
-  '.mts': typescriptIcon,
-  '.cts': typescriptIcon,
+  '.ts': { label: 'TS', colorClass: 'text-blue-500' },
+  '.mts': { label: 'TS', colorClass: 'text-blue-500' },
+  '.cts': { label: 'TS', colorClass: 'text-blue-500' },
 
   // React (TSX/JSX)
-  '.tsx': reactIcon,
-  '.jsx': reactIcon,
+  '.tsx': { label: 'TX', colorClass: 'text-blue-400' },
+  '.jsx': { label: 'JX', colorClass: 'text-yellow-400' },
 
   // JavaScript
-  '.js': javascriptIcon,
-  '.mjs': javascriptIcon,
-  '.cjs': javascriptIcon,
+  '.js': { label: 'JS', colorClass: 'text-yellow-500' },
+  '.mjs': { label: 'JS', colorClass: 'text-yellow-500' },
+  '.cjs': { label: 'JS', colorClass: 'text-yellow-500' },
 
   // Python
-  '.py': pythonIcon,
-  '.pyi': pythonIcon,
-  '.pyx': pythonIcon,
+  '.py': { label: 'Py', colorClass: 'text-sky-500' },
+  '.pyi': { label: 'Py', colorClass: 'text-sky-500' },
+  '.pyx': { label: 'Py', colorClass: 'text-sky-500' },
 
   // Go
-  '.go': goIcon,
+  '.go': { label: 'Go', colorClass: 'text-cyan-500' },
 
   // Rust
-  '.rs': rustIcon,
+  '.rs': { label: 'Rs', colorClass: 'text-orange-500' },
 
   // Swift
-  '.swift': swiftIcon,
+  '.swift': { label: 'Sw', colorClass: 'text-orange-400' },
 
   // Java
-  '.java': javaIcon,
+  '.java': { label: 'Jv', colorClass: 'text-red-500' },
 
   // Kotlin
-  '.kt': kotlinIcon,
-  '.kts': kotlinIcon,
+  '.kt': { label: 'Kt', colorClass: 'text-violet-500' },
+  '.kts': { label: 'Kt', colorClass: 'text-violet-500' },
 
   // C
-  '.c': cIcon,
-  '.h': cIcon,
+  '.c': { label: 'C', colorClass: 'text-gray-500' },
+  '.h': { label: 'H', colorClass: 'text-gray-500' },
 
   // C++
-  '.cpp': cppIcon,
-  '.hpp': cppIcon,
-  '.cc': cppIcon,
-  '.cxx': cppIcon,
+  '.cpp': { label: 'C+', colorClass: 'text-blue-600' },
+  '.hpp': { label: 'H+', colorClass: 'text-blue-600' },
+  '.cc': { label: 'C+', colorClass: 'text-blue-600' },
+  '.cxx': { label: 'C+', colorClass: 'text-blue-600' },
 
   // C#
-  '.cs': csharpIcon,
+  '.cs': { label: 'C#', colorClass: 'text-green-500' },
 
   // Ruby
-  '.rb': rubyIcon,
-  '.erb': rubyIcon,
+  '.rb': { label: 'Rb', colorClass: 'text-red-500' },
+  '.erb': { label: 'Rb', colorClass: 'text-red-500' },
 
   // PHP
-  '.php': phpIcon,
+  '.php': { label: 'PH', colorClass: 'text-indigo-400' },
 
   // Dart
-  '.dart': dartIcon,
+  '.dart': { label: 'Dt', colorClass: 'text-teal-400' },
 
   // YAML
-  '.yaml': yamlIcon,
-  '.yml': yamlIcon,
+  '.yaml': { label: 'YM', colorClass: 'text-rose-400' },
+  '.yml': { label: 'YM', colorClass: 'text-rose-400' },
 
   // TOML
-  '.toml': tomlIcon,
+  '.toml': { label: 'TL', colorClass: 'text-orange-400' },
 
   // Markdown
-  '.md': markdownIcon,
-  '.mdx': markdownIcon,
+  '.md': { label: 'MD', colorClass: 'text-blue-400' },
+  '.mdx': { label: 'MX', colorClass: 'text-blue-400' },
 
   // HTML
-  '.html': htmlIcon,
-  '.htm': htmlIcon,
+  '.html': { label: 'HT', colorClass: 'text-orange-500' },
+  '.htm': { label: 'HT', colorClass: 'text-orange-500' },
 
   // CSS
-  '.css': cssIcon,
+  '.css': { label: 'CS', colorClass: 'text-blue-500' },
 
   // Sass/SCSS/Less
-  '.scss': sassIcon,
-  '.sass': sassIcon,
-  '.less': sassIcon,
+  '.scss': { label: 'SC', colorClass: 'text-pink-500' },
+  '.sass': { label: 'SA', colorClass: 'text-pink-500' },
+  '.less': { label: 'LS', colorClass: 'text-pink-500' },
 
   // Vue
-  '.vue': vueIcon,
+  '.vue': { label: 'Vu', colorClass: 'text-green-500' },
 
   // Svelte
-  '.svelte': svelteIcon,
+  '.svelte': { label: 'Sv', colorClass: 'text-orange-600' },
 
   // JSON
-  '.json': jsonIcon,
-  '.jsonc': jsonIcon,
-  '.json5': jsonIcon,
+  '.json': { label: 'JN', colorClass: 'text-amber-500' },
+  '.jsonc': { label: 'JN', colorClass: 'text-amber-500' },
+  '.json5': { label: 'JN', colorClass: 'text-amber-500' },
 
   // GraphQL
-  '.graphql': graphqlIcon,
-  '.graphqls': graphqlIcon,
-  '.gql': graphqlIcon,
+  '.graphql': { label: 'GQ', colorClass: 'text-pink-500' },
+  '.graphqls': { label: 'GQ', colorClass: 'text-pink-500' },
+  '.gql': { label: 'GQ', colorClass: 'text-pink-500' },
 
   // Lua
-  '.lua': luaIcon,
+  '.lua': { label: 'Lu', colorClass: 'text-blue-600' },
 
   // R
-  '.r': rLangIcon,
+  '.r': { label: 'R', colorClass: 'text-blue-500' },
 
   // Scala
-  '.scala': scalaIcon,
-  '.sc': scalaIcon,
+  '.scala': { label: 'Sc', colorClass: 'text-red-500' },
+  '.sc': { label: 'Sc', colorClass: 'text-red-500' },
 
   // Zig
-  '.zig': zigIcon,
+  '.zig': { label: 'Zg', colorClass: 'text-orange-400' },
 
   // Elixir
-  '.ex': elixirIcon,
-  '.exs': elixirIcon,
+  '.ex': { label: 'Ex', colorClass: 'text-purple-500' },
+  '.exs': { label: 'Ex', colorClass: 'text-purple-500' },
 
   // Astro
-  '.astro': astroIcon,
+  '.astro': { label: 'As', colorClass: 'text-orange-500' },
 
   // Shell
-  '.sh': shellIcon,
-  '.bash': shellIcon,
-  '.zsh': shellIcon,
-  '.fish': shellIcon,
-  '.ps1': shellIcon,
-  '.bat': shellIcon,
-  '.cmd': shellIcon,
+  '.sh': { label: 'SH', colorClass: 'text-green-600' },
+  '.bash': { label: 'SH', colorClass: 'text-green-600' },
+  '.zsh': { label: 'SH', colorClass: 'text-green-600' },
+  '.fish': { label: 'SH', colorClass: 'text-green-600' },
+  '.ps1': { label: 'PS', colorClass: 'text-blue-500' },
+  '.bat': { label: 'BT', colorClass: 'text-gray-500' },
+  '.cmd': { label: 'CM', colorClass: 'text-gray-500' },
 
   // SQL
-  '.sql': sqlIcon,
-  '.sqlite': sqlIcon,
+  '.sql': { label: 'SQ', colorClass: 'text-blue-400' },
+  '.sqlite': { label: 'SQ', colorClass: 'text-blue-400' },
 
   // XML
-  '.xml': xmlIcon,
-  '.xsl': xmlIcon,
-  '.xslt': xmlIcon,
+  '.xml': { label: 'XM', colorClass: 'text-orange-400' },
+  '.xsl': { label: 'XM', colorClass: 'text-orange-400' },
+  '.xslt': { label: 'XM', colorClass: 'text-orange-400' },
 
   // Haskell
-  '.hs': haskellIcon,
-  '.lhs': haskellIcon,
+  '.hs': { label: 'Hs', colorClass: 'text-purple-500' },
+  '.lhs': { label: 'Hs', colorClass: 'text-purple-500' },
 
   // Erlang
-  '.erl': erlangIcon,
-  '.hrl': erlangIcon,
+  '.erl': { label: 'Er', colorClass: 'text-red-400' },
+  '.hrl': { label: 'Er', colorClass: 'text-red-400' },
 
   // Clojure
-  '.clj': clojureIcon,
-  '.cljs': clojureIcon,
-  '.cljc': clojureIcon,
-  '.edn': clojureIcon,
+  '.clj': { label: 'Cl', colorClass: 'text-green-500' },
+  '.cljs': { label: 'Cl', colorClass: 'text-green-500' },
+  '.cljc': { label: 'Cl', colorClass: 'text-green-500' },
+  '.edn': { label: 'Cl', colorClass: 'text-green-500' },
 
   // Perl
-  '.pl': perlIcon,
-  '.pm': perlIcon
+  '.pl': { label: 'Pl', colorClass: 'text-blue-400' },
+  '.pm': { label: 'Pl', colorClass: 'text-blue-400' }
 }
 
 /** Maps extensions to lucide icon + color for non-language file types */
@@ -257,7 +435,7 @@ export const lucideFallbackMap: Record<string, { icon: LucideIcon; color: string
   '.doc': { icon: BookOpen, color: 'text-blue-500' },
   '.docx': { icon: BookOpen, color: 'text-blue-500' },
 
-  // Config (no language SVG)
+  // Config (no language text label)
   '.ini': { icon: Settings, color: 'text-gray-500' },
   '.styl': { icon: Settings, color: 'text-pink-500' },
   '.stylus': { icon: Settings, color: 'text-pink-500' },
@@ -272,13 +450,12 @@ export const lucideFallbackMap: Record<string, { icon: LucideIcon; color: string
 }
 
 interface SpecialFileEntry {
-  svg?: string
   lucide?: LucideIcon
   color?: string
 }
 
 /**
- * Maps special filenames (lowercase) to SVG or lucide icon info.
+ * Maps special filenames (lowercase) to lucide icon info.
  * All keys are lowercase — lookup normalizes via toLowerCase().
  */
 export const specialFileMap: Record<string, SpecialFileEntry> = {
@@ -287,11 +464,11 @@ export const specialFileMap: Record<string, SpecialFileEntry> = {
   'pnpm-lock.yaml': { lucide: Lock, color: 'text-yellow-600' },
   'yarn.lock': { lucide: Lock, color: 'text-yellow-600' },
   'bun.lockb': { lucide: Lock, color: 'text-yellow-600' },
-  dockerfile: { svg: dockerIcon },
-  'docker-compose.yml': { svg: dockerIcon },
-  'docker-compose.yaml': { svg: dockerIcon },
+  dockerfile: { lucide: Container, color: 'text-blue-500' },
+  'docker-compose.yml': { lucide: Container, color: 'text-blue-500' },
+  'docker-compose.yaml': { lucide: Container, color: 'text-blue-500' },
   '.dockerignore': { lucide: Settings, color: 'text-muted-foreground' },
-  makefile: { svg: shellIcon },
+  makefile: { lucide: Terminal, color: 'text-green-600' },
   'tsconfig.json': { lucide: Settings, color: 'text-blue-500' },
   'jsconfig.json': { lucide: Settings, color: 'text-yellow-500' },
   '.eslintrc': { lucide: Settings, color: 'text-purple-500' },
@@ -306,9 +483,7 @@ export const specialFileMap: Record<string, SpecialFileEntry> = {
   '.gitignore': { lucide: Settings, color: 'text-orange-500' },
   '.gitattributes': { lucide: Settings, color: 'text-orange-500' },
   '.editorconfig': { lucide: Settings, color: 'text-muted-foreground' },
-  'readme.md': { svg: markdownIcon },
   license: { lucide: FileText, color: 'text-gray-400' },
-  'changelog.md': { svg: markdownIcon },
   '.env': { lucide: Lock, color: 'text-yellow-600' },
   '.env.local': { lucide: Lock, color: 'text-yellow-600' },
   '.env.development': { lucide: Lock, color: 'text-yellow-600' },
@@ -317,18 +492,16 @@ export const specialFileMap: Record<string, SpecialFileEntry> = {
 }
 
 export type FileIconInfo =
-  | { type: 'svg'; src: string }
-  | { type: 'lucide'; icon: LucideIcon; colorClass: string; containerClass?: string }
+  | { type: 'text'; label: string; colorClass: string }
+  | { type: 'lucide'; icon: LucideIcon; colorClass: string }
 
 /** Resolves a special file entry to a FileIconInfo, or null if entry is empty */
 function resolveSpecial(entry: SpecialFileEntry): FileIconInfo | null {
-  if (entry.svg) return { type: 'svg', src: entry.svg }
   if (entry.lucide) {
     return {
       type: 'lucide',
       icon: entry.lucide,
-      colorClass: entry.color ?? 'text-muted-foreground',
-      containerClass: 'bg-background/70 ring-1 ring-border/40'
+      colorClass: entry.color ?? 'text-muted-foreground'
     }
   }
   return null
@@ -336,7 +509,7 @@ function resolveSpecial(entry: SpecialFileEntry): FileIconInfo | null {
 
 /**
  * Determines the appropriate icon for a file based on its name, extension, and type.
- * Returns either an SVG asset URL or a lucide icon with color class.
+ * Returns either a colored text label or a lucide icon with color class.
  */
 export function getFileIconInfo(
   name: string,
@@ -349,8 +522,7 @@ export function getFileIconInfo(
     return {
       type: 'lucide',
       icon: isExpanded ? FolderOpen : Folder,
-      colorClass: 'text-amber-600 dark:text-amber-300',
-      containerClass: 'bg-amber-500/12 ring-1 ring-amber-500/22'
+      colorClass: 'text-amber-600 dark:text-amber-300'
     }
   }
 
@@ -370,24 +542,22 @@ export function getFileIconInfo(
     return {
       type: 'lucide',
       icon: Lock,
-      colorClass: 'text-yellow-600',
-      containerClass: 'bg-background/70 ring-1 ring-border/40'
+      colorClass: 'text-yellow-600'
     }
   }
 
-  // Check SVG icon by extension
+  // Check text label by extension (language/code files)
   if (ext) {
-    const svgSrc = svgIconMap[ext]
-    if (svgSrc) return { type: 'svg', src: svgSrc }
+    const textLabel = textLabelMap[ext]
+    if (textLabel) return { type: 'text', ...textLabel }
 
-    // Check lucide fallback by extension
+    // Check lucide fallback by extension (media, archives, etc.)
     const fallback = lucideFallbackMap[ext]
     if (fallback) {
       return {
         type: 'lucide',
         icon: fallback.icon,
-        colorClass: fallback.color,
-        containerClass: 'bg-background/70 ring-1 ring-border/40'
+        colorClass: fallback.color
       }
     }
   }
@@ -396,7 +566,6 @@ export function getFileIconInfo(
   return {
     type: 'lucide',
     icon: File,
-    colorClass: 'text-muted-foreground',
-    containerClass: 'bg-background/70 ring-1 ring-border/40'
+    colorClass: 'text-muted-foreground'
   }
 }

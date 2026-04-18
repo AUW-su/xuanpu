@@ -3,10 +3,12 @@ export type UsageAnalyticsEngine = 'claude-code' | 'codex'
 export type UsageAnalyticsEngineFilter = 'all' | UsageAnalyticsEngine
 
 export type UsageAnalyticsRange = 'today' | '7d' | '30d' | 'all'
+export type UsageAnalyticsSessionStatusFilter = 'all' | 'active' | 'archived'
 
 export interface UsageAnalyticsFilters {
   range: UsageAnalyticsRange
   engine: UsageAnalyticsEngineFilter
+  sessionStatus: UsageAnalyticsSessionStatusFilter
 }
 
 export interface UsageAnalyticsEngineSummary {
@@ -49,6 +51,7 @@ export interface UsageAnalyticsSessionRow {
   project_path: string
   worktree_name: string | null
   model_label: string | null
+  model_labels: string[]
   total_cost: number
   total_tokens: number
   input_tokens: number
@@ -112,6 +115,7 @@ export interface UsageAnalyticsSessionSummary {
   cache_read_tokens: number
   duration_seconds: number
   last_used_at: string | null
+  model_labels: string[]
   latest_model_label: string | null
   partial: boolean
 }

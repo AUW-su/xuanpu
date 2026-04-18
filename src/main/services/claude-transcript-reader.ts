@@ -70,7 +70,8 @@ const MAX_TAIL_LINES = 1200
 const LARGE_FILE_THRESHOLD = 2 * 1024 * 1024
 
 function isContextContinuationSummary(text: string): boolean {
-  return text.trimStart().startsWith(CONTINUATION_PREFIX)
+  const trimmed = text.trimStart().replace(/^(?:<[^>]+>\s*)+/, '')
+  return trimmed.startsWith(CONTINUATION_PREFIX)
 }
 
 function extractTextFromContent(content: ClaudeContentBlock[] | string | undefined): string {
@@ -365,6 +366,15 @@ function shouldSkipEntry(entry: ClaudeJsonlEntry): boolean {
   if (entry.type === 'user') {
     const text = extractTextFromContent(entry.message?.content)
     if (isContextContinuationSummary(text)) return true
+
+    // Filter synthetic system messages wrapped in XML tags
+    const trimmed = text.trimStart()
+    if (
+      trimmed.startsWith('<local-command-stdout>') ||
+      trimmed.startsWith('<system-reminder>')
+    ) {
+      return true
+    }
 
     const content = Array.isArray(entry.message?.content) ? entry.message.content : []
     if (content.length > 0 && content.every((block) => block.type === 'tool_result')) {

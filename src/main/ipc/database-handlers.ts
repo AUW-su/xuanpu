@@ -268,7 +268,12 @@ export function registerDatabaseHandlers(): void {
   })
 
   ipcMain.handle('db:session:delete', (_event, id: string) => {
-    return getDatabase().deleteSession(id)
+    // Soft-archive instead of hard delete — sessions are user assets
+    return getDatabase().archiveSession(id)
+  })
+
+  ipcMain.handle('db:session:restore', (_event, id: string) => {
+    return getDatabase().restoreSession(id)
   })
 
   ipcMain.handle('db:session:getByConnection', (_event, connectionId: string) => {

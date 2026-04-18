@@ -192,6 +192,7 @@ export class DatabaseService {
       'TEXT DEFAULT NULL REFERENCES connections(id) ON DELETE SET NULL'
     )
     this.safeAddColumn('sessions', 'agent_sdk', "TEXT NOT NULL DEFAULT 'opencode'")
+    this.safeAddColumn('sessions', 'color', 'TEXT DEFAULT NULL')
     this.safeAddColumn('connections', 'color', 'TEXT DEFAULT NULL')
     this.safeAddColumn('connections', 'custom_name', 'TEXT DEFAULT NULL')
     this.safeAddColumn('worktrees', 'attachments', "TEXT DEFAULT '[]'")
@@ -965,6 +966,10 @@ export class DatabaseService {
       updates.push('model_variant = ?')
       values.push(data.model_variant)
     }
+    if (data.color !== undefined) {
+      updates.push('color = ?')
+      values.push(data.color)
+    }
     if (data.completed_at !== undefined) {
       updates.push('completed_at = ?')
       values.push(data.completed_at)
@@ -976,6 +981,37 @@ export class DatabaseService {
     return this.getSession(id)
   }
 
+  /**
+   * Soft-archive a session. Sets status to 'archived' instead of deleting.
+   * Session messages and activities are preserved.
+   */
+  archiveSession(id: string): boolean {
+    const db = this.getDb()
+    const result = db
+      .prepare(
+        "UPDATE sessions SET status = 'archived', completed_at = COALESCE(completed_at, ?) WHERE id = ?"
+      )
+      .run(new Date().toISOString(), id)
+    return result.changes > 0
+  }
+
+  restoreSession(id: string): Session | null {
+    const db = this.getDb()
+    const existing = this.getSession(id)
+    if (!existing) return null
+
+    db.prepare("UPDATE sessions SET status = 'active', updated_at = ? WHERE id = ?").run(
+      new Date().toISOString(),
+      id
+    )
+
+    return this.getSession(id)
+  }
+
+  /**
+   * @internal Hard-delete a session and all associated data (CASCADE).
+   * Only for data cleanup scripts — never exposed via IPC.
+   */
   deleteSession(id: string): boolean {
     const db = this.getDb()
     const result = db.prepare('DELETE FROM sessions WHERE id = ?').run(id)
@@ -992,6 +1028,7 @@ export class DatabaseService {
         s.*,
         w.name as worktree_name,
         w.branch_name as worktree_branch_name,
+        w.status as worktree_status,
         p.name as project_name
       FROM sessions s
       LEFT JOIN worktrees w ON s.worktree_id = w.id
@@ -1017,6 +1054,14 @@ export class DatabaseService {
     if (options.worktree_id) {
       conditions.push('s.worktree_id = ?')
       values.push(options.worktree_id)
+    }
+
+    if (options.statusFilter === 'active') {
+      conditions.push("s.status = 'active'")
+    } else if (options.statusFilter === 'archived') {
+      conditions.push("s.status = 'archived'")
+    } else if (options.statusFilter === 'closed') {
+      conditions.push("s.status = 'completed'")
     }
 
     if (options.dateFrom) {
@@ -1203,6 +1248,22 @@ export class DatabaseService {
 
   replaceSessionMessages(sessionId: string, messages: SessionMessageCreate[]): SessionMessage[] {
     const db = this.getDb()
+
+    // Safety: refuse to wipe existing messages with an empty array.
+    // This guards against accidental data loss from empty in-memory caches.
+    if (messages.length === 0) {
+      const existing = db
+        .prepare('SELECT COUNT(*) as cnt FROM session_messages WHERE session_id = ?')
+        .get(sessionId) as { cnt: number } | undefined
+      if (existing && existing.cnt > 0) {
+        console.error(
+          `[Database] replaceSessionMessages: refusing to delete ${existing.cnt} existing messages with empty array for session ${sessionId}`
+        )
+        return this.getSessionMessages(sessionId)
+      }
+      return []
+    }
+
     const tx = db.transaction(() => {
       db.prepare('DELETE FROM session_messages WHERE session_id = ?').run(sessionId)
       const created: SessionMessage[] = []
@@ -1433,13 +1494,15 @@ export class DatabaseService {
   }
 
   getUsageAnalyticsSessions(
-    agentSdks?: Array<'claude-code' | 'codex'>
+    agentSdks?: Array<'claude-code' | 'codex'>,
+    sessionStatus: 'all' | 'active' | 'archived' = 'all'
   ): Array<
     Session & {
       project_name: string
       project_path: string
       worktree_name: string | null
       worktree_path: string | null
+      worktree_status: 'active' | 'archived' | null
     }
   > {
     const db = this.getDb()
@@ -1452,6 +1515,12 @@ export class DatabaseService {
       values.push(...agentSdks)
     }
 
+    if (sessionStatus === 'active') {
+      conditions.push("s.status = 'active'")
+    } else if (sessionStatus === 'archived') {
+      conditions.push("s.status = 'archived'")
+    }
+
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
     return db
@@ -1461,10 +1530,12 @@ export class DatabaseService {
           p.name AS project_name,
           p.path AS project_path,
           w.name AS worktree_name,
-          w.path AS worktree_path
+          w.status AS worktree_status,
+          COALESCE(w.path, c.path) AS worktree_path
         FROM sessions s
         JOIN projects p ON s.project_id = p.id
         LEFT JOIN worktrees w ON s.worktree_id = w.id
+        LEFT JOIN connections c ON s.connection_id = c.id
         ${where}
         ORDER BY s.updated_at DESC`
       )
@@ -1474,6 +1545,7 @@ export class DatabaseService {
         project_path: string
         worktree_name: string | null
         worktree_path: string | null
+        worktree_status: 'active' | 'archived' | null
       }
     >
   }

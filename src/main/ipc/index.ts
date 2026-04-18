@@ -1,7 +1,6 @@
 export { registerDatabaseHandlers } from './database-handlers'
 export { registerProjectHandlers } from './project-handlers'
 export { registerWorktreeHandlers } from './worktree-handlers'
-export { registerOpenCodeHandlers, cleanupOpenCode } from './opencode-handlers'
 export { registerAgentHandlers, cleanupAgentHandlers } from './agent-handlers'
 export { registerFileTreeHandlers, cleanupFileTreeWatchers } from './file-tree-handlers'
 export {
@@ -16,3 +15,4 @@ export { registerTerminalHandlers, cleanupTerminals } from './terminal-handlers'
 export { registerUpdaterHandlers } from './updater-handlers'
 export { registerConnectionHandlers } from './connection-handlers'
 export { registerUsageHandlers } from './usage-handlers'
+export { registerTimelineHandlers } from './session-timeline-handlers'

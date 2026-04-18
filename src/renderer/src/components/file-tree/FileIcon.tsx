@@ -1,5 +1,10 @@
 import { cn } from '@/lib/utils'
-import { getFileIconInfo } from '@/lib/file-icons'
+import { getFileIconInfo, getCatppuccinIcon } from '@/lib/file-icons'
+import { Icon, addCollection } from '@iconify/react'
+import catppuccinIcons from '@iconify-json/catppuccin/icons.json'
+
+// Register Catppuccin icons locally so @iconify/react doesn't need API calls
+addCollection(catppuccinIcons)
 
 interface FileIconProps {
   name: string
@@ -16,31 +21,50 @@ export function FileIcon({
   isExpanded = false,
   className
 }: FileIconProps): React.JSX.Element {
-  const info = getFileIconInfo(name, extension, isDirectory, isExpanded)
-
-  if (info.type === 'svg') {
+  // Try Catppuccin icon first
+  const catIcon = getCatppuccinIcon(name, extension, isDirectory, isExpanded)
+  if (catIcon) {
     return (
-      <img
-        src={info.src}
-        alt=""
+      <span
+        className={cn(
+          'inline-flex h-4 w-4 flex-shrink-0 items-center justify-center catppuccin-icon',
+          className
+        )}
         aria-hidden="true"
-        draggable={false}
-        className={cn('h-4 w-4 flex-shrink-0', className)}
-      />
+      >
+        <Icon icon={catIcon} width={16} height={16} />
+      </span>
     )
   }
 
-  const Icon = info.icon
+  // Fallback to legacy text labels / lucide icons
+  const info = getFileIconInfo(name, extension, isDirectory, isExpanded)
+
+  if (info.type === 'text') {
+    return (
+      <span
+        className={cn(
+          'inline-flex h-4 w-4 flex-shrink-0 items-center justify-center text-[10px] font-bold leading-none',
+          info.colorClass,
+          className
+        )}
+        aria-hidden="true"
+      >
+        {info.label}
+      </span>
+    )
+  }
+
+  const LucideIcon = info.icon
   return (
     <span
       className={cn(
-        'inline-flex size-[18px] flex-shrink-0 items-center justify-center rounded-[6px]',
-        info.containerClass,
+        'inline-flex h-4 w-4 flex-shrink-0 items-center justify-center',
         className
       )}
       aria-hidden="true"
     >
-      <Icon className={cn('h-[13px] w-[13px]', info.colorClass)} />
+      <LucideIcon className={cn('h-[14px] w-[14px]', info.colorClass)} />
     </span>
   )
 }

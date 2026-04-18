@@ -4,22 +4,27 @@ import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 
 import { createLogger } from './logger'
+import { asObject, asString } from './codex-utils'
 import { notificationService } from './notification-service'
 import { loadClaudeSDK } from './claude-sdk-loader'
 import { maybeWithClaudeProjectMemory } from './claude-project-memory-loader'
-import type { AgentSdkCapabilities, AgentSdkImplementer } from './agent-sdk-types'
+import type { AgentSdkCapabilities, AgentSdkImplementer } from './agent-runtime-types'
 import type { AgentRuntimeAdapter } from './agent-runtime-types'
-import { CLAUDE_CODE_CAPABILITIES } from './agent-sdk-types'
+import { CLAUDE_CODE_CAPABILITIES } from './agent-runtime-types'
 import type { DatabaseService } from '../db/database'
 import { readClaudeTranscript, translateEntry } from './claude-transcript-reader'
 import { generateSessionTitle } from './claude-session-title'
 import { autoRenameWorktreeBranch } from './git-service'
 import { getEventBus } from '../../server/event-bus'
 import { Options, PermissionMode } from '@anthropic-ai/claude-agent-sdk'
+import type { SDKControlGetContextUsageResponse } from '@anthropic-ai/claude-agent-sdk'
 import { CommandFilterService, type CommandFilterSettings } from './command-filter-service'
 import { createLspMcpServerConfig, LspService } from './lsp'
 import { APP_SETTINGS_DB_KEY } from '@shared/types/settings'
 import { getActiveAppHomeDir } from '@shared/app-identity'
+import { emitAgentEvent } from '@shared/lib/normalize-agent-event'
+import { resolveRuntimeModelId } from '@shared/usage/models'
+import { calculateUsageCost, resolvePricingModelKey } from '@shared/usage/pricing'
 
 const log = createLogger({ component: 'ClaudeCodeImplementer' })
 
@@ -29,8 +34,8 @@ const CLAUDE_OPUS_EFFORT_VARIANTS = { low: {}, medium: {}, high: {}, max: {} }
 const CLAUDE_MODELS = [
   {
     id: 'opus',
-    name: 'Opus 4.6',
-    limit: { context: 1000000, output: 32000 },
+    name: 'Opus 4.7',
+    limit: { context: 200000, output: 32000 },
     variants: CLAUDE_OPUS_EFFORT_VARIANTS,
     defaultVariant: 'high'
   },
@@ -56,6 +61,7 @@ export interface ClaudeQuery {
   return?(value?: void): Promise<IteratorResult<unknown, void>>
   next(...args: unknown[]): Promise<IteratorResult<unknown, void>>
   [Symbol.asyncIterator](): AsyncGenerator<unknown, void>
+  getContextUsage?(): Promise<SDKControlGetContextUsageResponse>
   rewindFiles?: (
     userMessageId: string,
     options?: { dryRun?: boolean }
@@ -277,6 +283,38 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     }
     this.sessions.set(key, state)
 
+    // Hydrate in-memory messages from DB so getMessages() and timeline
+    // work immediately without waiting for the first prompt() call.
+    if (this.dbService) {
+      try {
+        const dbRows = this.dbService.getSessionMessages(hiveSessionId)
+        if (dbRows.length > 0) {
+          const hydrated: unknown[] = []
+          for (const row of dbRows) {
+            if (row.opencode_message_json) {
+              try {
+                hydrated.push(JSON.parse(row.opencode_message_json))
+              } catch {
+                // Corrupted JSON row — skip
+              }
+            }
+          }
+          if (hydrated.length > 0) {
+            state.messages = hydrated
+            log.info('Reconnect: hydrated messages from DB', {
+              hiveSessionId,
+              count: hydrated.length
+            })
+          }
+        }
+      } catch (err) {
+        log.warn('Reconnect: failed to hydrate from DB', {
+          hiveSessionId,
+          error: err instanceof Error ? err.message : String(err)
+        })
+      }
+    }
+
     log.info('Reconnected (restored from DB)', { worktreePath, agentSessionId, hiveSessionId })
     return { success: true, sessionStatus: 'idle', revertMessageID: null }
   }
@@ -296,6 +334,11 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     if (!session) {
       log.warn('Disconnect: session not found, ignoring', { worktreePath, agentSessionId })
       return
+    }
+
+    // Persist messages before removing from memory to prevent data loss
+    if (session.messages.length > 0) {
+      this.persistMessagesToDB(session)
     }
 
     if (session.query) {
@@ -332,6 +375,10 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
   async cleanup(): Promise<void> {
     log.info('Cleaning up all Claude Code sessions', { count: this.sessions.size })
     for (const [key, session] of this.sessions) {
+      // Persist messages before clearing to prevent data loss on app exit
+      if (session.messages.length > 0) {
+        this.persistMessagesToDB(session)
+      }
       if (session.query) {
         try {
           session.query.close()
@@ -658,7 +705,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           const status = (sdkMessage as Record<string, unknown>).status as string | undefined
           if (status === 'compacting') {
             log.info('Compaction started detected via system status message')
-            this.sendToRenderer('opencode:stream', {
+            emitAgentEvent(this.mainWindow, {
               type: 'session.compaction_started',
               sessionId: session.hiveSessionId,
               data: {}
@@ -714,14 +761,14 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           }
 
           // Notify renderer that commands are now available for fetching
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'session.commands_available',
             sessionId: session.hiveSessionId,
             data: {}
           })
 
           // Send Claude model limits so the renderer can populate contextStore
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'session.model_limits',
             sessionId: session.hiveSessionId,
             data: {
@@ -790,7 +837,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           // Include wasFork so the renderer knows whether to clear old messages.
           // wasFork is true ONLY for explicit fork requests (undo+resend), not
           // for normal SDK session ID changes during resume.
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'session.materialized',
             sessionId: session.hiveSessionId,
             data: { newSessionId: sdkSessionId, wasFork: !wasPending && wasForkRequest }
@@ -818,28 +865,39 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
 
           // Skip compaction summary — a synthetic user message containing the
           // conversation summary after context compaction. Should not appear in UI.
-          if (sdkMsg.isCompactSummary === true) return
+          if (sdkMsg.isCompactSummary === true) continue
 
           const msgContent = (
             sdkMsg.message as { content?: { type: string; [key: string]: unknown }[] } | undefined
           )?.content
 
-          // Skip context-continuation summary — content-based fallback.
-          // Claude CLI injects a synthetic user message when resuming from a
-          // context-exhausted session; it has no isCompactSummary flag.
-          if (msgType === 'user' && Array.isArray(msgContent)) {
-            const textContent = msgContent
-              .filter((b) => b.type === 'text' && typeof b.text === 'string')
-              .map((b) => b.text as string)
-              .join('')
+          // Skip compaction-related user messages — content-based fallback.
+          // Covers both: (1) context-continuation summary from CLI after context
+          // exhaustion, and (2) compaction summary injected by SDK after context
+          // window compression. Neither should appear in the UI timeline.
+          // Also skip skill prompt injection messages (expanded skill file content).
+          if (msgType === 'user') {
+            let textContent = ''
+            if (Array.isArray(msgContent)) {
+              textContent = msgContent
+                .filter((b) => b.type === 'text' && typeof b.text === 'string')
+                .map((b) => b.text as string)
+                .join('')
+            } else if (typeof msgContent === 'string') {
+              textContent = msgContent
+            } else if (typeof (sdkMsg as Record<string, unknown>).content === 'string') {
+              // Some SDK versions put content directly on the message, not nested
+              textContent = (sdkMsg as Record<string, unknown>).content as string
+            }
+            const trimmed = textContent.trimStart()
             if (
-              textContent
-                .trimStart()
-                .startsWith(
-                  'This session is being continued from a previous conversation'
-                )
+              trimmed.startsWith('This session is being continued from a previous conversation') ||
+              trimmed.startsWith('Here is a summary of the conversation so far') ||
+              trimmed.startsWith('Base directory for this skill:') ||
+              trimmed.startsWith('<local-command-stdout>') ||
+              trimmed.startsWith('<system-reminder>')
             ) {
-              return
+              continue
             }
           }
 
@@ -990,9 +1048,12 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         // survives the getMessages() → finalizeResponse() reload cycle.
         // Without this, the CompactionPill would disappear when the renderer
         // refreshes messages from the in-memory cache on stream completion.
+        let compactBoundaryDetected = false
+
         if (msgType === 'system') {
           const subtype = (sdkMessage as Record<string, unknown>).subtype as string | undefined
           if (subtype === 'compact_boundary') {
+            compactBoundaryDetected = true
             const meta = (sdkMessage as Record<string, unknown>).compact_metadata as
               | Record<string, unknown>
               | undefined
@@ -1018,6 +1079,14 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
 
         // Emit normalized event
         this.emitSdkMessage(session.hiveSessionId, sdkMessage, messageIndex, session.toolNames)
+        if (compactBoundaryDetected) {
+          await this.emitClaudeContextUsageSnapshot(session)
+          emitAgentEvent(this.mainWindow, {
+            type: 'session.context_compacted',
+            sessionId: session.hiveSessionId,
+            data: {}
+          })
+        }
         messageIndex++
       }
 
@@ -1025,7 +1094,8 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         totalMessages: messageIndex,
         aborted: session.abortController?.signal.aborted ?? false
       })
-      this.emitStatus(session.hiveSessionId, 'idle')
+      await this.reconcileSessionMessagesFromTranscript(session)
+      this.persistMessagesToDB(session)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       const stderrOutput = session.stderrBuffer.join('').trim() || undefined
@@ -1039,7 +1109,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           agentSessionId,
           stderr: stderrOutput
         })
-        this.sendToRenderer('opencode:stream', {
+        emitAgentEvent(this.mainWindow, {
           type: 'session.warning',
           sessionId: session.hiveSessionId,
           data: {
@@ -1077,15 +1147,22 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         }
       )
 
-      this.sendToRenderer('opencode:stream', {
+      emitAgentEvent(this.mainWindow, {
         type: 'session.error',
         sessionId: session.hiveSessionId,
         data: { error: errorMessage, stderr: stderrOutput }
       })
-      this.emitStatus(session.hiveSessionId, 'idle')
+      // idle is emitted by the finally block after persist
     } finally {
+      // Always persist messages — whether the loop completed normally,
+      // was aborted, or threw an error. This prevents message loss.
+      this.persistMessagesToDB(session)
       session.lastQuery = session.query
       session.query = null
+      // Guarantee idle status is emitted after persist completes.
+      // try/catch paths emit idle before finally, but abort() relies on
+      // finally to emit idle (to avoid racing with persist).
+      this.emitStatus(session.hiveSessionId, 'idle')
     }
   }
 
@@ -1095,6 +1172,8 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
       log.warn('Abort: session not found', { worktreePath, agentSessionId })
       return false
     }
+
+    const wasStreaming = !!session.query
 
     if (session.abortController) {
       session.abortController.abort()
@@ -1108,9 +1187,136 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
       }
     }
 
-    session.query = null
-    this.emitStatus(session.hiveSessionId, 'idle')
+    // If a prompt was active, let prompt().finally handle persist + idle emit
+    // to avoid racing with it. Only emit idle here if nothing was streaming.
+    if (!wasStreaming) {
+      session.query = null
+      this.emitStatus(session.hiveSessionId, 'idle')
+    }
+    // If wasStreaming, prompt().finally will: persist → set query=null → emit idle
     return true
+  }
+
+  /** Persist in-memory messages to the session_messages table so that
+   *  getSessionTimeline() can return them. Follows the same pattern as
+   *  Codex's persistCanonicalMessages(). */
+  private persistMessagesToDB(session: ClaudeSessionState): void {
+    if (!this.dbService) return
+    if (session.messages.length === 0) return
+
+    try {
+      const rows = session.messages.flatMap((message) => {
+        const record = asObject(message)
+        if (!record) return []
+
+        const role = asString(record.role)
+        const timestamp = asString(record.timestamp) ?? new Date().toISOString()
+        if (role !== 'user' && role !== 'assistant') return []
+
+        const parts = Array.isArray(record.parts) ? record.parts : []
+        const textContent = parts
+          .map((part) => asObject(part))
+          .filter((part) => part?.type === 'text' || part?.type === 'reasoning')
+          .map((part) => asString(part?.text) ?? '')
+          .join('')
+
+        return [
+          {
+            session_id: session.hiveSessionId,
+            role,
+            content: textContent || asString(record.content) || '',
+            opencode_message_id: asString(record.id) ?? null,
+            opencode_message_json: JSON.stringify(message),
+            opencode_parts_json: JSON.stringify(parts),
+            created_at: timestamp
+          }
+        ]
+      })
+
+      if (rows.length === 0) return
+
+      this.dbService.replaceSessionMessages(session.hiveSessionId, rows)
+      log.debug('Persisted Claude Code messages to DB', {
+        hiveSessionId: session.hiveSessionId,
+        rowCount: rows.length
+      })
+    } catch (error) {
+      log.warn('Failed to persist Claude Code messages', {
+        hiveSessionId: session.hiveSessionId,
+        error: error instanceof Error ? error.message : String(error)
+      })
+    }
+  }
+
+  private async reconcileSessionMessagesFromTranscript(
+    session: ClaudeSessionState
+  ): Promise<void> {
+    if (!session.materialized) return
+    if (!session.claudeSessionId || session.claudeSessionId.startsWith('pending::')) return
+    if (session.messages.length === 0) return
+
+    try {
+      const transcriptMessages = await readClaudeTranscript(
+        session.worktreePath,
+        session.claudeSessionId
+      )
+      if (!Array.isArray(transcriptMessages) || transcriptMessages.length === 0) return
+
+      const transcriptAssistants = new Map<string, Record<string, unknown>>()
+      for (const message of transcriptMessages) {
+        const record = asObject(message)
+        if (!record || asString(record.role) !== 'assistant') continue
+
+        const id = asString(record.id)
+        if (!id) continue
+        transcriptAssistants.set(id, record)
+      }
+
+      if (transcriptAssistants.size === 0) return
+
+      let updatedCount = 0
+      session.messages = session.messages.map((message) => {
+        const record = asObject(message)
+        if (!record || asString(record.role) !== 'assistant') return message
+
+        const id = asString(record.id)
+        if (!id) return message
+
+        const transcriptRecord = transcriptAssistants.get(id)
+        if (!transcriptRecord) return message
+
+        const usageChanged =
+          JSON.stringify(record.usage ?? null) !== JSON.stringify(transcriptRecord.usage ?? null)
+        const modelChanged =
+          JSON.stringify(record.model ?? null) !== JSON.stringify(transcriptRecord.model ?? null)
+        const costChanged = (record.cost ?? null) !== (transcriptRecord.cost ?? null)
+        const contentChanged = (record.content ?? null) !== (transcriptRecord.content ?? null)
+        const partsChanged =
+          JSON.stringify(record.parts ?? null) !== JSON.stringify(transcriptRecord.parts ?? null)
+
+        if (!usageChanged && !modelChanged && !costChanged && !contentChanged && !partsChanged) {
+          return message
+        }
+
+        updatedCount += 1
+        return {
+          ...record,
+          ...transcriptRecord
+        }
+      })
+
+      if (updatedCount > 0) {
+        log.info('Reconciled Claude session messages from transcript', {
+          hiveSessionId: session.hiveSessionId,
+          updatedCount
+        })
+      }
+    } catch (error) {
+      log.warn('Failed to reconcile Claude transcript into session messages', {
+        hiveSessionId: session.hiveSessionId,
+        error: error instanceof Error ? error.message : String(error)
+      })
+    }
   }
 
   /** In-flight transcript reads keyed by agentSessionId — deduplicates concurrent calls */
@@ -1124,6 +1330,9 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         agentSessionId,
         count: session.messages.length
       })
+      // Ensure DB is in sync — callers like getTimeline read from DB,
+      // so an in-memory-only state would cause empty timeline on refresh.
+      this.persistMessagesToDB(session)
       return session.messages
     }
 
@@ -1149,6 +1358,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         const currentSession = this.getSession(worktreePath, agentSessionId)
         if (currentSession) {
           currentSession.messages = [...transcript]
+          this.persistMessagesToDB(currentSession)
           log.info('getMessages: warmed in-memory cache from transcript', {
             agentSessionId,
             count: transcript.length
@@ -1247,7 +1457,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     session.pendingQuestion.resolve({ answers })
 
     // Emit question.replied so the renderer removes the QuestionPrompt
-    this.sendToRenderer('opencode:stream', {
+    emitAgentEvent(this.mainWindow, {
       type: 'question.replied',
       sessionId: session.hiveSessionId,
       data: { requestId, id: requestId }
@@ -1274,7 +1484,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     session.pendingQuestion.resolve({ answers: [], rejected: true })
 
     // Emit question.rejected so the renderer removes the QuestionPrompt
-    this.sendToRenderer('opencode:stream', {
+    emitAgentEvent(this.mainWindow, {
       type: 'question.rejected',
       sessionId: session.hiveSessionId,
       data: { requestId, id: requestId }
@@ -1339,6 +1549,83 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     return this.sessions.get(sessionKey)
   }
 
+  private resolveClaudeContextModel(model: string | undefined): string | null {
+    if (!model) return null
+
+    return (
+      resolveRuntimeModelId(model, 'anthropic') ??
+      resolvePricingModelKey(model, 'claude-code') ??
+      null
+    )
+  }
+
+  private async emitClaudeContextUsageSnapshot(session: ClaudeSessionState): Promise<boolean> {
+    const query = session.query
+    if (!query?.getContextUsage) {
+      log.debug('Claude context refresh unavailable on current query', {
+        hiveSessionId: session.hiveSessionId
+      })
+      return false
+    }
+
+    try {
+      const usage = await query.getContextUsage()
+      const modelID = this.resolveClaudeContextModel(usage.model)
+
+      emitAgentEvent(this.mainWindow, {
+        type: 'session.context_usage',
+        sessionId: session.hiveSessionId,
+        data: {
+          tokens: {
+            input: 0,
+            output: 0
+          },
+          ...(modelID
+            ? {
+                model: {
+                  providerID: 'anthropic',
+                  modelID
+                }
+              }
+            : {}),
+          contextWindow: usage.maxTokens,
+          breakdown: {
+            usedTokens: usage.totalTokens,
+            maxTokens: usage.maxTokens,
+            ...(typeof usage.rawMaxTokens === 'number' ? { rawMaxTokens: usage.rawMaxTokens } : {}),
+            percentage: usage.percentage,
+            ...(Array.isArray(usage.categories) && usage.categories.length > 0
+              ? {
+                  categories: usage.categories.map((category) => ({
+                    name: category.name,
+                    tokens: category.tokens,
+                    color: category.color,
+                    ...(category.isDeferred === true ? { isDeferred: true } : {})
+                  }))
+                }
+              : {})
+          }
+        }
+      })
+
+      log.info('Emitted live Claude context usage snapshot', {
+        hiveSessionId: session.hiveSessionId,
+        usedTokens: usage.totalTokens,
+        maxTokens: usage.maxTokens,
+        percentage: usage.percentage,
+        modelID
+      })
+
+      return true
+    } catch (error) {
+      log.warn('Failed to refresh Claude context usage after compaction', {
+        hiveSessionId: session.hiveSessionId,
+        error: error instanceof Error ? error.message : String(error)
+      })
+      return false
+    }
+  }
+
   /** Approve a pending plan — unblocks the SDK to continue implementation */
   async planApprove(
     _worktreePath: string,
@@ -1377,7 +1664,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     this.pendingPlanSessions.delete(resolvedRequestId)
 
     // Emit plan.resolved so the renderer clears the plan UI
-    this.sendToRenderer('opencode:stream', {
+    emitAgentEvent(this.mainWindow, {
       type: 'plan.resolved',
       sessionId: hiveSessionId,
       data: { approved: true }
@@ -1423,7 +1710,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     this.pendingPlanSessions.delete(resolvedRequestId)
 
     // Emit plan.resolved so the renderer clears the plan UI
-    this.sendToRenderer('opencode:stream', {
+    emitAgentEvent(this.mainWindow, {
       type: 'plan.resolved',
       sessionId: hiveSessionId,
       data: { approved: false, feedback }
@@ -1790,7 +2077,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
       // 2. Notify renderer with session.updated event (same format as OpenCode)
       // The renderer's SessionView.tsx and useOpenCodeGlobalListener.ts both
       // read: event.data?.info?.title || event.data?.title
-      this.sendToRenderer('opencode:stream', {
+      emitAgentEvent(this.mainWindow, {
         type: 'session.updated',
         sessionId: session.hiveSessionId,
         data: {
@@ -1929,7 +2216,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
             ? JSON.stringify(input.plan, null, 2)
             : ''
 
-      this.sendToRenderer('opencode:stream', {
+      emitAgentEvent(this.mainWindow, {
         type: 'plan.ready',
         sessionId: session.hiveSessionId,
         data: {
@@ -1951,7 +2238,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           session.pendingPlanApproval = null
           this.pendingPlanSessions.delete(requestId)
           // Notify renderer to clear stale pending plan UI
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'plan.resolved',
             sessionId: session.hiveSessionId,
             data: { approved: false, aborted: true }
@@ -2099,7 +2386,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           }
 
           // Emit question.asked event to renderer (matches OpenCode event format)
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'question.asked',
             sessionId: session.hiveSessionId,
             data: questionRequest
@@ -2279,7 +2566,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
       requestId,
       sessionId: session.hiveSessionId
     })
-    this.sendToRenderer('opencode:stream', {
+    emitAgentEvent(this.mainWindow, {
       type: 'command.approval_needed',
       sessionId: session.hiveSessionId,
       data: approvalRequest
@@ -2313,7 +2600,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           })
 
           // Notify renderer about the problem so user sees actionable feedback
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'command.approval_problem',
             sessionId: session.hiveSessionId,
             data: {
@@ -2326,7 +2613,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           })
 
           // Clear approval UI
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'command.approval_replied',
             sessionId: session.hiveSessionId,
             data: { requestId, id: requestId, approved: false }
@@ -2362,7 +2649,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           })
 
           // Send command.approval_replied event to clear the UI state
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'command.approval_replied',
             sessionId: pending.hiveSessionId,
             data: { requestId, id: requestId, approved: false }
@@ -2516,7 +2803,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
   }
 
   /**
-   * Handle approval reply from IPC (called by opencode-handlers.ts)
+   * Handle approval reply from IPC (called by agent-handlers.ts)
    */
   handleApprovalReply(
     requestId: string,
@@ -2541,7 +2828,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
 
     // Send command.approval_replied event to renderer so it can clear the pending approval
     // We know which session this approval belongs to from the stored data
-    this.sendToRenderer('opencode:stream', {
+    emitAgentEvent(this.mainWindow, {
       type: 'command.approval_replied',
       sessionId: pendingApproval.hiveSessionId,
       data: { requestId, id: requestId, approved }
@@ -2556,7 +2843,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     extra?: { attempt?: number; message?: string; next?: number }
   ): void {
     const statusPayload = { type: status, ...extra }
-    this.sendToRenderer('opencode:stream', {
+    emitAgentEvent(this.mainWindow, {
       type: 'session.status',
       sessionId: hiveSessionId,
       data: { status: statusPayload },
@@ -2633,7 +2920,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
 
             if (deltaType === 'text_delta') {
               const text = delta.text as string
-              this.sendToRenderer('opencode:stream', {
+              emitAgentEvent(this.mainWindow, {
                 type: 'message.part.updated',
                 sessionId: hiveSessionId,
                 childSessionId,
@@ -2644,7 +2931,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
               })
             } else if (deltaType === 'thinking_delta') {
               const thinking = delta.thinking as string
-              this.sendToRenderer('opencode:stream', {
+              emitAgentEvent(this.mainWindow, {
                 type: 'message.part.updated',
                 sessionId: hiveSessionId,
                 childSessionId,
@@ -2699,7 +2986,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
                   inputJson: ''
                 })
               }
-              this.sendToRenderer('opencode:stream', {
+              emitAgentEvent(this.mainWindow, {
                 type: 'message.part.updated',
                 sessionId: hiveSessionId,
                 childSessionId,
@@ -2741,7 +3028,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
                     parsedInput = tool.inputJson
                   }
                 }
-                this.sendToRenderer('opencode:stream', {
+                emitAgentEvent(this.mainWindow, {
                   type: 'message.part.updated',
                   sessionId: hiveSessionId,
                   childSessionId,
@@ -2775,21 +3062,71 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
       // via stream_event deltas.  Emit as message.updated for metadata/usage only.
       case 'assistant': {
         const usage = innerMessage?.usage as Record<string, unknown> | undefined
+        const modelStr = typeof innerMessage?.model === 'string' ? innerMessage.model : undefined
+        const visibleContentBlocks = Array.isArray(innerContent)
+          ? innerContent.filter((block) => {
+              const type = (block as Record<string, unknown>)?.type as string | undefined
+              return type !== 'thinking'
+            })
+          : []
+        const requestId =
+          typeof msg.requestId === 'string'
+            ? msg.requestId
+            : typeof msg.request_id === 'string'
+              ? (msg.request_id as string)
+              : undefined
+        const messageId =
+          typeof msg.uuid === 'string'
+            ? msg.uuid
+            : typeof innerMessage?.id === 'string'
+              ? innerMessage.id
+              : undefined
+
+        // Compute per-turn cost from usage + model so the renderer can display it.
+        // Claude Code SDK result messages don't always carry total_cost_usd.
+        let turnCost: number | undefined
+        if (usage && modelStr && visibleContentBlocks.length > 0) {
+          try {
+            const pricingKey = resolvePricingModelKey(modelStr, 'claude-code')
+            turnCost = calculateUsageCost(
+              pricingKey,
+              {
+                input: typeof usage.input_tokens === 'number' ? usage.input_tokens : 0,
+                output: typeof usage.output_tokens === 'number' ? usage.output_tokens : 0,
+                cacheWrite:
+                  typeof usage.cache_creation_input_tokens === 'number'
+                    ? usage.cache_creation_input_tokens
+                    : 0,
+                cacheRead:
+                  typeof usage.cache_read_input_tokens === 'number'
+                    ? usage.cache_read_input_tokens
+                    : 0
+              },
+              'claude-code'
+            )
+          } catch {
+            // Pricing data unavailable — skip cost
+          }
+        }
+
         log.info('emitSdkMessage: assistant (complete)', {
           hiveSessionId,
           messageIndex,
           contentBlocks: Array.isArray(innerContent) ? innerContent.length : 0,
-          hasUsage: !!usage
+          hasUsage: !!usage,
+          turnCost
         })
-        this.sendToRenderer('opencode:stream', {
+        emitAgentEvent(this.mainWindow, {
           type: 'message.updated',
           sessionId: hiveSessionId,
           childSessionId,
           data: {
+            ...(messageId ? { id: messageId } : {}),
+            ...(requestId ? { requestId } : {}),
             role: 'assistant',
             messageIndex,
-            // Pass usage/model info so the renderer can extract tokens
             info: {
+              ...(requestId ? { requestId } : {}),
               time: { completed: new Date().toISOString() },
               usage: usage
                 ? {
@@ -2799,7 +3136,8 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
                     cacheCreation: usage.cache_creation_input_tokens
                   }
                 : undefined,
-              model: innerMessage?.model
+              model: innerMessage?.model,
+              ...(turnCost !== undefined ? { cost: turnCost } : {})
             }
           }
         })
@@ -2812,7 +3150,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
           for (const block of innerContent) {
             const b = block as Record<string, unknown>
             if (b.type === 'tool_use') {
-              this.sendToRenderer('opencode:stream', {
+              emitAgentEvent(this.mainWindow, {
                 type: 'message.part.updated',
                 sessionId: hiveSessionId,
                 childSessionId,
@@ -2828,6 +3166,15 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
             }
           }
         }
+
+        // Persist messages to DB after each assistant turn completes.
+        // This ensures data survives app crashes — at most one in-flight turn is lost.
+        if (!childSessionId) {
+          const session = this.findSessionByHiveId(hiveSessionId)
+          if (session && session.messages.length > 0) {
+            this.persistMessagesToDB(session)
+          }
+        }
         break
       }
 
@@ -2835,6 +3182,12 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         // Result content is in msg.result (array of content blocks or text)
         const resultContent = msg.result as unknown[] | unknown
         const resultArray = Array.isArray(resultContent) ? resultContent : undefined
+        const requestId =
+          typeof msg.requestId === 'string'
+            ? msg.requestId
+            : typeof msg.request_id === 'string'
+              ? (msg.request_id as string)
+              : undefined
         log.info('emitSdkMessage: result', {
           hiveSessionId,
           messageIndex,
@@ -2848,28 +3201,23 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         // but that duplicated text already streamed via stream_event deltas.
         // Removed to fix duplicate message display.
 
-        this.sendToRenderer('opencode:stream', {
+        emitAgentEvent(this.mainWindow, {
           type: 'message.updated',
           sessionId: hiveSessionId,
           childSessionId,
           data: {
+            ...(requestId ? { requestId } : {}),
             role: 'assistant',
             content: resultArray ?? resultContent,
             isError: msg.is_error ?? false,
             messageIndex,
-            // Include cost/usage from result for token tracking
+            // Include cost and modelUsage (for context limit detection) but
+            // NOT per-turn cost or per-token usage — the `assistant` event is
+            // the authoritative per-turn source. Re-counting the same turn on
+            // `result` causes duplicate session cost accumulation.
             info: {
               time: { completed: new Date().toISOString() },
-              cost: msg.total_cost_usd,
-              usage: msg.usage
-                ? {
-                    input: (msg.usage as Record<string, unknown>).input_tokens,
-                    output: (msg.usage as Record<string, unknown>).output_tokens,
-                    cacheRead: (msg.usage as Record<string, unknown>).cache_read_input_tokens,
-                    cacheCreation: (msg.usage as Record<string, unknown>)
-                      .cache_creation_input_tokens
-                  }
-                : undefined,
+              ...(requestId ? { requestId } : {}),
               modelUsage: msg.modelUsage
             }
           }
@@ -2909,7 +3257,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
                 hasOutput: !!output,
                 outputLength: output?.length ?? 0
               })
-              this.sendToRenderer('opencode:stream', {
+              emitAgentEvent(this.mainWindow, {
                 type: 'message.part.updated',
                 sessionId: hiveSessionId,
                 childSessionId,
@@ -2937,7 +3285,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
         const subtype = msg.subtype as string | undefined
         if (subtype === 'compact_boundary') {
           const meta = msg.compact_metadata as Record<string, unknown> | undefined
-          this.sendToRenderer('opencode:stream', {
+          emitAgentEvent(this.mainWindow, {
             type: 'message.part.updated',
             sessionId: hiveSessionId,
             childSessionId,
@@ -2956,7 +3304,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
       case 'tool_progress': {
         const toolId = msg.tool_use_id as string
         const toolName = msg.tool_name as string
-        this.sendToRenderer('opencode:stream', {
+        emitAgentEvent(this.mainWindow, {
           type: 'message.part.updated',
           sessionId: hiveSessionId,
           childSessionId,
@@ -2974,7 +3322,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
 
       case 'tool_use': {
         log.info('emitSdkMessage: tool_use', { hiveSessionId, messageIndex })
-        this.sendToRenderer('opencode:stream', {
+        emitAgentEvent(this.mainWindow, {
           type: 'message.part.updated',
           sessionId: hiveSessionId,
           childSessionId,
@@ -3068,7 +3416,8 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     let result: void | RewindFilesResult | undefined
     let gotMessage = false
     try {
-      for await (const _message of rewindQuery) {
+      for await (const message of rewindQuery) {
+        void message
         gotMessage = true
         result = await queryObj.rewindFiles(targetUuid)
         break
@@ -3147,7 +3496,7 @@ export class ClaudeCodeImplementer implements AgentSdkImplementer, AgentRuntimeA
     try {
       const bus = getEventBus()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (channel === 'opencode:stream') bus.emit('opencode:stream', data as any)
+      if (channel === 'agent:stream') bus.emit('agent:stream', data as any)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       else if (channel === 'worktree:branchRenamed') bus.emit('worktree:branchRenamed', data as any)
     } catch {

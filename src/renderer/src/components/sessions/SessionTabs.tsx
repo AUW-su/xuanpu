@@ -34,6 +34,7 @@ import { useProjectStore } from '@/stores/useProjectStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useWorktreeStatusStore } from '@/stores/useWorktreeStatusStore'
+import { useSessionRuntimeStore } from '@/stores/useSessionRuntimeStore'
 import { useLayoutStore } from '@/stores/useLayoutStore'
 import { useVimModeStore } from '@/stores/useVimModeStore'
 import { useHintStore } from '@/stores/useHintStore'
@@ -48,18 +49,57 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
+import { SessionStatusIndicator } from '@/components/layout/SessionStatusIndicator'
+
+/**
+ * Session color palette (Catppuccin-inspired).
+ * Each entry is a ConnectionColorQuad: [inactiveBg, activeBg, inactiveText, activeText].
+ * Stored in DB as JSON string to match connection color format.
+ */
+const SESSION_COLOR_PALETTE: Array<{ label: string; value: string; swatch: string }> = [
+  {
+    label: 'Lavender',
+    swatch: '#b4befe',
+    value: JSON.stringify(['#b4befe40', '#b4befe', '#1e1e2e', '#1e1e2e'])
+  },
+  {
+    label: 'Peach',
+    swatch: '#fab387',
+    value: JSON.stringify(['#fab38740', '#fab387', '#1e1e2e', '#1e1e2e'])
+  },
+  {
+    label: 'Green',
+    swatch: '#a6e3a1',
+    value: JSON.stringify(['#a6e3a140', '#a6e3a1', '#1e1e2e', '#1e1e2e'])
+  },
+  {
+    label: 'Pink',
+    swatch: '#f5c2e7',
+    value: JSON.stringify(['#f5c2e740', '#f5c2e7', '#1e1e2e', '#1e1e2e'])
+  },
+  {
+    label: 'Teal',
+    swatch: '#94e2d5',
+    value: JSON.stringify(['#94e2d540', '#94e2d5', '#1e1e2e', '#1e1e2e'])
+  }
+]
 
 interface SessionTabProps {
   sessionId: string
   name: string
   isActive: boolean
   agentSdk: 'opencode' | 'claude-code' | 'codex' | 'terminal'
+  color: string | null
   onClick: () => void
   onClose: (e: React.MouseEvent) => void
   onMiddleClick: (e: React.MouseEvent) => void
   onRename: (newName: string) => void
+  onSetColor: (color: string | null) => void
   onDragStart: (e: React.DragEvent) => void
   onDragOver: (e: React.DragEvent) => void
   onDrop: (e: React.DragEvent) => void
@@ -77,10 +117,12 @@ const SessionTab = memo(function SessionTab({
   name,
   isActive,
   agentSdk,
+  color,
   onClick,
   onClose,
   onMiddleClick,
   onRename,
+  onSetColor,
   onDragStart,
   onDragOver,
   onDrop,
@@ -140,6 +182,16 @@ const SessionTab = memo(function SessionTab({
     }
   }
 
+  // Resolve background/text when a custom color is set
+  const colorStyle = useMemo(() => {
+    if (!color) return undefined
+    const [inactiveBg, activeBg, inactiveText, activeText] = parseColorQuad(color)
+    return {
+      backgroundColor: isActive ? activeBg : inactiveBg,
+      color: isActive ? activeText : inactiveText
+    }
+  }, [color, isActive])
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -159,14 +211,18 @@ const SessionTab = memo(function SessionTab({
             }
           }}
           className={cn(
-            'group relative flex items-center gap-1 px-3 py-1.5 text-sm cursor-pointer select-none',
-            'border-r border-border transition-colors min-w-[100px] max-w-[200px]',
-            isActive
-              ? 'bg-background text-foreground'
-              : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground',
+            'group relative flex items-center gap-1 px-3 py-1 text-sm cursor-pointer select-none',
+            'rounded-md transition-colors min-w-[100px] max-w-[200px] my-0.5 mx-0.5',
+            !color && (
+              isActive
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
+            ),
+            color && isActive && 'shadow-sm',
             isDragging && 'opacity-50',
             isDragOver && 'bg-accent/50'
           )}
+          style={colorStyle}
         >
           {agentSdk === 'terminal' ? (
             <TerminalSquare
@@ -198,7 +254,7 @@ const SessionTab = memo(function SessionTab({
               )}
               {sessionStatus === 'unread' && !isActive && (
                 <span
-                  className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"
+                  className="w-2 h-2 rounded-full bg-primary flex-shrink-0"
                   data-testid={`tab-unread-${sessionId}`}
                 />
               )}
@@ -236,7 +292,6 @@ const SessionTab = memo(function SessionTab({
           >
             <X className="h-3 w-3" />
           </button>
-          {isActive && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
@@ -250,6 +305,42 @@ const SessionTab = memo(function SessionTab({
         <ContextMenuItem onSelect={onCloseToRight}>
           {t('sessionTabs.menu.closeToRight')}
         </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>
+            <span className="flex items-center gap-2">
+              {color ? (
+                <span
+                  className="h-3 w-3 rounded-full border border-border/40"
+                  style={{ backgroundColor: parseColorQuad(color)[1] }}
+                />
+              ) : (
+                <span className="h-3 w-3 rounded-full border border-border/40 bg-transparent" />
+              )}
+              {t('sessionTabs.menu.setColor')}
+            </span>
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent>
+            {SESSION_COLOR_PALETTE.map((c) => (
+              <ContextMenuItem key={c.label} onSelect={() => onSetColor(c.value)}>
+                <span className="flex items-center gap-2">
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: c.swatch }}
+                  />
+                  {c.label}
+                </span>
+              </ContextMenuItem>
+            ))}
+            <ContextMenuSeparator />
+            <ContextMenuItem onSelect={() => onSetColor(null)}>
+              <span className="flex items-center gap-2 text-muted-foreground">
+                <span className="h-3 w-3 rounded-full border border-border/40" />
+                {t('sessionTabs.menu.clearColor')}
+              </span>
+            </ContextMenuItem>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
       </ContextMenuContent>
     </ContextMenu>
   )
@@ -292,11 +383,11 @@ function FileTab({
             }
           }}
           className={cn(
-            'group relative flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer select-none',
-            'border-r border-border transition-colors min-w-[100px] max-w-[200px]',
+            'group relative flex items-center gap-1.5 px-3 py-1 text-sm cursor-pointer select-none',
+            'rounded-md transition-colors min-w-[100px] max-w-[200px] my-0.5 mx-0.5',
             isActive
-              ? 'bg-background text-foreground'
-              : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
           )}
           title={filePath}
         >
@@ -328,7 +419,6 @@ function FileTab({
               <X className="h-3 w-3" />
             </button>
           )}
-          {isActive && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
@@ -396,11 +486,11 @@ function DiffTabItem({
             }
           }}
           className={cn(
-            'group relative flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer select-none',
-            'border-r border-border transition-colors min-w-[100px] max-w-[200px]',
+            'group relative flex items-center gap-1.5 px-3 py-1 text-sm cursor-pointer select-none',
+            'rounded-md transition-colors min-w-[100px] max-w-[200px] my-0.5 mx-0.5',
             isActive
-              ? 'bg-background text-foreground'
-              : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
           )}
           title={`${tab.filePath} (${tab.staged ? t('sessionTabs.common.staged') : t('sessionTabs.common.unstaged')})`}
         >
@@ -417,7 +507,6 @@ function DiffTabItem({
           >
             <X className="h-3 w-3" />
           </button>
-          {isActive && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
@@ -483,8 +572,8 @@ const ConnectionSessionTab = memo(function ConnectionSessionTab({
       }}
       title={`${connectionName} — ${name || t('sessionTabs.common.untitled')}`}
       className={cn(
-        'group relative flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer select-none',
-        'border-r border-border/50 transition-colors min-w-[100px] max-w-[200px]'
+        'group relative flex items-center gap-1.5 px-3 py-1 text-sm cursor-pointer select-none',
+        'rounded-md transition-colors min-w-[100px] max-w-[200px] my-0.5 mx-0.5'
       )}
       style={{
         backgroundColor: isActive ? activeBg : inactiveBg,
@@ -550,6 +639,7 @@ export function SessionTabs(): React.JSX.Element | null {
   const setActiveSession = useSessionStore((s) => s.setActiveSession)
   const reorderTabs = useSessionStore((s) => s.reorderTabs)
   const updateSessionName = useSessionStore((s) => s.updateSessionName)
+  const updateSessionColor = useSessionStore((s) => s.updateSessionColor)
   const closeOtherSessions = useSessionStore((s) => s.closeOtherSessions)
   const closeSessionsToRight = useSessionStore((s) => s.closeSessionsToRight)
   const loadConnectionSessions = useSessionStore((s) => s.loadConnectionSessions)
@@ -803,6 +893,9 @@ export function SessionTabs(): React.JSX.Element | null {
     const result = await closeSession(sessionId)
     if (!result.success) {
       toast.error(result.error || t('sessionTabs.errors.closeSession'))
+    } else {
+      // P1-4 CR fix: clean up runtime store to prevent memory leak
+      useSessionRuntimeStore.getState().clearSession(sessionId)
     }
   }
 
@@ -811,6 +904,13 @@ export function SessionTabs(): React.JSX.Element | null {
     const success = await updateSessionName(sessionId, newName)
     if (!success) {
       toast.error(t('sessionTabs.errors.renameSession'))
+    }
+  }
+
+  const handleSetSessionColor = async (sessionId: string, color: string | null) => {
+    const success = await updateSessionColor(sessionId, color)
+    if (!success) {
+      toast.error(t('sessionTabs.errors.setColor'))
     }
   }
 
@@ -980,7 +1080,7 @@ export function SessionTabs(): React.JSX.Element | null {
 
   return (
     <div
-      className="flex items-center border-b border-border bg-muted/30"
+      className="flex items-center border-b border-border/40 bg-muted/30 px-1"
       data-testid="session-tabs"
     >
       {/* New session button - on the left */}
@@ -994,7 +1094,7 @@ export function SessionTabs(): React.JSX.Element | null {
         <ContextMenuTrigger asChild>
           <button
             onClick={handleCreateSession}
-            className="p-1.5 hover:bg-accent transition-colors shrink-0 border-r border-border"
+            className="p-1.5 rounded-md hover:bg-background/50 transition-colors shrink-0"
             data-testid="create-session"
             title={t('sessionTabs.actions.createSession')}
           >
@@ -1098,6 +1198,7 @@ export function SessionTabs(): React.JSX.Element | null {
                 sessionId={session.id}
                 name={session.name || t('sessionTabs.common.untitled')}
                 agentSdk={session.agent_sdk}
+                color={session.color ?? null}
                 isActive={
                   session.id === activeSessionId && !isFileTabActive && !inlineConnectionSessionId
                 }
@@ -1105,6 +1206,7 @@ export function SessionTabs(): React.JSX.Element | null {
                 onClose={(e) => handleCloseSession(e, session.id)}
                 onMiddleClick={(e) => handleCloseSession(e, session.id)}
                 onRename={(newName) => handleRenameSession(session.id, newName)}
+                onSetColor={(color) => handleSetSessionColor(session.id, color)}
                 onDragStart={(e) => handleDragStart(e, session.id)}
                 onDragOver={(e) => handleDragOver(e, session.id)}
                 onDrop={(e) => handleDrop(e, session.id)}
@@ -1174,11 +1276,11 @@ export function SessionTabs(): React.JSX.Element | null {
                   }
                 }}
                 className={cn(
-                  'group relative flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer select-none',
-                  'border-r border-border transition-colors min-w-[100px] max-w-[200px]',
+                  'group relative flex items-center gap-1.5 px-3 py-1 text-sm cursor-pointer select-none',
+                  'rounded-md transition-colors min-w-[100px] max-w-[200px] my-0.5 mx-0.5',
                   isFileTabActive && activeFilePath === key
-                    ? 'bg-background text-foreground'
-                    : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
                 )}
                 title={t('sessionTabs.context.title')}
               >
@@ -1198,9 +1300,6 @@ export function SessionTabs(): React.JSX.Element | null {
                 >
                   <X className="h-3 w-3" />
                 </button>
-                {isFileTabActive && activeFilePath === key && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                )}
               </div>
             ))}
           </>
@@ -1217,6 +1316,11 @@ export function SessionTabs(): React.JSX.Element | null {
           <ChevronRight className="h-4 w-4" />
         </button>
       )}
+
+      {/* Global session status indicator (Phase 6) */}
+      <SessionStatusIndicator
+        onJumpToSession={(sid) => handleSessionTabClick(sid)}
+      />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { Header } from './Header'
 import { LeftSidebar } from './LeftSidebar'
 import { MainPane } from './MainPane'
 import { RightSidebar } from './RightSidebar'
+import { BottomDock } from './BottomDock'
 import { Toaster } from '@/components/ui/sonner'
 
 const SessionHistory = lazy(() =>
@@ -25,7 +26,7 @@ const FileSearchDialog = lazy(() =>
 )
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useVimNavigation } from '@/hooks/useVimNavigation'
-import { useAgentGlobalListener } from '@/hooks/useAgentGlobalListener'
+import { useAgentEventBridge } from '@/hooks/useAgentEventBridge'
 import { useNotificationNavigation } from '@/hooks/useNotificationNavigation'
 import { useWindowFocusRefresh } from '@/hooks/useWindowFocusRefresh'
 import { useWorktreeWatcher } from '@/hooks/useWorktreeWatcher'
@@ -41,6 +42,7 @@ import { useDropZone } from '@/hooks/useDropZone'
 import { DropOverlay } from './DropOverlay'
 import { toast } from '@/lib/toast'
 import { useDropAttachmentStore } from '@/stores'
+import { useLayoutStore } from '@/stores/useLayoutStore'
 import { MAX_ATTACHMENTS, isImageMime } from '@/lib/file-attachment-utils'
 import type { Attachment } from '@/components/sessions/AttachmentPreview'
 import { useI18n } from '@/i18n/useI18n'
@@ -74,7 +76,7 @@ export function AppLayout({ children }: AppLayoutProps): React.JSX.Element {
   // Vim-style modal navigation (hjkl, panel shortcuts, file tab cycling)
   useVimNavigation()
   // Global listener for background session events (AI finishes while viewing another project)
-  useAgentGlobalListener()
+  useAgentEventBridge()
   // Navigate to session when native notification is clicked
   useNotificationNavigation()
   // Refresh git statuses when window regains focus
@@ -181,31 +183,40 @@ export function AppLayout({ children }: AppLayoutProps): React.JSX.Element {
     }
   }, [selectedWorktreeId, selectedWorktreePath])
 
+  const terminalDock = useLayoutStore((s) => s.terminalDock)
+
   return (
     <div className="h-screen flex flex-col bg-background text-foreground" data-testid="app-layout">
       <ErrorBoundary componentName="Header" fallback={<div className="h-12 bg-muted" />}>
         <Header />
       </ErrorBoundary>
-      <div className="flex-1 flex min-h-0" data-testid="layout-content">
-        <ErrorBoundary
-          componentName="LeftSidebar"
-          fallback={
-            <div className="w-60 border-r bg-muted/50 flex items-center justify-center">
-              <ErrorFallback compact title={t('appLayout.sidebarError')} />
-            </div>
-          }
-        >
-          <LeftSidebar />
-        </ErrorBoundary>
-        <ErrorBoundary componentName="MainPane">
-          <MainPane>{children}</MainPane>
-        </ErrorBoundary>
-        <ErrorBoundary
-          componentName="RightSidebar"
-          fallback={<div className="border-l bg-muted/50" />}
-        >
-          <RightSidebar />
-        </ErrorBoundary>
+      <div className="flex-1 flex flex-col min-h-0" data-testid="layout-content">
+        <div className="flex-1 flex min-h-0">
+          <ErrorBoundary
+            componentName="LeftSidebar"
+            fallback={
+              <div className="w-60 border-r bg-muted/50 flex items-center justify-center">
+                <ErrorFallback compact title={t('appLayout.sidebarError')} />
+              </div>
+            }
+          >
+            <LeftSidebar />
+          </ErrorBoundary>
+          <ErrorBoundary componentName="MainPane">
+            <MainPane>{children}</MainPane>
+          </ErrorBoundary>
+          <ErrorBoundary
+            componentName="RightSidebar"
+            fallback={<div className="border-l bg-muted/50" />}
+          >
+            <RightSidebar />
+          </ErrorBoundary>
+        </div>
+        {terminalDock === 'bottom' && (
+          <ErrorBoundary componentName="BottomDock" fallback={null}>
+            <BottomDock />
+          </ErrorBoundary>
+        )}
       </div>
       <Toaster />
       {isDragging && <DropOverlay variant={activeSessionId ? 'normal' : 'warning'} />}

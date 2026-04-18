@@ -7,355 +7,89 @@ export interface ThemePreset {
 
 export const THEME_PRESETS: ThemePreset[] = [
   // =====================
-  // DARK THEMES (6)
+  // DARK THEME — Catppuccin Mocha
+  // https://github.com/catppuccin/catppuccin
   // =====================
   {
-    id: 'amethyst',
-    name: 'Amethyst',
+    id: 'mocha',
+    name: 'Mocha',
     type: 'dark',
     colors: {
-      background: 'hsl(165 11% 8%)',
-      foreground: 'hsl(155 8% 94%)',
-      card: 'hsl(165 11% 10%)',
-      'card-foreground': 'hsl(155 8% 94%)',
-      popover: 'hsl(165 11% 10%)',
-      'popover-foreground': 'hsl(155 8% 94%)',
-      primary: 'hsl(164 43% 48%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(165 9% 15%)',
-      'secondary-foreground': 'hsl(155 8% 90%)',
-      muted: 'hsl(165 9% 15%)',
-      'muted-foreground': 'hsl(155 6% 56%)',
-      accent: 'hsl(165 9% 15%)',
-      'accent-foreground': 'hsl(155 8% 90%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(165 9% 18%)',
-      input: 'hsl(165 9% 18%)',
-      ring: 'hsl(164 43% 48%)',
-      sidebar: 'hsl(165 11% 7%)',
-      'sidebar-foreground': 'hsl(155 6% 56%)',
-      'sidebar-primary': 'hsl(164 43% 48%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(165 9% 14%)',
-      'sidebar-accent-foreground': 'hsl(155 8% 90%)',
-      'sidebar-border': 'hsl(165 9% 18%)',
-      'sidebar-ring': 'hsl(164 43% 48%)'
-    }
-  },
-  {
-    id: 'obsidian',
-    name: 'Obsidian',
-    type: 'dark',
-    colors: {
-      background: 'hsl(0 0% 7%)',
-      foreground: 'hsl(0 0% 93%)',
-      card: 'hsl(0 0% 9%)',
-      'card-foreground': 'hsl(0 0% 93%)',
-      popover: 'hsl(0 0% 9%)',
-      'popover-foreground': 'hsl(0 0% 93%)',
-      primary: 'hsl(0 0% 90%)',
-      'primary-foreground': 'hsl(0 0% 7%)',
-      secondary: 'hsl(0 0% 15%)',
-      'secondary-foreground': 'hsl(0 0% 88%)',
-      muted: 'hsl(0 0% 15%)',
-      'muted-foreground': 'hsl(0 0% 55%)',
-      accent: 'hsl(0 0% 15%)',
-      'accent-foreground': 'hsl(0 0% 88%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(0 0% 17%)',
-      input: 'hsl(0 0% 17%)',
-      ring: 'hsl(0 0% 70%)',
-      sidebar: 'hsl(0 0% 6%)',
-      'sidebar-foreground': 'hsl(0 0% 55%)',
-      'sidebar-primary': 'hsl(0 0% 90%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 7%)',
-      'sidebar-accent': 'hsl(0 0% 13%)',
-      'sidebar-accent-foreground': 'hsl(0 0% 88%)',
-      'sidebar-border': 'hsl(0 0% 17%)',
-      'sidebar-ring': 'hsl(0 0% 70%)'
-    }
-  },
-  {
-    id: 'midnight-blue',
-    name: 'Midnight Blue',
-    type: 'dark',
-    colors: {
-      background: 'hsl(220 20% 8%)',
-      foreground: 'hsl(215 15% 93%)',
-      card: 'hsl(220 20% 10%)',
-      'card-foreground': 'hsl(215 15% 93%)',
-      popover: 'hsl(220 20% 10%)',
-      'popover-foreground': 'hsl(215 15% 93%)',
-      primary: 'hsl(215 70% 55%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(220 18% 16%)',
-      'secondary-foreground': 'hsl(215 15% 90%)',
-      muted: 'hsl(220 18% 16%)',
-      'muted-foreground': 'hsl(215 15% 55%)',
-      accent: 'hsl(220 18% 16%)',
-      'accent-foreground': 'hsl(215 15% 90%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(220 18% 18%)',
-      input: 'hsl(220 18% 18%)',
-      ring: 'hsl(215 70% 55%)',
-      sidebar: 'hsl(220 20% 7%)',
-      'sidebar-foreground': 'hsl(215 15% 55%)',
-      'sidebar-primary': 'hsl(215 70% 55%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(220 18% 14%)',
-      'sidebar-accent-foreground': 'hsl(215 15% 90%)',
-      'sidebar-border': 'hsl(220 18% 18%)',
-      'sidebar-ring': 'hsl(215 70% 55%)'
-    }
-  },
-  {
-    id: 'emerald-night',
-    name: 'Emerald Night',
-    type: 'dark',
-    colors: {
-      background: 'hsl(160 15% 7%)',
-      foreground: 'hsl(155 10% 93%)',
-      card: 'hsl(160 15% 9%)',
-      'card-foreground': 'hsl(155 10% 93%)',
-      popover: 'hsl(160 15% 9%)',
-      'popover-foreground': 'hsl(155 10% 93%)',
-      primary: 'hsl(150 60% 45%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(160 12% 15%)',
-      'secondary-foreground': 'hsl(155 10% 90%)',
-      muted: 'hsl(160 12% 15%)',
-      'muted-foreground': 'hsl(155 10% 55%)',
-      accent: 'hsl(160 12% 15%)',
-      'accent-foreground': 'hsl(155 10% 90%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(160 12% 17%)',
-      input: 'hsl(160 12% 17%)',
-      ring: 'hsl(150 60% 45%)',
-      sidebar: 'hsl(160 15% 6%)',
-      'sidebar-foreground': 'hsl(155 10% 55%)',
-      'sidebar-primary': 'hsl(150 60% 45%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(160 12% 13%)',
-      'sidebar-accent-foreground': 'hsl(155 10% 90%)',
-      'sidebar-border': 'hsl(160 12% 17%)',
-      'sidebar-ring': 'hsl(150 60% 45%)'
-    }
-  },
-  {
-    id: 'crimson',
-    name: 'Crimson',
-    type: 'dark',
-    colors: {
-      background: 'hsl(0 12% 8%)',
-      foreground: 'hsl(0 5% 93%)',
-      card: 'hsl(0 12% 10%)',
-      'card-foreground': 'hsl(0 5% 93%)',
-      popover: 'hsl(0 12% 10%)',
-      'popover-foreground': 'hsl(0 5% 93%)',
-      primary: 'hsl(0 70% 55%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(0 10% 16%)',
-      'secondary-foreground': 'hsl(0 5% 90%)',
-      muted: 'hsl(0 10% 16%)',
-      'muted-foreground': 'hsl(0 5% 55%)',
-      accent: 'hsl(0 10% 16%)',
-      'accent-foreground': 'hsl(0 5% 90%)',
-      destructive: 'hsl(30 80% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(0 10% 18%)',
-      input: 'hsl(0 10% 18%)',
-      ring: 'hsl(0 70% 55%)',
-      sidebar: 'hsl(0 12% 7%)',
-      'sidebar-foreground': 'hsl(0 5% 55%)',
-      'sidebar-primary': 'hsl(0 70% 55%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(0 10% 14%)',
-      'sidebar-accent-foreground': 'hsl(0 5% 90%)',
-      'sidebar-border': 'hsl(0 10% 18%)',
-      'sidebar-ring': 'hsl(0 70% 55%)'
-    }
-  },
-  {
-    id: 'sunset',
-    name: 'Sunset',
-    type: 'dark',
-    colors: {
-      background: 'hsl(20 15% 8%)',
-      foreground: 'hsl(30 10% 93%)',
-      card: 'hsl(20 15% 10%)',
-      'card-foreground': 'hsl(30 10% 93%)',
-      popover: 'hsl(20 15% 10%)',
-      'popover-foreground': 'hsl(30 10% 93%)',
-      primary: 'hsl(25 85% 55%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(20 12% 16%)',
-      'secondary-foreground': 'hsl(30 10% 90%)',
-      muted: 'hsl(20 12% 16%)',
-      'muted-foreground': 'hsl(30 10% 55%)',
-      accent: 'hsl(20 12% 16%)',
-      'accent-foreground': 'hsl(30 10% 90%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(20 12% 18%)',
-      input: 'hsl(20 12% 18%)',
-      ring: 'hsl(25 85% 55%)',
-      sidebar: 'hsl(20 15% 7%)',
-      'sidebar-foreground': 'hsl(30 10% 55%)',
-      'sidebar-primary': 'hsl(25 85% 55%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(20 12% 14%)',
-      'sidebar-accent-foreground': 'hsl(30 10% 90%)',
-      'sidebar-border': 'hsl(20 12% 18%)',
-      'sidebar-ring': 'hsl(25 85% 55%)'
+      background: 'hsl(240 21% 15%)',         // Base
+      foreground: 'hsl(226 64% 88%)',          // Text
+      card: 'hsl(240 21% 12%)',                // Mantle
+      'card-foreground': 'hsl(226 64% 88%)',   // Text
+      popover: 'hsl(240 21% 12%)',             // Mantle
+      'popover-foreground': 'hsl(226 64% 88%)',// Text
+      primary: 'hsl(232 97% 85%)',             // Lavender
+      'primary-foreground': 'hsl(240 23% 9%)', // Crust
+      secondary: 'hsl(237 16% 23%)',           // Surface0
+      'secondary-foreground': 'hsl(228 24% 72%)', // Subtext0
+      muted: 'hsl(237 16% 23%)',               // Surface0
+      'muted-foreground': 'hsl(230 13% 55%)',  // Overlay1
+      accent: 'hsl(237 16% 23%)',              // Surface0
+      'accent-foreground': 'hsl(226 64% 88%)', // Text
+      destructive: 'hsl(343 81% 75%)',         // Red
+      'destructive-foreground': 'hsl(240 23% 9%)', // Crust
+      border: 'hsl(234 13% 31%)',              // Surface1
+      input: 'hsl(234 13% 31%)',               // Surface1
+      ring: 'hsl(232 97% 85%)',                // Lavender
+      sidebar: 'hsl(240 23% 9%)',              // Crust
+      'sidebar-foreground': 'hsl(228 24% 72%)',// Subtext0
+      'sidebar-primary': 'hsl(232 97% 85%)',   // Lavender
+      'sidebar-primary-foreground': 'hsl(240 23% 9%)', // Crust
+      'sidebar-accent': 'hsl(237 16% 23%)',    // Surface0
+      'sidebar-accent-foreground': 'hsl(226 64% 88%)', // Text
+      'sidebar-border': 'hsl(234 13% 31%)',    // Surface1
+      'sidebar-ring': 'hsl(232 97% 85%)',      // Lavender
+      celadon: 'hsl(170 57% 73%)',             // Teal
+      'celadon-foreground': 'hsl(240 23% 9%)'  // Crust
     }
   },
 
   // =====================
-  // LIGHT THEMES (4)
+  // LIGHT THEME — Catppuccin Latte
+  // https://github.com/catppuccin/catppuccin
   // =====================
   {
-    id: 'daylight',
-    name: 'Daylight',
+    id: 'latte',
+    name: 'Latte',
     type: 'light',
     colors: {
-      background: 'hsl(150 16% 97%)',
-      foreground: 'hsl(165 10% 13%)',
-      card: 'hsl(0 0% 100%)',
-      'card-foreground': 'hsl(165 10% 13%)',
-      popover: 'hsl(0 0% 100%)',
-      'popover-foreground': 'hsl(165 10% 13%)',
-      primary: 'hsl(165 44% 34%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(150 12% 95%)',
-      'secondary-foreground': 'hsl(165 10% 18%)',
-      muted: 'hsl(150 12% 94%)',
-      'muted-foreground': 'hsl(165 7% 43%)',
-      accent: 'hsl(150 12% 93%)',
-      'accent-foreground': 'hsl(165 10% 18%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(150 8% 88%)',
-      input: 'hsl(150 8% 88%)',
-      ring: 'hsl(165 44% 34%)',
-      sidebar: 'hsl(150 10% 95%)',
-      'sidebar-foreground': 'hsl(165 7% 40%)',
-      'sidebar-primary': 'hsl(165 44% 34%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(150 12% 92%)',
-      'sidebar-accent-foreground': 'hsl(165 10% 18%)',
-      'sidebar-border': 'hsl(150 8% 87%)',
-      'sidebar-ring': 'hsl(165 44% 34%)'
-    }
-  },
-  {
-    id: 'cloud',
-    name: 'Cloud',
-    type: 'light',
-    colors: {
-      background: 'hsl(0 0% 100%)',
-      foreground: 'hsl(215 15% 15%)',
-      card: 'hsl(0 0% 100%)',
-      'card-foreground': 'hsl(215 15% 15%)',
-      popover: 'hsl(0 0% 100%)',
-      'popover-foreground': 'hsl(215 15% 15%)',
-      primary: 'hsl(215 20% 35%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(215 15% 95%)',
-      'secondary-foreground': 'hsl(215 15% 20%)',
-      muted: 'hsl(215 15% 95%)',
-      'muted-foreground': 'hsl(215 10% 45%)',
-      accent: 'hsl(215 15% 95%)',
-      'accent-foreground': 'hsl(215 15% 20%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(215 10% 90%)',
-      input: 'hsl(215 10% 90%)',
-      ring: 'hsl(215 20% 35%)',
-      sidebar: 'hsl(215 15% 97%)',
-      'sidebar-foreground': 'hsl(215 10% 45%)',
-      'sidebar-primary': 'hsl(215 20% 35%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(215 15% 93%)',
-      'sidebar-accent-foreground': 'hsl(215 15% 20%)',
-      'sidebar-border': 'hsl(215 10% 90%)',
-      'sidebar-ring': 'hsl(215 20% 35%)'
-    }
-  },
-  {
-    id: 'mint',
-    name: 'Mint',
-    type: 'light',
-    colors: {
-      background: 'hsl(150 20% 99%)',
-      foreground: 'hsl(160 15% 12%)',
-      card: 'hsl(150 20% 99%)',
-      'card-foreground': 'hsl(160 15% 12%)',
-      popover: 'hsl(150 20% 99%)',
-      'popover-foreground': 'hsl(160 15% 12%)',
-      primary: 'hsl(160 60% 38%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(150 18% 94%)',
-      'secondary-foreground': 'hsl(160 15% 20%)',
-      muted: 'hsl(150 18% 94%)',
-      'muted-foreground': 'hsl(160 10% 45%)',
-      accent: 'hsl(150 18% 94%)',
-      'accent-foreground': 'hsl(160 15% 20%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(150 12% 88%)',
-      input: 'hsl(150 12% 88%)',
-      ring: 'hsl(160 60% 38%)',
-      sidebar: 'hsl(150 18% 96%)',
-      'sidebar-foreground': 'hsl(160 10% 45%)',
-      'sidebar-primary': 'hsl(160 60% 38%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(150 18% 92%)',
-      'sidebar-accent-foreground': 'hsl(160 15% 20%)',
-      'sidebar-border': 'hsl(150 12% 88%)',
-      'sidebar-ring': 'hsl(160 60% 38%)'
-    }
-  },
-  {
-    id: 'rose',
-    name: 'Rose',
-    type: 'light',
-    colors: {
-      background: 'hsl(350 20% 99%)',
-      foreground: 'hsl(340 15% 12%)',
-      card: 'hsl(350 20% 99%)',
-      'card-foreground': 'hsl(340 15% 12%)',
-      popover: 'hsl(350 20% 99%)',
-      'popover-foreground': 'hsl(340 15% 12%)',
-      primary: 'hsl(340 65% 55%)',
-      'primary-foreground': 'hsl(0 0% 100%)',
-      secondary: 'hsl(340 18% 94%)',
-      'secondary-foreground': 'hsl(340 15% 20%)',
-      muted: 'hsl(340 18% 94%)',
-      'muted-foreground': 'hsl(340 10% 45%)',
-      accent: 'hsl(340 18% 94%)',
-      'accent-foreground': 'hsl(340 15% 20%)',
-      destructive: 'hsl(0 62% 50%)',
-      'destructive-foreground': 'hsl(0 0% 100%)',
-      border: 'hsl(340 12% 88%)',
-      input: 'hsl(340 12% 88%)',
-      ring: 'hsl(340 65% 55%)',
-      sidebar: 'hsl(340 18% 96%)',
-      'sidebar-foreground': 'hsl(340 10% 45%)',
-      'sidebar-primary': 'hsl(340 65% 55%)',
-      'sidebar-primary-foreground': 'hsl(0 0% 100%)',
-      'sidebar-accent': 'hsl(340 18% 92%)',
-      'sidebar-accent-foreground': 'hsl(340 15% 20%)',
-      'sidebar-border': 'hsl(340 12% 88%)',
-      'sidebar-ring': 'hsl(340 65% 55%)'
+      background: 'hsl(220 23% 95%)',          // Base
+      foreground: 'hsl(234 16% 35%)',          // Text
+      card: 'hsl(220 22% 92%)',                // Mantle
+      'card-foreground': 'hsl(234 16% 35%)',   // Text
+      popover: 'hsl(220 22% 92%)',             // Mantle
+      'popover-foreground': 'hsl(234 16% 35%)',// Text
+      primary: 'hsl(231 97% 72%)',             // Lavender
+      'primary-foreground': 'hsl(220 23% 95%)',// Base
+      secondary: 'hsl(223 16% 83%)',           // Surface0
+      'secondary-foreground': 'hsl(233 10% 47%)', // Subtext0
+      muted: 'hsl(223 16% 83%)',               // Surface0
+      'muted-foreground': 'hsl(231 10% 59%)',  // Overlay1
+      accent: 'hsl(223 16% 83%)',              // Surface0
+      'accent-foreground': 'hsl(234 16% 35%)', // Text
+      destructive: 'hsl(347 87% 44%)',         // Red
+      'destructive-foreground': 'hsl(220 23% 95%)', // Base
+      border: 'hsl(225 14% 77%)',              // Surface1
+      input: 'hsl(225 14% 77%)',               // Surface1
+      ring: 'hsl(231 97% 72%)',                // Lavender
+      sidebar: 'hsl(220 21% 89%)',             // Crust
+      'sidebar-foreground': 'hsl(233 10% 47%)',// Subtext0
+      'sidebar-primary': 'hsl(231 97% 72%)',   // Lavender
+      'sidebar-primary-foreground': 'hsl(220 23% 95%)', // Base
+      'sidebar-accent': 'hsl(223 16% 83%)',    // Surface0
+      'sidebar-accent-foreground': 'hsl(234 16% 35%)', // Text
+      'sidebar-border': 'hsl(225 14% 77%)',    // Surface1
+      'sidebar-ring': 'hsl(231 97% 72%)',      // Lavender
+      celadon: 'hsl(183 74% 35%)',             // Teal
+      'celadon-foreground': 'hsl(220 23% 95%)' // Base
     }
   }
 ]
 
-export const DEFAULT_THEME_ID = 'daylight'
+export const DEFAULT_THEME_ID = 'latte'
 
 export function getThemeById(id: string): ThemePreset | undefined {
   return THEME_PRESETS.find((preset) => preset.id === id)

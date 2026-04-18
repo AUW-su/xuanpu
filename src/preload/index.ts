@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils, webFrame } from 'electron'
+import { normalizeAgentEvent } from '@shared/lib/normalize-agent-event'
 
 // Apply persisted UI zoom level from localStorage before first paint to avoid flash.
 // Ghostty's getContainerRect() has visualViewport.scale compensation for non-100% zoom.
@@ -121,7 +122,7 @@ const db = {
       id: string,
       data: {
         name?: string | null
-        status?: 'active' | 'completed' | 'error'
+        status?: 'active' | 'completed' | 'error' | 'archived'
         opencode_session_id?: string | null
         agent_sdk?: 'opencode' | 'claude-code' | 'codex' | 'terminal'
         mode?: 'build' | 'plan'
@@ -133,6 +134,7 @@ const db = {
       }
     ) => ipcRenderer.invoke('db:session:update', id, data),
     delete: (id: string) => ipcRenderer.invoke('db:session:delete', id),
+    restore: (id: string) => ipcRenderer.invoke('db:session:restore', id),
     search: (options: {
       keyword?: string
       project_id?: string
@@ -140,6 +142,7 @@ const db = {
       dateFrom?: string
       dateTo?: string
       includeArchived?: boolean
+      statusFilter?: 'all' | 'active' | 'archived'
     }) => ipcRenderer.invoke('db:session:search', options),
     getDraft: (sessionId: string) => ipcRenderer.invoke('db:session:getDraft', sessionId),
     updateDraft: (sessionId: string, draft: string | null) =>
@@ -1377,18 +1380,34 @@ const agentOps = {
       messageId
     }),
 
-  // Subscribe to streaming events
-  // Listen on both canonical (agent:stream) and legacy (opencode:stream) channels
-  // because runtime implementers still emit on the legacy channel.
+  // Get unified timeline for a session (durable data from DB)
+  getTimeline: (
+    sessionId: string
+  ): Promise<{
+    messages: Array<{
+      id: string
+      role: 'user' | 'assistant' | 'system'
+      content: string
+      timestamp: string
+      parts?: unknown[]
+      attachments?: unknown[]
+    }>
+    compactionMarkers: string[]
+    revertBoundary: string | null
+  }> => ipcRenderer.invoke('session:getTimeline', sessionId),
+
+  // Subscribe to streaming events on the canonical `agent:stream` channel.
+  // Events are normalized through normalizeAgentEvent() to ensure consistent shape.
   onStream: (callback: (event: CanonicalAgentEvent) => void): (() => void) => {
-    const handler = (_e: Electron.IpcRendererEvent, event: CanonicalAgentEvent): void => {
-      callback(event)
+    const handler = (
+      _e: Electron.IpcRendererEvent,
+      event: Record<string, unknown>
+    ): void => {
+      callback(normalizeAgentEvent(event))
     }
     ipcRenderer.on('agent:stream', handler)
-    ipcRenderer.on('opencode:stream', handler)
     return () => {
       ipcRenderer.removeListener('agent:stream', handler)
-      ipcRenderer.removeListener('opencode:stream', handler)
     }
   }
 }

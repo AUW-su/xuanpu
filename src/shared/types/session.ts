@@ -4,13 +4,14 @@ export interface Session {
   project_id: string
   connection_id: string | null
   name: string | null
-  status: 'active' | 'completed' | 'error'
+  status: 'active' | 'completed' | 'error' | 'archived'
   opencode_session_id: string | null
   agent_sdk: 'opencode' | 'claude-code' | 'codex' | 'terminal'
   mode: 'build' | 'plan'
   model_provider_id: string | null
   model_id: string | null
   model_variant: string | null
+  color: string | null
   created_at: string
   updated_at: string
   completed_at: string | null
@@ -19,6 +20,7 @@ export interface Session {
 export interface SessionWithWorktree extends Session {
   worktree_name?: string
   worktree_branch_name?: string
+  worktree_status?: 'active' | 'archived' | null
   project_name?: string
 }
 
@@ -29,4 +31,5 @@ export interface SessionSearchOptions {
   dateFrom?: string
   dateTo?: string
   includeArchived?: boolean
+  statusFilter?: 'all' | 'active' | 'archived' | 'closed'
 }

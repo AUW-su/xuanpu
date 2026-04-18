@@ -61,7 +61,7 @@ import { toast } from '@/lib/toast'
 import { formatRelativeTime } from '@/lib/format-utils'
 import { ModelIcon } from '@/components/worktrees/ModelIcon'
 import { PulseAnimation } from '@/components/worktrees/PulseAnimation'
-import { LanguageIcon } from '@/components/projects/LanguageIcon'
+import { ProjectAvatar } from '@/components/projects/ProjectAvatar'
 import { ArchiveConfirmDialog } from '@/components/worktrees/ArchiveConfirmDialog'
 import { AddAttachmentDialog } from '@/components/worktrees/AddAttachmentDialog'
 import { ManageConnectionWorktreesDialog } from '@/components/connections/ManageConnectionWorktreesDialog'
@@ -105,7 +105,7 @@ export function PinnedList(): React.JSX.Element | null {
           <PinnedConnectionItem key={`conn-${item.id}`} connectionId={item.id} />
         )
       )}
-      <div className="border-b border-border/50 mx-2 mt-1 mb-1" />
+      <div className="border-b border-sidebar-border/50 mx-2 mt-1 mb-1" />
     </div>
   )
 }
@@ -392,7 +392,7 @@ function PinnedWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
   const hasNamedBranch = Boolean(worktree.branch_name)
 
   // Derive display status text + color
-  const { displayStatus, statusClass } =
+  const { displayStatus: _displayStatus, statusClass: _statusClass } =
     worktreeStatus === 'answering'
       ? { displayStatus: t('pinned.status.answering'), statusClass: 'font-semibold text-amber-500' }
       : worktreeStatus === 'command_approval'
@@ -603,12 +603,12 @@ function PinnedWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
           className={cn(
             'group flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer',
             'transition-colors mx-1',
-            isSelected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
+            isSelected ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/70'
           )}
           onClick={handleClick}
           data-testid={`pinned-worktree-${worktreeId}`}
         >
-          <LanguageIcon language={project.language} customIcon={project.custom_icon} />
+          <ProjectAvatar name={project.name} customIcon={project.custom_icon} />
 
           {isRunProcessAlive && <PulseAnimation className="h-3.5 w-3.5 text-green-500 shrink-0" />}
           {(worktreeStatus === 'working' || worktreeStatus === 'planning') && (
@@ -690,9 +690,6 @@ function PinnedWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
             )}
             <div className="flex items-center pr-1">
               <ModelIcon worktreeId={worktreeId} className="h-2.5 w-2.5 mr-1 shrink-0" />
-              <span className={cn('text-[11px]', statusClass)} data-testid="pinned-status-text">
-                {displayStatus}
-              </span>
               <span className="flex-1" />
               {lastMessageTime && (
                 <span
@@ -727,7 +724,7 @@ function PinnedWorktreeItem({ worktreeId }: { worktreeId: string }): React.JSX.E
                 size="icon"
                 className={cn(
                   'h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity',
-                  'hover:bg-accent'
+                  'hover:bg-sidebar-accent'
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -928,7 +925,7 @@ function PinnedConnectionItem({
     : projectNames || connection.name || t('pinned.connectionFallback')
 
   // Derive display status text + color
-  const { displayStatus, statusClass } =
+  const { displayStatus: _displayStatus2, statusClass: _statusClass2 } =
     connectionStatus === 'answering'
       ? { displayStatus: t('pinned.status.answering'), statusClass: 'font-semibold text-amber-500' }
       : connectionStatus === 'command_approval'
@@ -1021,7 +1018,7 @@ function PinnedConnectionItem({
           className={cn(
             'group flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer',
             'transition-colors mx-1',
-            isSelected ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
+            isSelected ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/70'
           )}
           onClick={handleClick}
           data-testid={`pinned-connection-${connectionId}`}
@@ -1104,11 +1101,8 @@ function PinnedConnectionItem({
                 <span className="text-sm truncate block" title={displayName}>
                   {displayName}
                 </span>
-                <span className={cn('text-[11px]', statusClass)} data-testid="pinned-status-text">
-                  {displayStatus}
-                  {hasCustomName && projectNames && (
-                    <span className="text-muted-foreground font-normal"> · {projectNames}</span>
-                  )}
+                <span className="text-[11px] text-muted-foreground" data-testid="pinned-status-text">
+                  {hasCustomName && projectNames ? projectNames : ''}
                 </span>
               </>
             )}
@@ -1135,7 +1129,7 @@ function PinnedConnectionItem({
                 size="icon"
                 className={cn(
                   'h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity',
-                  'hover:bg-accent'
+                  'hover:bg-sidebar-accent'
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
